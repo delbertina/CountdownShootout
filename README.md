@@ -1,4 +1,10 @@
-# React + TypeScript + Vite
+# Countdown Showdown
+
+This project relies on an experimental feature in Firefox.
+
+To enable it, navigate to `about:config` and set `dom.gamepad.non_standard_events.enabled` to true.
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
