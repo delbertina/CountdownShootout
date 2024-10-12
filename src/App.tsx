@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./App.css";
 import { ButtonData, useGameStore } from "./store/gameStore";
 
@@ -6,52 +6,27 @@ const App = () => {
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonDown = useGameStore((state) => state.gamepadButtonDown);
-
+  // Only run the effect once - React 18 dev mode bug that they don't think is a bug
+  const effectRan = useRef(false);
+  
   useEffect(() => {
-    // @ts-expect-error (Firefox experimental event)
-    window.addEventListener(
-      "gamepadbuttondown",
-      (evt: { gamepad: Gamepad; button: number }) => {
-        console.log(selectedButtonCol, selectedButtonRow);
-        callPadMove(evt);
-      }
-    );
-    console.log("Listening for gamepad button presses...");
-    return () => {
+    if (!effectRan.current) {
       // @ts-expect-error (Firefox experimental event)
-      window.removeEventListener("gamepadbuttondown", callPadMove);
-      console.log("Stopped listening for gamepad button presses...");
-    };
+      window.addEventListener(
+        "gamepadbuttondown",
+        (evt: { gamepad: Gamepad; button: number }) => {
+          console.log(selectedButtonCol, selectedButtonRow);
+          callPadMove(evt);
+        }
+      );
+      console.log("Listening for gamepad button presses...");
+    }
+    return () => {effectRan.current = true;}
   }, []);
 
-  const callPadMove = useCallback((e: { gamepad: Gamepad; button: number }) => {
+  const callPadMove = (e: { gamepad: Gamepad; button: number }) => {
     gamepadButtonDown(e);
-  }, [])
-
-  // const gamepadButtonDown = (e: { gamepad: Gamepad; button: number }) => {
-  //   const newEvent = `Gamepad button down at index ${e.gamepad.index}: ${e.gamepad.id}. Button: ${e.button}.`;
-  //   console.log(newEvent);
-  //   console.log(selectedButtonCol, selectedButtonRow);
-  //   switch (e.button) {
-  //     case 14:
-  //       moveLeft();
-  //       break;
-  //     case 15:
-  //       moveRight();
-  //       break;
-  //     case 12:
-  //       moveUp();
-  //       break;
-  //     case 13:
-  //       moveDown();
-  //       break;
-  //     case 0:
-  //       resetSelection();
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
+  }
 
   return (
     <>
