@@ -5,7 +5,7 @@ import { ButtonData, useGameStore } from "./store/gameStore";
 const App = () => {
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
-  const gamepadButtonDown = useGameStore((state) => state.gamepadButtonDown);
+  const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
   
@@ -25,7 +25,7 @@ const App = () => {
   }, []);
 
   const callPadMove = (e: { gamepad: Gamepad; button: number }) => {
-    gamepadButtonDown(e);
+    gamepadButtonPress(e);
   }
 
   return (

@@ -13,12 +13,12 @@ interface GameState {
   stage: GameStage;
   tempButtonCol: number;
   tempButtonRow: number;
-  resetButtonSelection: () => void;
-  moveButtonSelectionRight: () => void;
-  moveButtonSelectionLeft: () => void;
-  moveButtonSelectionUp: () => void;
-  moveButtonSelectionDown: () => void;
-  gamepadButtonDown: (e: { gamepad: Gamepad; button: number }) => void;
+  symbolDown: (gamepadIndex: number) => void;
+  arrowRight: (gamepadIndex: number) => void;
+  arrowLeft: (gamepadIndex: number) => void;
+  arrowUp: (gamepadIndex: number) => void;
+  arrowDown: (gamepadIndex: number) => void;
+  gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => void;
   completeQuestion: () => void;
 }
 
@@ -27,47 +27,58 @@ export const useGameStore = create<GameState>((set, get) => ({
   stage: GameStage.Testing,
   tempButtonCol: 1,
   tempButtonRow: 1,
-  resetButtonSelection: () => set({ tempButtonCol: 1, tempButtonRow: 1 }),
-  moveButtonSelectionRight: () =>
+  symbolDown: (gamepadIndex: number) => {
+    if (gamepadIndex !== 0) return;
+    set({ tempButtonCol: 1, tempButtonRow: 1 });
+  },
+  arrowRight: (gamepadIndex: number) => {
+    if (gamepadIndex !== 0) return;
     set((state) => ({
       tempButtonCol:
         state.tempButtonCol === ButtonData[0].length - 1
           ? ButtonData[0].length - 1
           : state.tempButtonCol + 1,
-    })),
-  moveButtonSelectionLeft: () =>
+    }));
+  },
+  arrowLeft: (gamepadIndex: number) => {
+    if (gamepadIndex !== 0) return;
     set((state) => ({
       tempButtonCol: state.tempButtonCol === 0 ? 0 : state.tempButtonCol - 1,
-    })),
-  moveButtonSelectionUp: () =>
+    }));
+  },
+  arrowUp: (gamepadIndex: number) => {
+    if (gamepadIndex !== 0) return;
     set((state) => ({
       tempButtonRow: state.tempButtonRow === 0 ? 0 : state.tempButtonRow - 1,
-    })),
-  moveButtonSelectionDown: () =>
+    }));
+  },
+  arrowDown: (gamepadIndex: number) => {
+    if (gamepadIndex !== 0) return;
     set((state) => ({
       tempButtonRow:
         state.tempButtonRow === ButtonData.length - 1
           ? ButtonData.length - 1
           : state.tempButtonRow + 1,
-    })),
-  gamepadButtonDown: (e: { gamepad: Gamepad; button: number }) => {
+    }));
+  },
+  gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => {
     const newEvent = `Gamepad button down at index ${e.gamepad.index}: ${e.gamepad.id}. Button: ${e.button}.`;
     console.log(newEvent);
     switch (e.button) {
       case 14:
-        get().moveButtonSelectionLeft();
+        get().arrowLeft(e.gamepad.index);
         break;
       case 15:
-        get().moveButtonSelectionRight();
+        get().arrowRight(e.gamepad.index);
         break;
       case 12:
-        get().moveButtonSelectionUp();
+        get().arrowUp(e.gamepad.index);
         break;
       case 13:
-        get().moveButtonSelectionDown();
+        get().arrowDown(e.gamepad.index);
         break;
       case 0:
-        get().resetButtonSelection();
+        get().symbolDown(e.gamepad.index);
         break;
       default:
         break;
