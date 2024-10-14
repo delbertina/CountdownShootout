@@ -3,12 +3,13 @@ import "./App.css";
 import { ButtonData, useGameStore } from "./store/gameStore";
 
 const App = () => {
+  const gameStage = useGameStore((state) => state.stage);
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
+  
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
-  
   useEffect(() => {
     if (!effectRan.current) {
       // @ts-expect-error (Firefox experimental event)
@@ -22,6 +23,10 @@ const App = () => {
       console.log("Listening for gamepad button presses...");
     }
     return () => {effectRan.current = true;}
+    //
+    // empty array to only run on first render
+    //
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const callPadMove = (e: { gamepad: Gamepad; button: number }) => {
@@ -31,6 +36,9 @@ const App = () => {
   return (
     <>
       <h1 className="font-bold">Testing Gamepad Inputs</h1>
+      <div>
+        Stage: "{gameStage}"
+      </div>
       {ButtonData.map((buttonRow, i) => (
         <div key={i}>
           {buttonRow.map((button, j) => (

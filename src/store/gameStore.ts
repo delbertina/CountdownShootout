@@ -19,6 +19,7 @@ interface GameState {
   arrowUp: (gamepadIndex: number) => void;
   arrowDown: (gamepadIndex: number) => void;
   gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => void;
+  advanceStage: () => void;
   completeQuestion: () => void;
 }
 
@@ -28,7 +29,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   tempButtonCol: 1,
   tempButtonRow: 1,
   symbolDown: (gamepadIndex: number) => {
-    if (gamepadIndex !== 0) return;
+    if (
+      gamepadIndex !== 0 &&
+      useGameStore.getState().stage !== GameStage.Testing
+    )
+      return;
+    get().advanceStage();
     set({ tempButtonCol: 1, tempButtonRow: 1 });
   },
   arrowRight: (gamepadIndex: number) => {
@@ -84,6 +90,22 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
     }
   },
+  advanceStage: () =>
+    set((state) => ({
+      // Testing -> Waiting -> Playing -> Answering -> Scoring -> (Loop to Waiting)
+      stage:
+        state.stage === GameStage.Testing
+          ? GameStage.Waiting
+          : state.stage === GameStage.Waiting
+          ? GameStage.Playing
+          : state.stage === GameStage.Playing
+          ? GameStage.Answering
+          : state.stage === GameStage.Answering
+          ? GameStage.Scoring
+          : state.stage === GameStage.Scoring
+          ? GameStage.Waiting
+          : state.stage,
+    })),
   completeQuestion: () =>
     set((state) => ({ questionId: state.questionId + 1 })),
 }));
