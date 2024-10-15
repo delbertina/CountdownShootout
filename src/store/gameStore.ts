@@ -13,6 +13,9 @@ interface GameState {
   stage: GameStage;
   tempButtonCol: number;
   tempButtonRow: number;
+  symbolRight: (gamepadIndex: number) => void;
+  symbolLeft: (gamepadIndex: number) => void;
+  symbolUp: (gamepadIndex: number) => void;
   symbolDown: (gamepadIndex: number) => void;
   arrowRight: (gamepadIndex: number) => void;
   arrowLeft: (gamepadIndex: number) => void;
@@ -28,6 +31,33 @@ export const useGameStore = create<GameState>((set, get) => ({
   stage: GameStage.Testing,
   tempButtonCol: 1,
   tempButtonRow: 1,
+  symbolRight: (gamepadIndex: number) => {
+    if (
+      gamepadIndex !== 0 &&
+      useGameStore.getState().stage !== GameStage.Testing
+    )
+      return;
+    // get().advanceStage();
+    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+  },
+  symbolLeft: (gamepadIndex: number) => {
+    if (
+      gamepadIndex !== 0 &&
+      useGameStore.getState().stage !== GameStage.Testing
+    )
+      return;
+    // get().advanceStage();
+    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+  },
+  symbolUp: (gamepadIndex: number) => {
+    if (
+      gamepadIndex !== 0 &&
+      useGameStore.getState().stage !== GameStage.Testing
+    )
+      return;
+    // get().advanceStage();
+    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+  },
   symbolDown: (gamepadIndex: number) => {
     if (
       gamepadIndex !== 0 &&
@@ -71,17 +101,26 @@ export const useGameStore = create<GameState>((set, get) => ({
     const newEvent = `Gamepad button down at index ${e.gamepad.index}: ${e.gamepad.id}. Button: ${e.button}.`;
     console.log(newEvent);
     switch (e.button) {
+      case 15:
+        get().arrowRight(e.gamepad.index);
+        break;
       case 14:
         get().arrowLeft(e.gamepad.index);
         break;
-      case 15:
-        get().arrowRight(e.gamepad.index);
+      case 13:
+        get().arrowDown(e.gamepad.index);
         break;
       case 12:
         get().arrowUp(e.gamepad.index);
         break;
-      case 13:
-        get().arrowDown(e.gamepad.index);
+      case 3:
+        get().symbolUp(e.gamepad.index);
+        break;
+      case 2:
+        get().symbolLeft(e.gamepad.index);
+        break;
+      case 1:
+        get().symbolRight(e.gamepad.index);
         break;
       case 0:
         get().symbolDown(e.gamepad.index);
