@@ -11,6 +11,8 @@ enum GameStage {
 interface GameState {
   questionId: number;
   stage: GameStage;
+  isPaused: boolean;
+  remainingTime: number;
   tempButtonCol: number;
   tempButtonRow: number;
   symbolRight: (gamepadIndex: number) => void;
@@ -29,6 +31,8 @@ interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   questionId: 0,
   stage: GameStage.Testing,
+  isPaused: false,
+  remainingTime: 0,
   tempButtonCol: 1,
   tempButtonRow: 1,
   symbolRight: (gamepadIndex: number) => {
