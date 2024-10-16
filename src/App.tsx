@@ -7,7 +7,7 @@ const App = () => {
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
-  
+
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
   useEffect(() => {
@@ -22,7 +22,9 @@ const App = () => {
       );
       console.log("Listening for gamepad button presses...");
     }
-    return () => {effectRan.current = true;}
+    return () => {
+      effectRan.current = true;
+    };
     //
     // empty array to only run on first render
     //
@@ -31,14 +33,12 @@ const App = () => {
 
   const callPadMove = (e: { gamepad: Gamepad; button: number }) => {
     gamepadButtonPress(e);
-  }
+  };
 
   return (
     <>
       <h1 className="font-bold">Testing Gamepad Inputs</h1>
-      <div>
-        Stage: "{gameStage}"
-      </div>
+      <div>Stage: "{gameStage}"</div>
       {ButtonData.map((buttonRow, i) => (
         <div key={i}>
           {buttonRow.map((button, j) => (
@@ -55,6 +55,15 @@ const App = () => {
           ))}
         </div>
       ))}
+      <div>
+        <iframe
+          height={480}
+          width={640}
+          src={
+            "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
+          }
+        ></iframe>
+      </div>
     </>
   );
 };

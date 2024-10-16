@@ -41,8 +41,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       useGameStore.getState().stage !== GameStage.Testing
     )
       return;
-    // get().advanceStage();
-    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+      // cancel?
   },
   symbolLeft: (gamepadIndex: number) => {
     if (
@@ -50,8 +49,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       useGameStore.getState().stage !== GameStage.Testing
     )
       return;
-    // get().advanceStage();
-    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+      // also pause?
   },
   symbolUp: (gamepadIndex: number) => {
     if (
@@ -59,8 +57,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       useGameStore.getState().stage !== GameStage.Testing
     )
       return;
-    // get().advanceStage();
-    // set({ tempButtonCol: 1, tempButtonRow: 1 });
+      // pause?
   },
   symbolDown: (gamepadIndex: number) => {
     if (
@@ -154,6 +151,17 @@ export const useGameStore = create<GameState>((set, get) => ({
 }));
 
 // Temp button array
+// Actions Needed:
+// - Edit Score
+// - View Score History
+// - Skip Question
+// - Skip Section
+// - Redo Question
+// - Manually Change Question
+// - Debug Controllers
+// - ???
+// - Middle = Resume
+
 export const ButtonData = [
   ["Zero", "One", "Two"],
   ["Three", "Four", "Five"],
