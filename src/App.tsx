@@ -1,12 +1,15 @@
 import { useEffect, useRef } from "react";
 import "./App.css";
 import { ButtonData, useGameStore } from "./store/gameStore";
+import ReactPlayer from "react-player";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
+  const isPaused = useGameStore((state) => state.isPaused);
+  const advanceStage = useGameStore((state) => state.advanceStage);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
@@ -56,13 +59,16 @@ const App = () => {
         </div>
       ))}
       <div>
-        <iframe
+        <ReactPlayer
+          playing={!isPaused}
+          controls={false}
+          onEnded={() => advanceStage()}
           height={480}
           width={640}
-          src={
+          url={
             "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
           }
-        ></iframe>
+        ></ReactPlayer>
       </div>
     </>
   );
