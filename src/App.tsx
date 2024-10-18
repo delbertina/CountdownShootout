@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import "./App.css";
-import { ButtonData, useGameStore } from "./store/gameStore";
+import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
+import { ButtonData } from "./types/game_types";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);

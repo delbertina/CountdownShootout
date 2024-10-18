@@ -1,12 +1,5 @@
 import { create } from "zustand";
-
-enum GameStage {
-  Testing = "TESTING",
-  Waiting = "WAITING",
-  Playing = "PLAYING",
-  Answering = "ANSWERING",
-  Scoring = "SCORING",
-}
+import { ButtonData, GameStage } from "../types/game_types";
 
 interface GameState {
   questionId: number;
@@ -56,7 +49,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       useGameStore.getState().stage !== GameStage.Testing
     )
       return;
-    // cancel?
+    // cancel / no / wrong
+    const stage = useGameStore.getState().stage;
+    if (stage === GameStage.Answering || stage === GameStage.Scoring) {
+      get().incorrectAnswer();
+    }
   },
   symbolLeft: (gamepadIndex: number) => {
     if (
@@ -258,21 +255,3 @@ export const useGameStore = create<GameState>((set, get) => ({
   completeQuestion: () =>
     set((state) => ({ questionId: state.questionId + 1 })),
 }));
-
-// Temp button array
-// Actions Needed:
-// - Edit Score
-// - View Score History
-// - Skip Question
-// - Skip Section
-// - Redo Question
-// - Manually Change Question
-// - Debug Controllers
-// - ???
-// - Middle = Resume
-
-export const ButtonData = [
-  ["Zero", "One", "Two"],
-  ["Three", "Four", "Five"],
-  ["Six", "Seven", "Eight"],
-];
