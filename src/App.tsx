@@ -41,35 +41,41 @@ const App = () => {
 
   return (
     <>
-      <h1 className="font-bold">Testing Gamepad Inputs</h1>
-      <div>Stage: "{gameStage}"</div>
-      {ButtonData.map((buttonRow, i) => (
-        <div key={i}>
-          {buttonRow.map((button, j) => (
-            <button
-              key={j}
-              className={
-                selectedButtonCol === j && selectedButtonRow === i
-                  ? "bg-red-500"
-                  : "bg-blue-500"
-              }
-            >
-              {button}
-            </button>
-          ))}
+      <div className="welcome-screen flex flex-col justify-center bg-slate-200">
+          <h1 className="font-bold">Welcome to Countdown Shootout</h1>
+          <h2>This game currently requires 3 controllers to play.</h2>
+      </div>
+      <div className="play-area">
+        <h1 className="font-bold">Testing Gamepad Inputs</h1>
+        <div>Stage: "{gameStage}"</div>
+        {ButtonData.map((buttonRow, i) => (
+          <div key={i}>
+            {buttonRow.map((button, j) => (
+              <button
+                key={j}
+                className={
+                  selectedButtonCol === j && selectedButtonRow === i
+                    ? "bg-red-500"
+                    : "bg-blue-500"
+                }
+              >
+                {button}
+              </button>
+            ))}
+          </div>
+        ))}
+        <div>
+          <ReactPlayer
+            playing={!isPaused}
+            controls={false}
+            onEnded={() => advanceStage()}
+            height={480}
+            width={640}
+            url={
+              "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
+            }
+          ></ReactPlayer>
         </div>
-      ))}
-      <div>
-        <ReactPlayer
-          playing={!isPaused}
-          controls={false}
-          onEnded={() => advanceStage()}
-          height={480}
-          width={640}
-          url={
-            "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
-          }
-        ></ReactPlayer>
       </div>
     </>
   );
