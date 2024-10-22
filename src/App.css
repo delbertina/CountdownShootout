@@ -4,7 +4,7 @@
   text-align: center;
 }
 
-.welcome-screen, .play-area {
+.whole-screen {
   min-height: 100vh;
   padding: 2rem;
 }

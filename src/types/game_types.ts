@@ -25,6 +25,7 @@ export const ButtonData = [
 ];
 
 export interface Game {
+  id: number;
   title: string;
   description: string;
   settings: GameSettings;

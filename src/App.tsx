@@ -3,6 +3,14 @@ import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
 import { ButtonData } from "./types/game_types";
+import { Games } from "./data/game_data";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./components/ui/card";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -41,11 +49,34 @@ const App = () => {
 
   return (
     <>
-      <div className="welcome-screen flex flex-col justify-center bg-slate-200">
-          <h1 className="font-bold">Welcome to Countdown Shootout</h1>
-          <h2>This game currently requires 3 controllers to play.</h2>
+      <div className="welcome-screen whole-screen flex flex-col justify-center bg-slate-200">
+        <h1 className="font-bold">Welcome to Countdown Shootout</h1>
+        <h2>This game currently requires 3 controllers to play.</h2>
       </div>
-      <div className="play-area">
+      <div className="card-page whole-screen flex flex-col justify-center bg-slate-700 text-amber-200 gap-8">
+        <h2 className="font-bold flex-grow-0">Question Sets</h2>
+        <div className="flex flex-row flex-wrap justify-center gap-4 flex-grow">
+          {Games.map((game, i) => (
+            <div>
+            <Card
+              key={i}
+              title={game.title}
+              className="w-96"
+              onClick={() => {
+                console.log("Game Selected", game);
+              }}
+            >
+              <CardHeader>
+                <CardTitle>{game.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-left">{game.description}</CardContent>
+              <CardFooter className="font-light italic">{"Last Played: 1/1/2022"}</CardFooter>
+            </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="play-area whole-screen">
         <h1 className="font-bold">Testing Gamepad Inputs</h1>
         <div>Stage: "{gameStage}"</div>
         {ButtonData.map((buttonRow, i) => (
