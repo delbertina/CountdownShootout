@@ -55,8 +55,8 @@ const App = () => {
       </div>
       <div className="card-page whole-screen flex flex-col justify-center bg-slate-700 text-amber-200 gap-8">
         <h2 className="font-bold flex-grow-0">Question Sets</h2>
-        <div className="flex flex-row flex-wrap justify-center gap-4 flex-grow">
-          {Games.map((game, i) => (
+        <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
+          {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
             <div>
             <Card
               key={i}
@@ -76,9 +76,10 @@ const App = () => {
           ))}
         </div>
       </div>
-      <div className="play-area whole-screen">
+      <div className="play-area whole-screen flex flex-col justify-center">
         <h1 className="font-bold">Testing Gamepad Inputs</h1>
         <div>Stage: "{gameStage}"</div>
+        <div>
         {ButtonData.map((buttonRow, i) => (
           <div key={i}>
             {buttonRow.map((button, j) => (
@@ -95,7 +96,8 @@ const App = () => {
             ))}
           </div>
         ))}
-        <div>
+        </div>
+        <div className="flex flex-col items-center">
           <ReactPlayer
             playing={!isPaused}
             controls={false}
