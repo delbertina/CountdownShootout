@@ -9,6 +9,8 @@ interface GameState {
   stage: GameStage;
   isPaused: boolean;
   remainingTime: number;
+  lastTeam1Press: number;
+  lastTeam2Press: number;
   canTeam1Answer: boolean;
   canTeam2Answer: boolean;
   isTeam1Answering: boolean;
@@ -39,6 +41,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   stage: GameStage.Testing,
   isPaused: true,
   remainingTime: 0,
+  lastTeam1Press: 0,
+  lastTeam2Press: 0,
   canTeam1Answer: false,
   canTeam2Answer: false,
   isTeam1Answering: false,
@@ -47,10 +51,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   tempButtonRow: 1,
   symbolRight: (gamepadIndex: number) => {
     if (
-      gamepadIndex !== 0 &&
-      useGameStore.getState().stage !== GameStage.Testing
-    )
+      gamepadIndex !== 0
+    ) {
+      console.log("symbolRight ", gamepadIndex, Date.now());
+      if (gamepadIndex === 1) {
+        set(() => ({lastTeam1Press: Date.now()}));
+      } else if (gamepadIndex === 2) {
+        set(() => ({lastTeam2Press: Date.now()}));
+      }
       return;
+    }
     // cancel / no / wrong
     const stage = useGameStore.getState().stage;
     if (stage === GameStage.Answering || stage === GameStage.Scoring) {
@@ -59,18 +69,28 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   symbolLeft: (gamepadIndex: number) => {
     if (
-      gamepadIndex !== 0 &&
-      useGameStore.getState().stage !== GameStage.Testing
-    )
+      gamepadIndex !== 0
+    ) {
+      if (gamepadIndex === 1) {
+        set(() => ({lastTeam1Press: Date.now()}));
+      } else if (gamepadIndex === 2) {
+        set(() => ({lastTeam2Press: Date.now()}));
+      }
       return;
+    }
     // also pause?
   },
   symbolUp: (gamepadIndex: number) => {
     if (
-      gamepadIndex !== 0 &&
-      useGameStore.getState().stage !== GameStage.Testing
-    )
+      gamepadIndex !== 0
+    ) {
+      if (gamepadIndex === 1) {
+        set(() => ({lastTeam1Press: Date.now()}));
+      } else if (gamepadIndex === 2) {
+        set(() => ({lastTeam2Press: Date.now()}));
+      }
       return;
+    }
     // pause?
   },
   symbolDown: (gamepadIndex: number) => {
@@ -78,6 +98,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (
       gamepadIndex !== 0
     ) {
+      if (gamepadIndex === 1) {
+        set(() => ({lastTeam1Press: Date.now()}));
+      } else if (gamepadIndex === 2) {
+        set(() => ({lastTeam2Press: Date.now()}));
+      }
       if (stage === GameStage.Testing) {
         // do something during the testing stage
         return;

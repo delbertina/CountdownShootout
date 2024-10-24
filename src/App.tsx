@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import { Toaster } from "./components/ui/toaster";
+import { useToast } from "./hooks/use-toast";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -19,6 +21,26 @@ const App = () => {
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
   const advanceStage = useGameStore((state) => state.advanceStage);
+  const { toast } = useToast();
+  const lastTeam1Press = useGameStore(
+    (state) => state.lastTeam1Press
+  );
+  const lastTeam2Press = useGameStore(
+    (state) => state.lastTeam2Press
+  );
+
+  const throwToast = () => {
+    toast({
+      title: "Toast!",
+    });
+  };
+
+  useEffect(() => {
+    console.log("Toast thrown");
+    if (lastTeam1Press > 0 || lastTeam2Press > 0) {
+      throwToast();
+    }
+  }, [lastTeam1Press, lastTeam2Press]);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
@@ -36,6 +58,8 @@ const App = () => {
     }
     return () => {
       effectRan.current = true;
+      // subTeam1Press();
+      // subTeam2Press();
     };
     //
     // empty array to only run on first render
@@ -58,20 +82,24 @@ const App = () => {
         <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
           {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
             <div>
-            <Card
-              key={i}
-              title={game.title}
-              className="w-96"
-              onClick={() => {
-                console.log("Game Selected", game);
-              }}
-            >
-              <CardHeader>
-                <CardTitle>{game.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-left">{game.description}</CardContent>
-              <CardFooter className="font-light italic">{"Last Played: 1/1/2022"}</CardFooter>
-            </Card>
+              <Card
+                key={i}
+                title={game.title}
+                className="w-96"
+                onClick={() => {
+                  console.log("Game Selected", game);
+                }}
+              >
+                <CardHeader>
+                  <CardTitle>{game.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-left">
+                  {game.description}
+                </CardContent>
+                <CardFooter className="font-light italic">
+                  {"Last Played: 1/1/2022"}
+                </CardFooter>
+              </Card>
             </div>
           ))}
         </div>
@@ -80,22 +108,22 @@ const App = () => {
         <h1 className="font-bold">Testing Gamepad Inputs</h1>
         <div>Stage: "{gameStage}"</div>
         <div>
-        {ButtonData.map((buttonRow, i) => (
-          <div key={i}>
-            {buttonRow.map((button, j) => (
-              <button
-                key={j}
-                className={
-                  selectedButtonCol === j && selectedButtonRow === i
-                    ? "bg-red-500"
-                    : "bg-blue-500"
-                }
-              >
-                {button}
-              </button>
-            ))}
-          </div>
-        ))}
+          {ButtonData.map((buttonRow, i) => (
+            <div key={i}>
+              {buttonRow.map((button, j) => (
+                <button
+                  key={j}
+                  className={
+                    selectedButtonCol === j && selectedButtonRow === i
+                      ? "bg-red-500"
+                      : "bg-blue-500"
+                  }
+                >
+                  {button}
+                </button>
+              ))}
+            </div>
+          ))}
         </div>
         <div className="flex flex-col items-center">
           <ReactPlayer
@@ -110,6 +138,7 @@ const App = () => {
           ></ReactPlayer>
         </div>
       </div>
+      <Toaster />
     </>
   );
 };
