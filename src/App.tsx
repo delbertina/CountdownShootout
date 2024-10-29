@@ -29,18 +29,26 @@ const App = () => {
     (state) => state.lastTeam2Press
   );
 
-  const throwToast = () => {
+  const throwToast = (isRed: boolean) => {
     toast({
       title: "Toast!",
+      variant: isRed ? "left_red" : "right_blue",
     });
   };
 
   useEffect(() => {
     console.log("Toast thrown");
-    if (lastTeam1Press > 0 || lastTeam2Press > 0) {
-      throwToast();
+    if (lastTeam1Press > 0) {
+      throwToast(true);
     }
-  }, [lastTeam1Press, lastTeam2Press]);
+  }, [lastTeam1Press]);
+
+  useEffect(() => {
+    console.log("Toast thrown");
+    if (lastTeam2Press > 0) {
+      throwToast(false);
+    }
+  }, [lastTeam2Press]);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);
