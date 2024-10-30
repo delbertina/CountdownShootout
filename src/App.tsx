@@ -32,7 +32,7 @@ const App = () => {
   const throwToast = (isRed: boolean) => {
     toast({
       title: "Toast!",
-      variant: isRed ? "left_red" : "right_blue",
+      variant: isRed ? "red" : "blue",
     });
   };
 
