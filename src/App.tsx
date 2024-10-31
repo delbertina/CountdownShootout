@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
-import { ButtonData } from "./types/game_types";
+import { ButtonData, GameStage } from "./types/game_types";
 import { Games } from "./data/game_data";
 import {
   Card,
@@ -16,6 +16,7 @@ import { useToast } from "./hooks/use-toast";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
+  const gameQuestion = useGameStore((state) => state.currentGame && state.questionId ? state.currentGame.questions[state.questionId] : undefined);
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
@@ -31,7 +32,7 @@ const App = () => {
 
   const throwToast = (isRed: boolean) => {
     toast({
-      title: "Toast!",
+      title: isRed ? "Red Team Buzzed" : "Blue Team Buzzed",
       variant: isRed ? "red" : "blue",
     });
   };
@@ -113,8 +114,32 @@ const App = () => {
         </div>
       </div>
       <div className="play-area whole-screen flex flex-col justify-center">
-        <h1 className="font-bold">Testing Gamepad Inputs</h1>
+        <h1 className="font-bold">Testing</h1>
         <div>Stage: "{gameStage}"</div>
+        {gameQuestion && (
+          <>
+          {gameStage === GameStage.Waiting && (
+            <div>
+              <h1>{gameQuestion.questionText}</h1>
+            </div>
+          )}
+          {gameStage === GameStage.Playing && (
+            <div>
+              <h2>{gameQuestion.questionText}</h2>
+            </div>
+          )}
+          {gameStage === GameStage.Answering && (
+            <div>
+
+            </div>
+          )}
+          {gameStage === GameStage.Scoring && (
+            <div>
+
+            </div>
+          )}
+          </>
+      )}
         <div>
           {ButtonData.map((buttonRow, i) => (
             <div key={i}>
