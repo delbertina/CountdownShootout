@@ -12,21 +12,27 @@ export const Games: Game[] = [
             {
                 id: 1,
                 questionText: "Question 1",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 15,
+                videoEndTime: 30,
                 answer: "Answer 1",
                 answerSubtext: "Answer 1 Subtext"
             },
             {
                 id: 2,
                 questionText: "Question 2",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 30,
+                videoEndTime: 45,
                 answer: "Answer 2",
                 answerSubtext: "Answer 2 Subtext"
             },
             {
                 id: 3,
                 questionText: "Question 3",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 45,
+                videoEndTime: 60,
                 answer: "Answer 3",
                 answerSubtext: "Answer 3 Subtext"
             },
@@ -43,21 +49,27 @@ export const Games: Game[] = [
             {
                 id: 1,
                 questionText: "Question 1",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 15,
+                videoEndTime: 30,
                 answer: "Answer 1",
                 answerSubtext: "Answer 1 Subtext"
             },
             {
                 id: 2,
                 questionText: "Question 2",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 30,
+                videoEndTime: 45,
                 answer: "Answer 2",
                 answerSubtext: "Answer 2 Subtext"
             },
             {
                 id: 3,
                 questionText: "Question 3",
-                questionSrc: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoYouTubeID: "dQw4w9WgXcQ",
+                videoStartTime: 45,
+                videoEndTime: 60,
                 answer: "Answer 3",
                 answerSubtext: "Answer 3 Subtext"
             },

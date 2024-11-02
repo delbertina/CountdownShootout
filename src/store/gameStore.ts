@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { ButtonData, Game, GameStage } from "../types/game_types";
+import { Games } from "../data/game_data";
 
 interface GameState {
   currentGame: Game | undefined;
@@ -34,7 +35,7 @@ interface GameState {
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
-  currentGame: undefined,
+  currentGame: Games[0],
   questionId: 0,
   team1ScoreHistory: [],
   team2ScoreHistory: [],

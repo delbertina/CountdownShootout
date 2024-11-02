@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
@@ -13,11 +13,13 @@ import {
 } from "./components/ui/card";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
+import { OnProgressProps } from "react-player/base";
+import { Progress } from "./components/ui/progress";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
   const gameQuestion = useGameStore((state) =>
-    state.currentGame && state.questionId
+    state.currentGame && state.questionId > -1
       ? state.currentGame.questions[state.questionId]
       : undefined
   );
@@ -31,6 +33,8 @@ const App = () => {
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
   const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
+
+  const [videoProgress, setVideoProgress] = useState(0);
 
   const throwToast = (isRed: boolean) => {
     toast({
@@ -78,8 +82,23 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const callPadMove = (e: { gamepad: Gamepad; button: number }) => {
+  const callPadMove = (e: { gamepad: Gamepad; button: number }): void => {
     gamepadButtonPress(e);
+  };
+
+  const handleVideoProgress = (e: OnProgressProps): void => {
+    if (isNaN(e.playedSeconds) || !gameQuestion) return;
+    console.log(e);
+    setVideoProgress(
+      ((e.playedSeconds - gameQuestion.videoStartTime) /
+        (gameQuestion.videoEndTime - gameQuestion.videoStartTime)) *
+        100
+    );
+  };
+
+  const handleVideoEnd = (): void => {
+    setVideoProgress(0);
+    advanceStage();
   };
 
   return (
@@ -133,13 +152,26 @@ const App = () => {
                   <ReactPlayer
                     playing={!isPaused}
                     controls={false}
-                    onEnded={() => advanceStage()}
+                    progressInterval={500}
+                    onEnded={() => handleVideoEnd()}
+                    onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
                     height={480}
                     width={640}
                     url={
-                      "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
+                      "https://www.youtube.com/watch?v=" +
+                      gameQuestion.videoYouTubeID
                     }
+                    config={{
+                      youtube: {
+                        playerVars: {
+                          start: gameQuestion.videoStartTime,
+                          end: gameQuestion.videoEndTime,
+                          rel: 0,
+                        },
+                      },
+                    }}
                   ></ReactPlayer>
+                  <Progress value={videoProgress} />
                 </div>
                 {/* timer for remaining time in video */}
               </div>
@@ -148,6 +180,9 @@ const App = () => {
               <div>
                 {isTeam1Answering && <h1>Team 1 is Answering</h1>}
                 {isTeam2Answering && <h1>Team 2 is Answering</h1>}
+                {!isTeam1Answering && !isTeam2Answering && (
+                  <h1>Nobody Won the Points</h1>
+                )}
                 {/* timer for remaining time to answer */}
               </div>
             )}
