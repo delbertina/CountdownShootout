@@ -16,19 +16,21 @@ import { useToast } from "./hooks/use-toast";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
-  const gameQuestion = useGameStore((state) => state.currentGame && state.questionId ? state.currentGame.questions[state.questionId] : undefined);
+  const gameQuestion = useGameStore((state) =>
+    state.currentGame && state.questionId
+      ? state.currentGame.questions[state.questionId]
+      : undefined
+  );
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
   const advanceStage = useGameStore((state) => state.advanceStage);
   const { toast } = useToast();
-  const lastTeam1Press = useGameStore(
-    (state) => state.lastTeam1Press
-  );
-  const lastTeam2Press = useGameStore(
-    (state) => state.lastTeam2Press
-  );
+  const lastTeam1Press = useGameStore((state) => state.lastTeam1Press);
+  const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
+  const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
+  const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
 
   const throwToast = (isRed: boolean) => {
     toast({
@@ -118,28 +120,46 @@ const App = () => {
         <div>Stage: "{gameStage}"</div>
         {gameQuestion && (
           <>
-          {gameStage === GameStage.Waiting && (
-            <div>
-              <h1>{gameQuestion.questionText}</h1>
-            </div>
-          )}
-          {gameStage === GameStage.Playing && (
-            <div>
-              <h2>{gameQuestion.questionText}</h2>
-            </div>
-          )}
-          {gameStage === GameStage.Answering && (
-            <div>
-
-            </div>
-          )}
-          {gameStage === GameStage.Scoring && (
-            <div>
-
-            </div>
-          )}
+            {gameStage === GameStage.Waiting && (
+              <div>
+                <h1>{gameQuestion.questionText}</h1>
+                {/* timer for remaining time before question starts */}
+              </div>
+            )}
+            {gameStage === GameStage.Playing && (
+              <div>
+                <h2>{gameQuestion.questionText}</h2>
+                <div className="flex flex-col items-center">
+                  <ReactPlayer
+                    playing={!isPaused}
+                    controls={false}
+                    onEnded={() => advanceStage()}
+                    height={480}
+                    width={640}
+                    url={
+                      "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
+                    }
+                  ></ReactPlayer>
+                </div>
+                {/* timer for remaining time in video */}
+              </div>
+            )}
+            {gameStage === GameStage.Answering && (
+              <div>
+                {isTeam1Answering && <h1>Team 1 is Answering</h1>}
+                {isTeam2Answering && <h1>Team 2 is Answering</h1>}
+                {/* timer for remaining time to answer */}
+              </div>
+            )}
+            {gameStage === GameStage.Scoring && (
+              <div>
+                {isTeam1Answering && <h1>Team 1 is Correct</h1>}
+                {isTeam2Answering && <h1>Team 2 is Correct</h1>}
+                {/* timer for remaining time before next stage */}
+              </div>
+            )}
           </>
-      )}
+        )}
         <div>
           {ButtonData.map((buttonRow, i) => (
             <div key={i}>
@@ -157,18 +177,6 @@ const App = () => {
               ))}
             </div>
           ))}
-        </div>
-        <div className="flex flex-col items-center">
-          <ReactPlayer
-            playing={!isPaused}
-            controls={false}
-            onEnded={() => advanceStage()}
-            height={480}
-            width={640}
-            url={
-              "https://www.youtube.com/embed/dQw4w9WgXcQ?si=SgyTMAVJ2tUM2BMm&amp;start=15&end=30&rel=0"
-            }
-          ></ReactPlayer>
         </div>
       </div>
       <Toaster />
