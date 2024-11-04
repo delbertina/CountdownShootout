@@ -149,6 +149,7 @@ const App = () => {
               <div>
                 <h2>{gameQuestion.questionText}</h2>
                 <div className="flex flex-col items-center">
+                  {/* TODO: Fix video reset on unpause */}
                   <ReactPlayer
                     playing={!isPaused}
                     controls={false}

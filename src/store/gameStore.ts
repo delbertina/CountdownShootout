@@ -51,15 +51,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   tempButtonCol: 1,
   tempButtonRow: 1,
   symbolRight: (gamepadIndex: number) => {
-    if (
-      gamepadIndex !== 0
-    ) {
+    if (gamepadIndex !== 0) {
       console.log("symbolRight ", gamepadIndex, Date.now());
       if (gamepadIndex === 1) {
-        set(() => ({lastTeam1Press: Date.now()}));
+        set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
-        set(() => ({lastTeam2Press: Date.now()}));
+        set(() => ({ lastTeam2Press: Date.now() }));
       }
+      get().answerQuestion(gamepadIndex);
       return;
     }
     // cancel / no / wrong
@@ -69,51 +68,45 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
   symbolLeft: (gamepadIndex: number) => {
-    if (
-      gamepadIndex !== 0
-    ) {
+    if (gamepadIndex !== 0) {
       if (gamepadIndex === 1) {
-        set(() => ({lastTeam1Press: Date.now()}));
+        set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
-        set(() => ({lastTeam2Press: Date.now()}));
+        set(() => ({ lastTeam2Press: Date.now() }));
       }
+      get().answerQuestion(gamepadIndex);
       return;
     }
     // also pause?
   },
   symbolUp: (gamepadIndex: number) => {
-    if (
-      gamepadIndex !== 0
-    ) {
+    if (gamepadIndex !== 0) {
       if (gamepadIndex === 1) {
-        set(() => ({lastTeam1Press: Date.now()}));
+        set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
-        set(() => ({lastTeam2Press: Date.now()}));
+        set(() => ({ lastTeam2Press: Date.now() }));
       }
+      get().answerQuestion(gamepadIndex);
       return;
     }
     // pause?
   },
   symbolDown: (gamepadIndex: number) => {
     const stage = useGameStore.getState().stage;
-    if (
-      gamepadIndex !== 0
-    ) {
+    if (gamepadIndex !== 0) {
       if (gamepadIndex === 1) {
-        set(() => ({lastTeam1Press: Date.now()}));
+        set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
-        set(() => ({lastTeam2Press: Date.now()}));
+        set(() => ({ lastTeam2Press: Date.now() }));
       }
       if (stage === GameStage.Testing) {
         // do something during the testing stage
         return;
       }
-      if (stage === GameStage.Answering) {
-        get().answerQuestion(gamepadIndex);
-      }
+      get().answerQuestion(gamepadIndex);
       return;
     }
-    if (stage === GameStage.Answering || stage === GameStage.Scoring) {
+    if (stage === GameStage.Answering) {
       get().correctAnswer();
       return;
     } else {
@@ -188,7 +181,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   answerQuestion: (gamepadIndex: number) => {
     // A team can only answer when it's the playing stage
-    if (get().stage !== GameStage.Playing) return;
+    // or if it's the answering stage and neither team triggered it
+    // aka time expired and automatically advanced the stage
+    const stage = useGameStore.getState().stage;
+    if (
+      !(
+        stage === GameStage.Playing ||
+        (stage === GameStage.Answering &&
+          !get().isTeam1Answering &&
+          !get().isTeam2Answering)
+      )
+    )
+      return;
     // The game master cannot answer
     if (gamepadIndex === 0) return;
     const can1Ans = get().canTeam1Answer;
@@ -225,9 +229,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const stage = get().stage;
     if (stage !== GameStage.Scoring && stage !== GameStage.Answering) return;
     set((state) => ({
-      stage: GameStage.Waiting,
-      // TODO: Check if new index in range
-      questionId: state.questionId + 1,
+      stage: GameStage.Scoring,
       team1ScoreHistory: [
         ...state.team1ScoreHistory,
         state.isTeam1Answering ? 1 : 0,
@@ -238,14 +240,17 @@ export const useGameStore = create<GameState>((set, get) => ({
       ],
       canTeam1Answer: true,
       canTeam2Answer: true,
-      isTeam1Answering: false,
-      isTeam2Answering: false,
     }));
   },
   incorrectAnswer: () => {
     const stage = get().stage;
     if (stage !== GameStage.Scoring && stage !== GameStage.Answering) return;
-    set(() => ({stage: GameStage.Playing, isPaused: false}));
+    set(() => ({
+      stage: GameStage.Playing,
+      isPaused: false,
+      isTeam1Answering: false,
+      isTeam2Answering: false,
+    }));
   },
   advanceStage: () => {
     // Testing -> Waiting -> Playing -> Answering -> Scoring -> (Loop to Waiting)
@@ -273,7 +278,13 @@ export const useGameStore = create<GameState>((set, get) => ({
         });
         break;
       case GameStage.Scoring:
-        set({ stage: GameStage.Waiting });
+        set((state) => ({
+          stage: GameStage.Waiting,
+          // TODO: Check if new index in range
+          questionId: state.questionId + 1,
+          isTeam1Answering: false,
+          isTeam2Answering: false,
+        }));
         break;
       default:
         break;
