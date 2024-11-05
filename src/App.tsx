@@ -37,7 +37,7 @@ const App = () => {
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
   const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
-
+  const selectQuiz = useGameStore((state) => state.selectQuiz);
   const [videoProgress, setVideoProgress] = useState(0);
 
   const throwToast = (isRed: boolean) => {
@@ -52,6 +52,7 @@ const App = () => {
     if (lastTeam1Press > 0) {
       throwToast(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastTeam1Press]);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ const App = () => {
     if (lastTeam2Press > 0) {
       throwToast(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastTeam2Press]);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
@@ -123,6 +125,7 @@ const App = () => {
                 className="w-96"
                 onClick={() => {
                   console.log("Game Selected", game);
+                  selectQuiz(game.id);
                 }}
               >
                 <CardHeader>

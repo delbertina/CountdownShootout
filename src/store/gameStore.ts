@@ -33,6 +33,7 @@ interface GameState {
   incorrectAnswer: () => void;
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
+  selectQuiz: (id: number) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -295,5 +296,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       default:
         break;
     }
+  },
+  selectQuiz(id: number) {
+    const foundGame = Games.find((game) => game.id === id);
+    if (!foundGame) return;
+    set({ currentGame: foundGame, questionId: 0 });
   },
 }));
