@@ -28,6 +28,10 @@ const App = () => {
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
   const advanceStage = useGameStore((state) => state.advanceStage);
+  const updateLastVideoTime = useGameStore(
+    (state) => state.updateLastVideoTime
+  );
+  const lastVideoTime = useGameStore((state) => state.lastVideoTime);
   const { toast } = useToast();
   const lastTeam1Press = useGameStore((state) => state.lastTeam1Press);
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
@@ -94,6 +98,7 @@ const App = () => {
         (gameQuestion.videoEndTime - gameQuestion.videoStartTime)) *
         100
     );
+    updateLastVideoTime(e.playedSeconds);
   };
 
   const handleVideoEnd = (): void => {
@@ -165,7 +170,7 @@ const App = () => {
                     config={{
                       youtube: {
                         playerVars: {
-                          start: gameQuestion.videoStartTime,
+                          start: !lastVideoTime ? gameQuestion.videoStartTime : lastVideoTime,
                           end: gameQuestion.videoEndTime,
                           rel: 0,
                         },

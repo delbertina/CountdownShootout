@@ -5,6 +5,7 @@ import { Games } from "../data/game_data";
 interface GameState {
   currentGame: Game | undefined;
   questionId: number;
+  lastVideoTime: number;
   team1ScoreHistory: number[];
   team2ScoreHistory: number[];
   stage: GameStage;
@@ -30,13 +31,14 @@ interface GameState {
   answerQuestion: (gamepadIndex: number) => void;
   correctAnswer: () => void;
   incorrectAnswer: () => void;
+  updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
-  completeQuestion: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
   currentGame: Games[0],
   questionId: 0,
+  lastVideoTime: 0,
   team1ScoreHistory: [],
   team2ScoreHistory: [],
   stage: GameStage.Testing,
@@ -252,6 +254,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       isTeam2Answering: false,
     }));
   },
+  updateLastVideoTime: (time: number) => {
+    set({ lastVideoTime: time });
+  },
   advanceStage: () => {
     // Testing -> Waiting -> Playing -> Answering -> Scoring -> (Loop to Waiting)
     switch (get().stage) {
@@ -282,6 +287,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           stage: GameStage.Waiting,
           // TODO: Check if new index in range
           questionId: state.questionId + 1,
+          lastVideoTime: 0,
           isTeam1Answering: false,
           isTeam2Answering: false,
         }));
@@ -290,7 +296,4 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
     }
   },
-
-  completeQuestion: () =>
-    set((state) => ({ questionId: state.questionId + 1 })),
 }));
