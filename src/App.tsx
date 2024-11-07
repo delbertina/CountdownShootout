@@ -27,7 +27,7 @@ const App = () => {
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
-  const advanceStage = useGameStore((state) => state.advanceStage);
+  // const advanceStage = useGameStore((state) => state.advanceStage);
   const updateLastVideoTime = useGameStore(
     (state) => state.updateLastVideoTime
   );
@@ -37,7 +37,9 @@ const App = () => {
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
   const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
+  const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
   const selectQuiz = useGameStore((state) => state.selectQuiz);
+  const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
   const [videoProgress, setVideoProgress] = useState(0);
 
   const throwToast = (isRed: boolean) => {
@@ -52,7 +54,7 @@ const App = () => {
     if (lastTeam1Press > 0) {
       throwToast(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastTeam1Press]);
 
   useEffect(() => {
@@ -60,7 +62,7 @@ const App = () => {
     if (lastTeam2Press > 0) {
       throwToast(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastTeam2Press]);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
@@ -79,8 +81,6 @@ const App = () => {
     }
     return () => {
       effectRan.current = true;
-      // subTeam1Press();
-      // subTeam2Press();
     };
     //
     // empty array to only run on first render
@@ -94,7 +94,7 @@ const App = () => {
 
   const handleVideoProgress = (e: OnProgressProps): void => {
     if (isNaN(e.playedSeconds) || !gameQuestion) return;
-    console.log(e);
+    console.log(e, lastVideoTime);
     setVideoProgress(
       ((e.playedSeconds - gameQuestion.videoStartTime) /
         (gameQuestion.videoEndTime - gameQuestion.videoStartTime)) *
@@ -105,7 +105,7 @@ const App = () => {
 
   const handleVideoEnd = (): void => {
     setVideoProgress(0);
-    advanceStage();
+    startSuddenDeath();
   };
 
   return (
@@ -173,13 +173,19 @@ const App = () => {
                     config={{
                       youtube: {
                         playerVars: {
-                          start: !lastVideoTime ? gameQuestion.videoStartTime : lastVideoTime,
-                          end: gameQuestion.videoEndTime,
+                          // start and end need a whole number
+                          start: !lastVideoTime
+                            ? Math.floor(gameQuestion.videoStartTime)
+                            : Math.floor(lastVideoTime),
+                          end: Math.floor(gameQuestion.videoEndTime),
                           rel: 0,
                         },
                       },
                     }}
                   ></ReactPlayer>
+                  {gameQuestion.videoStartTime}
+                  <hr />
+                  {lastVideoTime}
                   <Progress value={videoProgress} />
                 </div>
                 {/* timer for remaining time in video */}
@@ -192,6 +198,7 @@ const App = () => {
                 {!isTeam1Answering && !isTeam2Answering && (
                   <h1>Nobody Won the Points</h1>
                 )}
+                Is Sudden Death: {isSuddenDeath ? "True" : "False"}
                 {/* timer for remaining time to answer */}
               </div>
             )}

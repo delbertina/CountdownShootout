@@ -17,6 +17,7 @@ interface GameState {
   canTeam2Answer: boolean;
   isTeam1Answering: boolean;
   isTeam2Answering: boolean;
+  isSuddenDeath: boolean;
   tempButtonCol: number;
   tempButtonRow: number;
   symbolRight: (gamepadIndex: number) => void;
@@ -31,6 +32,7 @@ interface GameState {
   answerQuestion: (gamepadIndex: number) => void;
   correctAnswer: () => void;
   incorrectAnswer: () => void;
+  startSuddenDeath: () => void;
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
@@ -51,6 +53,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   canTeam2Answer: false,
   isTeam1Answering: false,
   isTeam2Answering: false,
+  isSuddenDeath: false,
   tempButtonCol: 1,
   tempButtonRow: 1,
   symbolRight: (gamepadIndex: number) => {
@@ -247,13 +250,24 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   incorrectAnswer: () => {
     const stage = get().stage;
-    if (stage !== GameStage.Scoring && stage !== GameStage.Answering) return;
-    set(() => ({
-      stage: GameStage.Playing,
+    if (stage !== GameStage.Answering) return;
+    set((state) => ({
+      stage: state.isSuddenDeath ? GameStage.Scoring : GameStage.Playing,
       isPaused: false,
       isTeam1Answering: false,
       isTeam2Answering: false,
     }));
+  },
+  startSuddenDeath: () => {
+    const stage = get().stage;
+    if (stage !== GameStage.Playing) return;
+    set({
+      stage: GameStage.Answering,
+      isPaused: true,
+      isSuddenDeath: true,
+      canTeam1Answer: true,
+      canTeam2Answer: true,
+    });
   },
   updateLastVideoTime: (time: number) => {
     set({ lastVideoTime: time });
@@ -291,6 +305,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           lastVideoTime: 0,
           isTeam1Answering: false,
           isTeam2Answering: false,
+          isSuddenDeath: false,
         }));
         break;
       default:
