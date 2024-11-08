@@ -44,7 +44,9 @@ export interface GameSettings {
 export interface GameQuestion {
   id: number;
   questionText: string;
-  questionSrc: string;
+  videoYouTubeID: string;
+  videoStartTime: number;
+  videoEndTime: number;
   answer: string;
   answerSubtext?: string;
 }
