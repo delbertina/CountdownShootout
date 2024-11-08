@@ -251,12 +251,37 @@ export const useGameStore = create<GameState>((set, get) => ({
   incorrectAnswer: () => {
     const stage = get().stage;
     if (stage !== GameStage.Answering) return;
-    set((state) => ({
-      stage: state.isSuddenDeath ? GameStage.Scoring : GameStage.Playing,
-      isPaused: false,
-      isTeam1Answering: false,
-      isTeam2Answering: false,
-    }));
+    set((state) =>
+      // if it's sudden death
+      state.isSuddenDeath
+        ? // if both teams have answered
+          !state.canTeam1Answer && !state.canTeam2Answer
+          ? // advance to the next stage
+            {
+              stage: GameStage.Scoring,
+              isTeam1Answering: false,
+              isTeam2Answering: false,
+            }
+          : // else, stay and let the other team answer
+            {
+              stage: GameStage.Answering,
+              // whichever team is left able to answer is now answering
+              isTeam1Answering: state.canTeam1Answer,
+              isTeam2Answering: state.canTeam2Answer,
+              // after this, neither team can answer again since it's sudden death
+              // so if the other teams answers incorrectly,
+              // it will hit the previous if statement and continue to scoring
+              canTeam1Answer: false,
+              canTeam2Answer: false,
+            }
+        : // else just an incorrect answer during video playback
+          {
+            stage: GameStage.Playing,
+            isPaused: false,
+            isTeam1Answering: false,
+            isTeam2Answering: false,
+          }
+    );
   },
   startSuddenDeath: () => {
     const stage = get().stage;
