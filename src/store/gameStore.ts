@@ -58,7 +58,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   tempButtonRow: 1,
   symbolRight: (gamepadIndex: number) => {
     if (gamepadIndex !== 0) {
-      console.log("symbolRight ", gamepadIndex, Date.now());
       if (gamepadIndex === 1) {
         set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
@@ -119,9 +118,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       get().advanceStage();
       return;
     }
-
-    // get().advanceStage();
-    // set({ tempButtonCol: 1, tempButtonRow: 1 });
   },
   arrowRight: (gamepadIndex: number) => {
     if (gamepadIndex !== 0) return;
@@ -298,7 +294,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ lastVideoTime: time });
   },
   advanceStage: () => {
-    // Testing -> Waiting -> Playing -> Answering -> Scoring -> (Loop to Waiting)
+    // Testing -> Waiting -> Playing -> Answering -> Scoring -> Ending -> (Loop to Waiting)
     switch (get().stage) {
       case GameStage.Testing:
         set({ stage: GameStage.Waiting });
@@ -324,14 +320,21 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       case GameStage.Scoring:
         set((state) => ({
-          stage: GameStage.Waiting,
-          // TODO: Check if new index in range
+          // if there are no more questions, end the game
+          stage: state.currentGame?.questions.find(
+            (question) => question.id === state.questionId + 1
+          )
+            ? GameStage.Waiting
+            : GameStage.Ending,
           questionId: state.questionId + 1,
           lastVideoTime: 0,
           isTeam1Answering: false,
           isTeam2Answering: false,
           isSuddenDeath: false,
         }));
+        break;
+      case GameStage.Ending:
+        set(() => ({ stage: GameStage.Waiting, game: undefined, questionId: 0 }));
         break;
       default:
         break;

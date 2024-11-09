@@ -4,6 +4,7 @@ export enum GameStage {
   Playing = "PLAYING",
   Answering = "ANSWERING",
   Scoring = "SCORING",
+  Ending = "ENDING",
 }
 
 // Temp button array
