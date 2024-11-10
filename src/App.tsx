@@ -37,6 +37,8 @@ const App = () => {
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
   const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
+  const team1ScoreHistory = useGameStore((state) => state.team1ScoreHistory);
+  const team2ScoreHistory = useGameStore((state) => state.team2ScoreHistory);
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
   const selectQuiz = useGameStore((state) => state.selectQuiz);
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -205,6 +207,13 @@ const App = () => {
               <div>
                 {isTeam1Answering && <h1>Team 1 is Correct</h1>}
                 {isTeam2Answering && <h1>Team 2 is Correct</h1>}
+                {/* timer for remaining time before next stage */}
+              </div>
+            )}
+            {gameStage === GameStage.Ending && (
+              <div>
+                Team 1 Score: {team1ScoreHistory.reduce((sum, current) => sum + current, 0)}
+                Team 2 Score: {team2ScoreHistory.reduce((sum, current) => sum + current, 0)}
                 {/* timer for remaining time before next stage */}
               </div>
             )}
