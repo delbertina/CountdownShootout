@@ -39,12 +39,12 @@ interface GameState {
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
-  currentGame: Games[0],
+  currentGame: undefined,
   questionId: 0,
   lastVideoTime: 0,
   team1ScoreHistory: [],
   team2ScoreHistory: [],
-  stage: GameStage.Testing,
+  stage: GameStage.Waiting,
   isPaused: true,
   remainingTime: 0,
   lastTeam1Press: 0,
@@ -103,10 +103,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         set(() => ({ lastTeam1Press: Date.now() }));
       } else if (gamepadIndex === 2) {
         set(() => ({ lastTeam2Press: Date.now() }));
-      }
-      if (stage === GameStage.Testing) {
-        // do something during the testing stage
-        return;
       }
       get().answerQuestion(gamepadIndex);
       return;
@@ -294,11 +290,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ lastVideoTime: time });
   },
   advanceStage: () => {
-    // Testing -> Waiting -> Playing -> Answering -> Scoring -> Ending -> (Loop to Waiting)
+    // Waiting -> Playing -> Answering -> Scoring -> (if last question) Ending -> (Loop to Waiting)
     switch (get().stage) {
-      case GameStage.Testing:
-        set({ stage: GameStage.Waiting });
-        break;
       case GameStage.Waiting:
         set({
           stage: GameStage.Playing,
@@ -321,9 +314,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       case GameStage.Scoring:
         set((state) => ({
           // if there are no more questions, end the game
-          stage: state.currentGame?.questions.find(
-            (question) => question.id === state.questionId + 1
-          )
+          stage: state.currentGame && state.currentGame.questions.length > state.questionId + 1
             ? GameStage.Waiting
             : GameStage.Ending,
           questionId: state.questionId + 1,

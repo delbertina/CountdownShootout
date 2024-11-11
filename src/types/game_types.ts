@@ -1,5 +1,4 @@
 export enum GameStage {
-  Testing = "TESTING",
   Waiting = "WAITING",
   Playing = "PLAYING",
   Answering = "ANSWERING",
@@ -43,7 +42,6 @@ export interface GameSettings {
 }
 
 export interface GameQuestion {
-  id: number;
   questionText: string;
   videoYouTubeID: string;
   videoStartTime: number;

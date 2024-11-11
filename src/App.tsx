@@ -18,10 +18,9 @@ import { Progress } from "./components/ui/progress";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
-  const gameQuestion = useGameStore((state) =>
-    state.currentGame && state.questionId > -1
-      ? state.currentGame.questions[state.questionId]
-      : undefined
+  const currentGame = useGameStore((state) => state.currentGame);
+  const gameQuestion = useGameStore(
+    (state) => state.currentGame?.questions[state.questionId]
   );
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
@@ -117,127 +116,145 @@ const App = () => {
         <h2>This game currently requires 3 controllers to play.</h2>
       </div>
       <div className="card-page whole-screen flex flex-col justify-center bg-slate-700 text-amber-200 gap-8">
-        <h2 className="font-bold flex-grow-0">Question Sets</h2>
-        <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
-          {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
-            <div>
-              <Card
-                key={i}
-                title={game.title}
-                className="w-96"
-                onClick={() => {
-                  console.log("Game Selected", game);
-                  selectQuiz(game.id);
-                }}
-              >
-                <CardHeader>
-                  <CardTitle>{game.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-left">
-                  {game.description}
-                </CardContent>
-                <CardFooter className="font-light italic">
-                  {"Last Played: 1/1/2022"}
-                </CardFooter>
-              </Card>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="play-area whole-screen flex flex-col justify-center">
-        <h1 className="font-bold">Testing</h1>
-        <div>Stage: "{gameStage}"</div>
-        {gameQuestion && (
+        {!currentGame && (
           <>
-            {gameStage === GameStage.Waiting && (
-              <div>
-                <h1>{gameQuestion.questionText}</h1>
-                {/* timer for remaining time before question starts */}
-              </div>
-            )}
-            {gameStage === GameStage.Playing && (
-              <div>
-                <h2>{gameQuestion.questionText}</h2>
-                <div className="flex flex-col items-center">
-                  <ReactPlayer
-                    playing={!isPaused}
-                    controls={false}
-                    progressInterval={500}
-                    onEnded={() => handleVideoEnd()}
-                    onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
-                    height={480}
-                    width={640}
-                    url={
-                      "https://www.youtube.com/watch?v=" +
-                      gameQuestion.videoYouTubeID
-                    }
-                    config={{
-                      youtube: {
-                        playerVars: {
-                          // start and end need a whole number
-                          start: !lastVideoTime
-                            ? Math.floor(gameQuestion.videoStartTime)
-                            : Math.floor(lastVideoTime),
-                          end: Math.floor(gameQuestion.videoEndTime),
-                          rel: 0,
-                        },
-                      },
+            <h2 className="font-bold flex-grow-0">Question Sets</h2>
+            <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
+              {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
+                <div>
+                  <Card
+                    key={i}
+                    title={game.title}
+                    className="w-96"
+                    onClick={() => {
+                      console.log("Game Selected", game);
+                      selectQuiz(game.id);
                     }}
-                  ></ReactPlayer>
-                  {gameQuestion.videoStartTime}
-                  <hr />
-                  {lastVideoTime}
-                  <Progress value={videoProgress} />
+                  >
+                    <CardHeader>
+                      <CardTitle>{game.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-left">
+                      {game.description}
+                    </CardContent>
+                    <CardFooter className="font-light italic">
+                      {"Last Played: 1/1/2022"}
+                    </CardFooter>
+                  </Card>
                 </div>
-                {/* timer for remaining time in video */}
-              </div>
-            )}
-            {gameStage === GameStage.Answering && (
-              <div>
-                {isTeam1Answering && <h1>Team 1 is Answering</h1>}
-                {isTeam2Answering && <h1>Team 2 is Answering</h1>}
-                {!isTeam1Answering && !isTeam2Answering && (
-                  <h1>Nobody Won the Points</h1>
-                )}
-                Is Sudden Death: {isSuddenDeath ? "True" : "False"}
-                {/* timer for remaining time to answer */}
-              </div>
-            )}
-            {gameStage === GameStage.Scoring && (
-              <div>
-                {isTeam1Answering && <h1>Team 1 is Correct</h1>}
-                {isTeam2Answering && <h1>Team 2 is Correct</h1>}
-                {/* timer for remaining time before next stage */}
-              </div>
-            )}
-            {gameStage === GameStage.Ending && (
-              <div>
-                Team 1 Score: {team1ScoreHistory.reduce((sum, current) => sum + current, 0)}
-                Team 2 Score: {team2ScoreHistory.reduce((sum, current) => sum + current, 0)}
-                {/* timer for remaining time before next stage */}
-              </div>
-            )}
-          </>
-        )}
-        <div>
-          {ButtonData.map((buttonRow, i) => (
-            <div key={i}>
-              {buttonRow.map((button, j) => (
-                <button
-                  key={j}
-                  className={
-                    selectedButtonCol === j && selectedButtonRow === i
-                      ? "bg-red-500"
-                      : "bg-blue-500"
-                  }
-                >
-                  {button}
-                </button>
               ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
+        {currentGame && (
+          <>
+            <div>Stage: "{gameStage}"</div>
+            {gameQuestion && (
+              <>
+                {gameStage === GameStage.Waiting && (
+                  <div>
+                    <h1>{gameQuestion.questionText}</h1>
+                    {/* timer for remaining time before question starts */}
+                  </div>
+                )}
+                {gameStage === GameStage.Playing && (
+                  <div>
+                    <h2>{gameQuestion.questionText}</h2>
+                    <div className="flex flex-col items-center">
+                      <ReactPlayer
+                        playing={!isPaused}
+                        controls={false}
+                        progressInterval={500}
+                        onEnded={() => handleVideoEnd()}
+                        onProgress={(e: OnProgressProps) =>
+                          handleVideoProgress(e)
+                        }
+                        height={480}
+                        width={640}
+                        url={
+                          "https://www.youtube.com/watch?v=" +
+                          gameQuestion.videoYouTubeID
+                        }
+                        config={{
+                          youtube: {
+                            playerVars: {
+                              // start and end need a whole number
+                              start: !lastVideoTime
+                                ? Math.floor(gameQuestion.videoStartTime)
+                                : Math.floor(lastVideoTime),
+                              end: Math.floor(gameQuestion.videoEndTime),
+                              rel: 0,
+                            },
+                          },
+                        }}
+                      ></ReactPlayer>
+                      {gameQuestion.videoStartTime}
+                      <hr />
+                      {lastVideoTime}
+                      <Progress value={videoProgress} />
+                    </div>
+                    {/* timer for remaining time in video */}
+                  </div>
+                )}
+                {gameStage === GameStage.Answering && (
+                  <div>
+                    {isTeam1Answering && <h1>Team 1 is Answering</h1>}
+                    {isTeam2Answering && <h1>Team 2 is Answering</h1>}
+                    {!isTeam1Answering && !isTeam2Answering && (
+                      <h1>Nobody Won the Points</h1>
+                    )}
+                    Is Sudden Death: {isSuddenDeath ? "True" : "False"}
+                    {/* timer for remaining time to answer */}
+                  </div>
+                )}
+                {gameStage === GameStage.Scoring && (
+                  <div>
+                    {isTeam1Answering && <h1>Team 1 is Correct</h1>}
+                    {isTeam2Answering && <h1>Team 2 is Correct</h1>}
+                    {/* timer for remaining time before next stage */}
+                  </div>
+                )}
+                {gameStage === GameStage.Ending && (
+                  <div>
+                    Team 1 Score:{" "}
+                    {team1ScoreHistory.reduce(
+                      (sum, current) => sum + current,
+                      0
+                    )}
+                    Team 2 Score:{" "}
+                    {team2ScoreHistory.reduce(
+                      (sum, current) => sum + current,
+                      0
+                    )}
+                    {/* timer for remaining time before next stage */}
+                  </div>
+                )}
+              </>
+            )}
+            <div>
+              {ButtonData.map((buttonRow, i) => (
+                <div key={i}>
+                  {buttonRow.map((button, j) => (
+                    <button
+                      key={j}
+                      className={
+                        selectedButtonCol === j && selectedButtonRow === i
+                          ? "bg-red-500"
+                          : "bg-blue-500"
+                      }
+                    >
+                      {button}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
+      {/* <div className="play-area whole-screen flex flex-col justify-center">
+        
+      </div> */}
       <Toaster />
     </>
   );

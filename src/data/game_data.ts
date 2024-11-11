@@ -10,7 +10,6 @@ export const Games: Game[] = [
         },
         questions: [
             {
-                id: 1,
                 questionText: "Question 1",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 15,
@@ -19,7 +18,6 @@ export const Games: Game[] = [
                 answerSubtext: "Answer 1 Subtext"
             },
             {
-                id: 2,
                 questionText: "Question 2",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 30,
@@ -28,7 +26,6 @@ export const Games: Game[] = [
                 answerSubtext: "Answer 2 Subtext"
             },
             {
-                id: 3,
                 questionText: "Question 3",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 45,
@@ -47,7 +44,6 @@ export const Games: Game[] = [
         },
         questions: [
             {
-                id: 1,
                 questionText: "Question 1",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 15,
@@ -56,7 +52,6 @@ export const Games: Game[] = [
                 answerSubtext: "Answer 1 Subtext"
             },
             {
-                id: 2,
                 questionText: "Question 2",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 30,
@@ -65,7 +60,6 @@ export const Games: Game[] = [
                 answerSubtext: "Answer 2 Subtext"
             },
             {
-                id: 3,
                 questionText: "Question 3",
                 videoYouTubeID: "dQw4w9WgXcQ",
                 videoStartTime: 45,
