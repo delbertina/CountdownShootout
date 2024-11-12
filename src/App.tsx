@@ -36,6 +36,8 @@ const App = () => {
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
   const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
+  const canTeam1Answer = useGameStore((state) => state.canTeam1Answer);
+  const canTeam2Answer = useGameStore((state) => state.canTeam2Answer);
   const team1ScoreHistory = useGameStore((state) => state.team1ScoreHistory);
   const team2ScoreHistory = useGameStore((state) => state.team2ScoreHistory);
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
@@ -115,7 +117,7 @@ const App = () => {
         <h1 className="font-bold">Welcome to Countdown Shootout</h1>
         <h2>This game currently requires 3 controllers to play.</h2>
       </div>
-      <div className="card-page whole-screen flex flex-col justify-center bg-slate-700 text-amber-200 gap-8">
+      <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
         {!currentGame && (
           <>
             <h2 className="font-bold flex-grow-0">Question Sets</h2>
@@ -148,6 +150,15 @@ const App = () => {
         )}
         {currentGame && (
           <>
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl border-red-500 bg-red-300 text-black">
+                Can Answer
+              </div>
+              <div className="flex-grow">{currentGame.title}</div>
+              <div className="flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl border-blue-500 bg-blue-300 text-black">
+                Can Answer
+              </div>
+            </div>
             <div>Stage: "{gameStage}"</div>
             {gameQuestion && (
               <>
