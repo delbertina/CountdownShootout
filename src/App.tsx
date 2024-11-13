@@ -151,11 +151,25 @@ const App = () => {
         {currentGame && (
           <>
             <div className="flex flex-row justify-between items-center">
-              <div className="flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl border-red-500 bg-red-300 text-black">
+              <div
+                className={
+                  "flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl " +
+                  (canTeam1Answer
+                    ? "border-red-500 bg-red-300 text-black"
+                    : "border-red-800 bg-gray-600 text-white")
+                }
+              >
                 Can Answer
               </div>
               <div className="flex-grow">{currentGame.title}</div>
-              <div className="flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl border-blue-500 bg-blue-300 text-black">
+              <div
+                className={
+                  "flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl " +
+                  (canTeam2Answer
+                    ? "border-blue-500 bg-blue-300 text-black"
+                    : "border-blue-800 bg-gray-600 text-white")
+                }
+              >
                 Can Answer
               </div>
             </div>
