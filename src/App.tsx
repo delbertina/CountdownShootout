@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
-import { ButtonData, GameStage } from "./types/game_types";
+import { GameStage } from "./types/game_types";
 import { Games } from "./data/game_data";
 import {
   Card,
@@ -15,6 +15,7 @@ import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import { OnProgressProps } from "react-player/base";
 import { Progress } from "./components/ui/progress";
+import DebugDialog from "./components/debug-dialog";
 
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -22,8 +23,6 @@ const App = () => {
   const gameQuestion = useGameStore(
     (state) => state.currentGame?.questions[state.questionId]
   );
-  const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
-  const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
   // const advanceStage = useGameStore((state) => state.advanceStage);
@@ -76,7 +75,6 @@ const App = () => {
       window.addEventListener(
         "gamepadbuttondown",
         (evt: { gamepad: Gamepad; button: number }) => {
-          console.log(selectedButtonCol, selectedButtonRow);
           callPadMove(evt);
         }
       );
@@ -256,31 +254,11 @@ const App = () => {
                 )}
               </>
             )}
-            <div>
-              {ButtonData.map((buttonRow, i) => (
-                <div key={i}>
-                  {buttonRow.map((button, j) => (
-                    <button
-                      key={j}
-                      className={
-                        selectedButtonCol === j && selectedButtonRow === i
-                          ? "bg-red-500"
-                          : "bg-blue-500"
-                      }
-                    >
-                      {button}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
           </>
         )}
       </div>
-      {/* <div className="play-area whole-screen flex flex-col justify-center">
-        
-      </div> */}
       <Toaster />
+      <DebugDialog />
     </>
   );
 };

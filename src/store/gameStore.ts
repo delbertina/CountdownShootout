@@ -20,6 +20,7 @@ interface GameState {
   isSuddenDeath: boolean;
   tempButtonCol: number;
   tempButtonRow: number;
+  isDebugOpen: boolean;
   symbolRight: (gamepadIndex: number) => void;
   symbolLeft: (gamepadIndex: number) => void;
   symbolUp: (gamepadIndex: number) => void;
@@ -36,6 +37,7 @@ interface GameState {
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
+  toggleDebugDialog: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -56,6 +58,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   isSuddenDeath: false,
   tempButtonCol: 1,
   tempButtonRow: 1,
+  isDebugOpen: false,
   symbolRight: (gamepadIndex: number) => {
     if (gamepadIndex !== 0) {
       if (gamepadIndex === 1) {
@@ -93,6 +96,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
       get().answerQuestion(gamepadIndex);
       return;
+    } else {
+      get().toggleDebugDialog();
     }
     // pause?
   },
@@ -105,14 +110,16 @@ export const useGameStore = create<GameState>((set, get) => ({
         set(() => ({ lastTeam2Press: Date.now() }));
       }
       get().answerQuestion(gamepadIndex);
-      return;
-    }
-    if (stage === GameStage.Answering) {
-      get().correctAnswer();
-      return;
     } else {
-      get().advanceStage();
-      return;
+      if (get().isDebugOpen) {
+        // select the button we're on
+      } else if (stage === GameStage.Answering) {
+        get().correctAnswer();
+        return;
+      } else {
+        get().advanceStage();
+        return;
+      }
     }
   },
   arrowRight: (gamepadIndex: number) => {
@@ -314,9 +321,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       case GameStage.Scoring:
         set((state) => ({
           // if there are no more questions, end the game
-          stage: state.currentGame && state.currentGame.questions.length > state.questionId + 1
-            ? GameStage.Waiting
-            : GameStage.Ending,
+          stage:
+            state.currentGame &&
+            state.currentGame.questions.length > state.questionId + 1
+              ? GameStage.Waiting
+              : GameStage.Ending,
           questionId: state.questionId + 1,
           lastVideoTime: 0,
           isTeam1Answering: false,
@@ -325,7 +334,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         }));
         break;
       case GameStage.Ending:
-        set(() => ({ stage: GameStage.Waiting, game: undefined, questionId: 0 }));
+        set(() => ({
+          stage: GameStage.Waiting,
+          game: undefined,
+          questionId: 0,
+        }));
         break;
       default:
         break;
@@ -336,4 +349,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!foundGame) return;
     set({ currentGame: foundGame, questionId: 0 });
   },
+  toggleDebugDialog: () =>
+    set((state) => ({
+      isDebugOpen: !state.isDebugOpen,
+      isPaused:
+        state.stage === GameStage.Playing ? !state.isDebugOpen : state.isPaused,
+    })),
 }));
