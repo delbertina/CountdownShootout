@@ -23,23 +23,28 @@ const DebugDialog = () => {
             See and change the state of the game.
           </DialogDescription>
         </DialogHeader>
-        <div>
-          {ButtonData.map((buttonRow, i) => (
-            <div key={i}>
-              {buttonRow.map((button, j) => (
-                <button
-                  key={j}
-                  className={
-                    selectedButtonCol === j && selectedButtonRow === i
-                      ? "bg-red-500"
-                      : "bg-blue-500"
-                  }
-                >
-                  {button}
-                </button>
-              ))}
-            </div>
-          ))}
+        <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
+            {ButtonData.map((buttonRow, i) => (
+              <div key={i} className="flex flex-row gap-2 justify-between">
+                {buttonRow.map((button, j) => (
+                  <div className="flex-grow flex-shrink basis-0">
+                    <button
+                      key={j}
+                      className={
+                        "w-full hover:border-transparent focus:outline-none focus:ring-0 " +
+                        (selectedButtonCol === j && selectedButtonRow === i
+                          ? "bg-red-500"
+                          : "bg-blue-500")
+                      }
+                    >
+                      {button}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
