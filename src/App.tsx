@@ -20,6 +20,7 @@ import DebugDialog from "./components/debug-dialog";
 const App = () => {
   const gameStage = useGameStore((state) => state.stage);
   const currentGame = useGameStore((state) => state.currentGame);
+  const questionId = useGameStore((state) => state.questionId);
   const gameQuestion = useGameStore(
     (state) => state.currentGame?.questions[state.questionId]
   );
@@ -121,9 +122,8 @@ const App = () => {
             <h2 className="font-bold flex-grow-0">Question Sets</h2>
             <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
               {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
-                <div>
+                <div key={i}>
                   <Card
-                    key={i}
                     title={game.title}
                     className="w-96"
                     onClick={() => {
@@ -148,22 +148,37 @@ const App = () => {
         )}
         {currentGame && (
           <>
-            <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-between items-center gap-4">
               <div
                 className={
-                  "flex-grow-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
-                  (canTeam1Answer && (isSuddenDeath ||(!isTeam1Answering && !isTeam2Answering))
+                  "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
+                  (canTeam1Answer &&
+                  (isSuddenDeath ||
+                    (gameStage === GameStage.Playing &&
+                      !isTeam1Answering &&
+                      !isTeam2Answering))
                     ? "border-red-800 bg-red-500 text-white"
                     : "border-red-400 bg-red-300 text-white")
                 }
               >
                 Can Answer
               </div>
-              <div className="flex-grow">{currentGame.title}</div>
+              <div className="flex-grow flex flex-col justify-between overflow-hidden">
+                <div className="font-bold text-xl truncate">
+                  {currentGame.title}
+                </div>
+                <div>
+                  {questionId + 1}/{currentGame.questions.length}
+                </div>
+              </div>
               <div
                 className={
-                  "flex-grow-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
-                  (canTeam2Answer && (isSuddenDeath ||(!isTeam1Answering && !isTeam2Answering))
+                  "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
+                  (canTeam2Answer &&
+                  (isSuddenDeath ||
+                    (gameStage === GameStage.Playing &&
+                      !isTeam1Answering &&
+                      !isTeam2Answering))
                     ? "border-blue-800 bg-blue-600 text-white"
                     : "border-blue-400 bg-blue-300 text-white")
                 }
@@ -171,7 +186,6 @@ const App = () => {
                 Can Answer
               </div>
             </div>
-            <div>Stage: "{gameStage}"</div>
             {gameQuestion && (
               <>
                 {gameStage === GameStage.Waiting && (
@@ -182,8 +196,8 @@ const App = () => {
                 )}
                 {gameStage === GameStage.Playing && (
                   <div>
-                    <h2>{gameQuestion.questionText}</h2>
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <h2>{gameQuestion.questionText}</h2>
                       <ReactPlayer
                         playing={!isPaused}
                         controls={false}
@@ -211,12 +225,9 @@ const App = () => {
                           },
                         }}
                       ></ReactPlayer>
-                      {gameQuestion.videoStartTime}
-                      <hr />
-                      {lastVideoTime}
+                      {/* timer for remaining time in video */}
                       <Progress value={videoProgress} />
                     </div>
-                    {/* timer for remaining time in video */}
                   </div>
                 )}
                 {gameStage === GameStage.Answering && (
@@ -239,11 +250,13 @@ const App = () => {
                 )}
                 {gameStage === GameStage.Ending && (
                   <div>
+                    <h1>Game Over</h1>
                     Team 1 Score:{" "}
                     {team1ScoreHistory.reduce(
                       (sum, current) => sum + current,
                       0
                     )}
+                    <br />
                     Team 2 Score:{" "}
                     {team2ScoreHistory.reduce(
                       (sum, current) => sum + current,

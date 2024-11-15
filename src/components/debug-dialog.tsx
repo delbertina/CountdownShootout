@@ -9,6 +9,7 @@ import { ButtonData } from "../types/game_types";
 import { useGameStore } from "../store/gameStore";
 
 const DebugDialog = () => {
+  const gameStage = useGameStore((state) => state.stage);
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
   const isDebugOpen = useGameStore((state) => state.isDebugOpen);
@@ -23,14 +24,14 @@ const DebugDialog = () => {
             See and change the state of the game.
           </DialogDescription>
         </DialogHeader>
+        <div>Stage: "{gameStage}"</div>
         <div className="flex flex-col">
           <div className="flex flex-col gap-2">
             {ButtonData.map((buttonRow, i) => (
               <div key={i} className="flex flex-row gap-2 justify-between">
                 {buttonRow.map((button, j) => (
-                  <div className="flex-grow flex-shrink basis-0">
+                  <div key={j} className="flex-grow flex-shrink basis-0">
                     <button
-                      key={j}
                       className={
                         "w-full hover:border-transparent focus:outline-none focus:ring-0 " +
                         (selectedButtonCol === j && selectedButtonRow === i

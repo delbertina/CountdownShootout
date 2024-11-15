@@ -243,8 +243,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         ...state.team2ScoreHistory,
         state.isTeam2Answering ? 1 : 0,
       ],
-      canTeam1Answer: true,
-      canTeam2Answer: true,
+      canTeam1Answer: false,
+      canTeam2Answer: false,
     }));
   },
   incorrectAnswer: () => {
@@ -297,6 +297,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ lastVideoTime: time });
   },
   advanceStage: () => {
+    console.log("Advancing stage: before", get().stage, get().currentGame);
     // Waiting -> Playing -> Answering -> Scoring -> (if last question) Ending -> (Loop to Waiting)
     switch (get().stage) {
       case GameStage.Waiting:
@@ -319,19 +320,27 @@ export const useGameStore = create<GameState>((set, get) => ({
         });
         break;
       case GameStage.Scoring:
-        set((state) => ({
-          // if there are no more questions, end the game
-          stage:
-            state.currentGame &&
-            state.currentGame.questions.length > state.questionId + 1
-              ? GameStage.Waiting
-              : GameStage.Ending,
-          questionId: state.questionId + 1,
-          lastVideoTime: 0,
-          isTeam1Answering: false,
-          isTeam2Answering: false,
-          isSuddenDeath: false,
-        }));
+        set((state) =>
+          state.currentGame &&
+          state.currentGame.questions.length > state.questionId + 1
+            ? // if we're playing a game, & there's more questions
+              {
+                stage: GameStage.Waiting,
+                questionId: state.questionId + 1,
+                lastVideoTime: 0,
+                isTeam1Answering: false,
+                isTeam2Answering: false,
+                isSuddenDeath: false,
+              }
+            : // if there are no more questions, end the game
+              {
+                stage: GameStage.Ending,
+                lastVideoTime: 0,
+                isTeam1Answering: false,
+                isTeam2Answering: false,
+                isSuddenDeath: false,
+              }
+        );
         break;
       case GameStage.Ending:
         set(() => ({
@@ -343,6 +352,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       default:
         break;
     }
+    console.log("Advancing stage: after", get().stage, get().currentGame);
   },
   selectQuiz(id: number) {
     const foundGame = Games.find((game) => game.id === id);
