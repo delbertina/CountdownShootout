@@ -151,10 +151,10 @@ const App = () => {
             <div className="flex flex-row justify-between items-center">
               <div
                 className={
-                  "flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl " +
-                  (canTeam1Answer
-                    ? "border-red-500 bg-red-300 text-black"
-                    : "border-red-800 bg-gray-600 text-white")
+                  "flex-grow-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
+                  (canTeam1Answer && (isSuddenDeath ||(!isTeam1Answering && !isTeam2Answering))
+                    ? "border-red-800 bg-red-500 text-white"
+                    : "border-red-400 bg-red-300 text-white")
                 }
               >
                 Can Answer
@@ -162,10 +162,10 @@ const App = () => {
               <div className="flex-grow">{currentGame.title}</div>
               <div
                 className={
-                  "flex-grow-0 p-6 border-4 rounded-xl font-bold text-2xl " +
-                  (canTeam2Answer
-                    ? "border-blue-500 bg-blue-300 text-black"
-                    : "border-blue-800 bg-gray-600 text-white")
+                  "flex-grow-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
+                  (canTeam2Answer && (isSuddenDeath ||(!isTeam1Answering && !isTeam2Answering))
+                    ? "border-blue-800 bg-blue-600 text-white"
+                    : "border-blue-400 bg-blue-300 text-white")
                 }
               >
                 Can Answer
