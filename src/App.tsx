@@ -26,7 +26,6 @@ const App = () => {
   );
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const isPaused = useGameStore((state) => state.isPaused);
-  // const advanceStage = useGameStore((state) => state.advanceStage);
   const updateLastVideoTime = useGameStore(
     (state) => state.updateLastVideoTime
   );
@@ -38,8 +37,12 @@ const App = () => {
   const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
   const canTeam1Answer = useGameStore((state) => state.canTeam1Answer);
   const canTeam2Answer = useGameStore((state) => state.canTeam2Answer);
-  const team1ScoreHistory = useGameStore((state) => state.team1ScoreHistory);
-  const team2ScoreHistory = useGameStore((state) => state.team2ScoreHistory);
+  const team1ScoreHistory = useGameStore((state) =>
+    state.team1ScoreHistory.reduce((sum, current) => sum + current, 0)
+  );
+  const team2ScoreHistory = useGameStore((state) =>
+    state.team2ScoreHistory.reduce((sum, current) => sum + current, 0)
+  );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
   const selectQuiz = useGameStore((state) => state.selectQuiz);
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -235,7 +238,7 @@ const App = () => {
                     {isTeam1Answering && <h1>Team 1 is Answering</h1>}
                     {isTeam2Answering && <h1>Team 2 is Answering</h1>}
                     {!isTeam1Answering && !isTeam2Answering && (
-                      <h1>Nobody Won the Points</h1>
+                      <h1>Nobody is Answering ... ?</h1>
                     )}
                     Is Sudden Death: {isSuddenDeath ? "True" : "False"}
                     {/* timer for remaining time to answer */}
@@ -245,23 +248,21 @@ const App = () => {
                   <div>
                     {isTeam1Answering && <h1>Team 1 is Correct</h1>}
                     {isTeam2Answering && <h1>Team 2 is Correct</h1>}
+                    {!isTeam1Answering && !isTeam2Answering && (
+                      <h1>Nobody Won the Points</h1>
+                    )}
                     {/* timer for remaining time before next stage */}
                   </div>
                 )}
                 {gameStage === GameStage.Ending && (
                   <div>
                     <h1>Game Over</h1>
+                    <h2>{team1ScoreHistory > team2ScoreHistory ? "Team 1 Won!" : "Team 2 Won!"}</h2>
                     Team 1 Score:{" "}
-                    {team1ScoreHistory.reduce(
-                      (sum, current) => sum + current,
-                      0
-                    )}
+                    {team1ScoreHistory}
                     <br />
                     Team 2 Score:{" "}
-                    {team2ScoreHistory.reduce(
-                      (sum, current) => sum + current,
-                      0
-                    )}
+                    {team2ScoreHistory}
                     {/* timer for remaining time before next stage */}
                   </div>
                 )}
