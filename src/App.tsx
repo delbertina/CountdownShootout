@@ -156,7 +156,7 @@ const App = () => {
                 className={
                   "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
                   (canTeam1Answer &&
-                  (isSuddenDeath ||
+                  ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
                     (gameStage === GameStage.Playing &&
                       !isTeam1Answering &&
                       !isTeam2Answering))
@@ -178,7 +178,7 @@ const App = () => {
                 className={
                   "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
                   (canTeam2Answer &&
-                  (isSuddenDeath ||
+                  ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
                     (gameStage === GameStage.Playing &&
                       !isTeam1Answering &&
                       !isTeam2Answering))
@@ -257,12 +257,14 @@ const App = () => {
                 {gameStage === GameStage.Ending && (
                   <div>
                     <h1>Game Over</h1>
-                    <h2>{team1ScoreHistory > team2ScoreHistory ? "Team 1 Won!" : "Team 2 Won!"}</h2>
-                    Team 1 Score:{" "}
-                    {team1ScoreHistory}
+                    <h2>
+                      {team1ScoreHistory > team2ScoreHistory
+                        ? "Team 1 Won!"
+                        : "Team 2 Won!"}
+                    </h2>
+                    Team 1 Score: {team1ScoreHistory}
                     <br />
-                    Team 2 Score:{" "}
-                    {team2ScoreHistory}
+                    Team 2 Score: {team2ScoreHistory}
                     {/* timer for remaining time before next stage */}
                   </div>
                 )}

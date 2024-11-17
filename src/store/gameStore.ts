@@ -297,7 +297,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ lastVideoTime: time });
   },
   advanceStage: () => {
-    console.log("Advancing stage: before", get().stage, get().currentGame);
+    if (!get().currentGame) return;
     // Waiting -> Playing -> Answering -> Scoring -> (if last question) Ending -> (Loop to Waiting)
     switch (get().stage) {
       case GameStage.Waiting:
@@ -352,7 +352,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       default:
         break;
     }
-    console.log("Advancing stage: after", get().stage, get().currentGame);
   },
   selectQuiz(id: number) {
     const foundGame = Games.find((game) => game.id === id);
