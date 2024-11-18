@@ -10,7 +10,7 @@ interface GameState {
   team2ScoreHistory: number[];
   stage: GameStage;
   isPaused: boolean;
-  remainingTime: number;
+  lastStageChangeTime: number;
   lastTeam1Press: number;
   lastTeam2Press: number;
   canTeam1Answer: boolean;
@@ -35,6 +35,7 @@ interface GameState {
   incorrectAnswer: () => void;
   startSuddenDeath: () => void;
   updateLastVideoTime: (videoTime: number) => void;
+  resetLastStageChangeTime: () => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
   toggleDebugDialog: () => void;
@@ -48,7 +49,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   team2ScoreHistory: [],
   stage: GameStage.Waiting,
   isPaused: true,
-  remainingTime: 0,
+  lastStageChangeTime: 0,
   lastTeam1Press: 0,
   lastTeam2Press: 0,
   canTeam1Answer: false,
@@ -295,6 +296,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   updateLastVideoTime: (time: number) => {
     set({ lastVideoTime: time });
+  },
+  resetLastStageChangeTime: () => {
+    set({ lastStageChangeTime: Date.now() });
   },
   advanceStage: () => {
     if (!get().currentGame) return;
