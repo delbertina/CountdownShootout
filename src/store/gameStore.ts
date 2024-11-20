@@ -349,7 +349,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       case GameStage.Ending:
         set(() => ({
           stage: GameStage.Waiting,
-          game: undefined,
+          currentGame: undefined,
           questionId: 0,
         }));
         break;

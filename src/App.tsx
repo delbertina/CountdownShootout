@@ -7,7 +7,7 @@ import { Games } from "./data/game_data";
 import {
   Card,
   CardContent,
-  CardFooter,
+  // CardFooter,
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
@@ -124,11 +124,11 @@ const App = () => {
           <>
             <h2 className="font-bold flex-grow-0">Question Sets</h2>
             <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
-              {[...Games, ...Games, ...Games, ...Games].map((game, i) => (
+              {Games.map((game, i) => (
                 <div key={i}>
                   <Card
                     title={game.title}
-                    className="w-96"
+                    className="w-96 h-48"
                     onClick={() => {
                       console.log("Game Selected", game);
                       selectQuiz(game.id);
@@ -140,9 +140,9 @@ const App = () => {
                     <CardContent className="text-left">
                       {game.description}
                     </CardContent>
-                    <CardFooter className="font-light italic">
+                    {/* <CardFooter className="font-light italic">
                       {"Last Played: 1/1/2022"}
-                    </CardFooter>
+                    </CardFooter> */}
                   </Card>
                 </div>
               ))}
@@ -164,7 +164,7 @@ const App = () => {
                     : "border-red-400 bg-red-300 text-white")
                 }
               >
-                Can Answer
+                BUZZER
               </div>
               <div className="flex-grow flex flex-col justify-between overflow-hidden">
                 <div className="font-bold text-xl truncate">
@@ -186,7 +186,7 @@ const App = () => {
                     : "border-blue-400 bg-blue-300 text-white")
                 }
               >
-                Can Answer
+                BUZZER
               </div>
             </div>
             {gameQuestion && (
@@ -194,13 +194,17 @@ const App = () => {
                 {gameStage === GameStage.Waiting && (
                   <div>
                     <h1>{gameQuestion.questionText}</h1>
+                    <h2>
+                      {gameQuestion.videoEndTime - gameQuestion.videoStartTime}{" "}
+                      seconds
+                    </h2>
                     {/* timer for remaining time before question starts */}
                   </div>
                 )}
                 {gameStage === GameStage.Playing && (
-                  <div>
-                    <div className="flex flex-col items-center gap-4">
-                      <h2>{gameQuestion.questionText}</h2>
+                  <div className="flex flex-col items-center gap-4 flex-grow h-full">
+                    <h2>{gameQuestion.questionText}</h2>
+                    <div className="flex-grow flex flex-row justify-center w-full">
                       <ReactPlayer
                         playing={!isPaused}
                         controls={false}
@@ -209,8 +213,8 @@ const App = () => {
                         onProgress={(e: OnProgressProps) =>
                           handleVideoProgress(e)
                         }
-                        height={480}
-                        width={640}
+                        className="react-player"
+                        width="80%"
                         url={
                           "https://www.youtube.com/watch?v=" +
                           gameQuestion.videoYouTubeID
@@ -228,43 +232,61 @@ const App = () => {
                           },
                         }}
                       ></ReactPlayer>
-                      {/* timer for remaining time in video */}
+                    </div>
+                    {/* timer for remaining time in video */}
+                    <div className="flex-grow-0 w-full">
                       <Progress value={videoProgress} />
                     </div>
                   </div>
                 )}
                 {gameStage === GameStage.Answering && (
                   <div>
-                    {isTeam1Answering && <h1>Team 1 is Answering</h1>}
-                    {isTeam2Answering && <h1>Team 2 is Answering</h1>}
+                    {isSuddenDeath && (
+                      <>
+                        <h1>SUDDEN DEATH</h1>
+                        <br />
+                        <hr />
+                        <br />
+                      </>
+                    )}
+                    {isTeam1Answering && <h1>Red is Answering</h1>}
+                    {isTeam2Answering && <h1>Blue is Answering</h1>}
                     {!isTeam1Answering && !isTeam2Answering && (
                       <h1>Nobody is Answering ... ?</h1>
                     )}
-                    Is Sudden Death: {isSuddenDeath ? "True" : "False"}
                     {/* timer for remaining time to answer */}
                   </div>
                 )}
                 {gameStage === GameStage.Scoring && (
-                  <div>
-                    {isTeam1Answering && <h1>Team 1 is Correct</h1>}
-                    {isTeam2Answering && <h1>Team 2 is Correct</h1>}
-                    {!isTeam1Answering && !isTeam2Answering && (
-                      <h1>Nobody Won the Points</h1>
-                    )}
-                    {/* timer for remaining time before next stage */}
-                  </div>
+                  <>
+                    <div>
+                      {isTeam1Answering && <h1>Red is Correct</h1>}
+                      {isTeam2Answering && <h1>Blue is Correct</h1>}
+                      {!isTeam1Answering && !isTeam2Answering && (
+                        <h1>Nobody Won the Points</h1>
+                      )}
+                      {/* timer for remaining time before next stage */}
+                    </div>
+                    <hr />
+                    <div>
+                      <h1>{gameQuestion.answer}</h1>
+                      <h2>{gameQuestion.answerSubtext}</h2>
+                    </div>
+                  </>
                 )}
                 {gameStage === GameStage.Ending && (
                   <div>
                     <h1>Game Over</h1>
                     <h2>
                       {team1ScoreHistory > team2ScoreHistory
-                        ? "Team 1 Won!"
-                        : "Team 2 Won!"}
+                        ? "Red Won!"
+                        : team1ScoreHistory < team2ScoreHistory
+                        ? "Blue Won!"
+                        : "It's a Tie!"}
                     </h2>
-                    Team 1 Score: {team1ScoreHistory}
+                    Red Score: {team1ScoreHistory}
                     <br />
-                    Team 2 Score: {team2ScoreHistory}
+                    Blue Score: {team2ScoreHistory}
                     {/* timer for remaining time before next stage */}
                   </div>
                 )}
