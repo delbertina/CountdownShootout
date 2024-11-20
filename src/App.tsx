@@ -198,9 +198,9 @@ const App = () => {
                   </div>
                 )}
                 {gameStage === GameStage.Playing && (
-                  <div>
-                    <div className="flex flex-col items-center gap-4">
+                    <div className="flex flex-col items-center gap-4 flex-grow h-full">
                       <h2>{gameQuestion.questionText}</h2>
+                      <div className="flex-grow flex flex-row justify-center w-full">
                       <ReactPlayer
                         playing={!isPaused}
                         controls={false}
@@ -209,8 +209,8 @@ const App = () => {
                         onProgress={(e: OnProgressProps) =>
                           handleVideoProgress(e)
                         }
-                        height={480}
-                        width={640}
+                        className="react-player"
+                        width="80%"
                         url={
                           "https://www.youtube.com/watch?v=" +
                           gameQuestion.videoYouTubeID
@@ -228,10 +228,12 @@ const App = () => {
                           },
                         }}
                       ></ReactPlayer>
+                      </div>
                       {/* timer for remaining time in video */}
+                      <div className="flex-grow-0 w-full">
                       <Progress value={videoProgress} />
+                      </div>
                     </div>
-                  </div>
                 )}
                 {gameStage === GameStage.Answering && (
                   <div>
