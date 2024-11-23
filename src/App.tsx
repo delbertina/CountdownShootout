@@ -236,8 +236,8 @@ const App = () => {
                     {/* timer for remaining time in video */}
                     <div className="flex-grow-0 w-full">
                       <Progress value={videoProgress} />
+                      </div>
                     </div>
-                  </div>
                 )}
                 {gameStage === GameStage.Answering && (
                   <div>
