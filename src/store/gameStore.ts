@@ -350,6 +350,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         set(() => ({
           stage: GameStage.Waiting,
           currentGame: undefined,
+          team1ScoreHistory: [],
+          team2ScoreHistory: [],
           questionId: 0,
         }));
         break;
