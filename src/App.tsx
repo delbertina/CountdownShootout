@@ -18,6 +18,12 @@ import { Progress } from "./components/ui/progress";
 import DebugDialog from "./components/debug-dialog";
 
 const App = () => {
+  // check browser settings
+  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+  // @ts-expect-error experimental feature
+  const canAutoplay = !!navigator.getAutoplayPolicy && navigator.getAutoplayPolicy("mediaelement") === "allowed"
+  const isGamepadDetected = useGameStore((state) => state.isGamepadDetected);
+
   const gameStage = useGameStore((state) => state.stage);
   const currentGame = useGameStore((state) => state.currentGame);
   const questionId = useGameStore((state) => state.questionId);
@@ -56,7 +62,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log("Toast thrown");
     if (lastTeam1Press > 0) {
       throwToast(true);
     }
@@ -64,7 +69,6 @@ const App = () => {
   }, [lastTeam1Press]);
 
   useEffect(() => {
-    console.log("Toast thrown");
     if (lastTeam2Press > 0) {
       throwToast(false);
     }
@@ -118,6 +122,12 @@ const App = () => {
       <div className="welcome-screen whole-screen flex flex-col justify-center bg-slate-200">
         <h1 className="font-bold">Welcome to Countdown Shootout</h1>
         <h2>This game currently requires 3 controllers to play.</h2>
+        <h2>This game requires "dom.gamepad.non_standard_events.enabled" to be enabled in about:config in Firefox</h2>
+-
+        <h2>Firefox Browser: {isFirefox ? "Good" : "Error"}</h2>
+        <h2>Can Autoplay: {canAutoplay ? "Good" : "Error"}</h2>
+        <h2>Gamepad Support: {isGamepadDetected ? "Good" : "Waiting ..."}</h2>
+
       </div>
       <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
         {!currentGame && (

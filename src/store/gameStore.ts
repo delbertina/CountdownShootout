@@ -21,6 +21,7 @@ interface GameState {
   tempButtonCol: number;
   tempButtonRow: number;
   isDebugOpen: boolean;
+  isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
   symbolLeft: (gamepadIndex: number) => void;
   symbolUp: (gamepadIndex: number) => void;
@@ -60,6 +61,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   tempButtonCol: 1,
   tempButtonRow: 1,
   isDebugOpen: false,
+  isGamepadDetected: false,
   symbolRight: (gamepadIndex: number) => {
     if (gamepadIndex !== 0) {
       if (gamepadIndex === 1) {
@@ -156,6 +158,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => {
     const newEvent = `Gamepad button down at index ${e.gamepad.index}: ${e.gamepad.id}. Button: ${e.button}.`;
     console.log(newEvent);
+    set({ isGamepadDetected: true });
     switch (e.button) {
       case 15:
         get().arrowRight(e.gamepad.index);
