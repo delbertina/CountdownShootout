@@ -16,12 +16,17 @@ import { useToast } from "./hooks/use-toast";
 import { OnProgressProps } from "react-player/base";
 import { Progress } from "./components/ui/progress";
 import DebugDialog from "./components/debug-dialog";
+import { Dialog } from "@radix-ui/react-dialog";
+import { DialogContent } from "./components/ui/dialog";
 
 const App = () => {
   // check browser settings
-  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-  // @ts-expect-error experimental feature
-  const canAutoplay = !!navigator.getAutoplayPolicy && navigator.getAutoplayPolicy("mediaelement") === "allowed"
+  const isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+  const canAutoplay =
+    // @ts-expect-error experimental feature
+    !!navigator.getAutoplayPolicy &&
+    // @ts-expect-error experimental feature
+    navigator.getAutoplayPolicy("mediaelement") === "allowed";
   const isGamepadDetected = useGameStore((state) => state.isGamepadDetected);
 
   const gameStage = useGameStore((state) => state.stage);
@@ -122,12 +127,13 @@ const App = () => {
       <div className="welcome-screen whole-screen flex flex-col justify-center bg-slate-200">
         <h1 className="font-bold">Welcome to Countdown Shootout</h1>
         <h2>This game currently requires 3 controllers to play.</h2>
-        <h2>This game requires "dom.gamepad.non_standard_events.enabled" to be enabled in about:config in Firefox</h2>
--
-        <h2>Firefox Browser: {isFirefox ? "Good" : "Error"}</h2>
+        <h2>
+          This game requires "dom.gamepad.non_standard_events.enabled" to be
+          enabled in about:config in Firefox
+        </h2>
+        -<h2>Firefox Browser: {isFirefox ? "Good" : "Error"}</h2>
         <h2>Can Autoplay: {canAutoplay ? "Good" : "Error"}</h2>
         <h2>Gamepad Support: {isGamepadDetected ? "Good" : "Waiting ..."}</h2>
-
       </div>
       <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
         {!currentGame && (
@@ -201,20 +207,13 @@ const App = () => {
             </div>
             {gameQuestion && (
               <>
-                {gameStage === GameStage.Waiting && (
-                  <div>
-                    <h1>{gameQuestion.questionText}</h1>
-                    <h2>
-                      {gameQuestion.videoEndTime - gameQuestion.videoStartTime}{" "}
-                      seconds
-                    </h2>
-                    {/* timer for remaining time before question starts */}
-                  </div>
-                )}
-                {gameStage === GameStage.Playing && (
-                  <div className="flex flex-col items-center gap-4 flex-grow h-full">
-                    <h2>{gameQuestion.questionText}</h2>
-                    <div className="flex-grow flex flex-row justify-center w-full">
+                <div className="flex flex-col items-center gap-4 flex-grow h-full">
+                  <h2>{gameQuestion.questionText}</h2>
+                  <div className="flex-grow flex flex-row justify-center w-full">
+                    {/* TODO: Figure out a better way to do this */}
+                    {/* Video player doesn't change the player vars for start and end */}
+                    {/* Only when it's instantiated */}
+                    {gameStage !== GameStage.Scoring && (
                       <ReactPlayer
                         playing={!isPaused}
                         controls={false}
@@ -242,64 +241,80 @@ const App = () => {
                           },
                         }}
                       ></ReactPlayer>
-                    </div>
-                    {/* timer for remaining time in video */}
-                    <div className="flex-grow-0 w-full">
-                      <Progress value={videoProgress} />
+                    )}
+                  </div>
+                  {/* timer for remaining time in video */}
+                  <div className="flex-grow-0 w-full">
+                    <Progress value={videoProgress} />
+                  </div>
+                </div>
+                {/* )} */}
+                <Dialog open={gameStage !== GameStage.Playing}>
+                  <DialogContent className="min-w-[80%] min-h-[80%] flex flex-col items-center gap-4 flex-grow text-center bg-amber-200">
+                    {gameStage === GameStage.Waiting && (
+                      <div>
+                        <h1>{gameQuestion.questionText}</h1>
+                        <h2>
+                          {gameQuestion.videoEndTime -
+                            gameQuestion.videoStartTime}{" "}
+                          seconds
+                        </h2>
+                        {/* timer for remaining time before question starts */}
                       </div>
-                    </div>
-                )}
-                {gameStage === GameStage.Answering && (
-                  <div>
-                    {isSuddenDeath && (
+                    )}
+                    {gameStage === GameStage.Answering && (
+                      <div>
+                        {isSuddenDeath && (
+                          <>
+                            <h1>SUDDEN DEATH</h1>
+                            <br />
+                            <hr />
+                            <br />
+                          </>
+                        )}
+                        {isTeam1Answering && <h1>Red is Answering</h1>}
+                        {isTeam2Answering && <h1>Blue is Answering</h1>}
+                        {!isTeam1Answering && !isTeam2Answering && (
+                          <h1>Nobody is Answering ... ?</h1>
+                        )}
+                        {/* timer for remaining time to answer */}
+                      </div>
+                    )}
+                    {gameStage === GameStage.Scoring && (
                       <>
-                        <h1>SUDDEN DEATH</h1>
-                        <br />
+                        <div>
+                          {isTeam1Answering && <h1>Red is Correct</h1>}
+                          {isTeam2Answering && <h1>Blue is Correct</h1>}
+                          {!isTeam1Answering && !isTeam2Answering && (
+                            <h1>Nobody Won the Points</h1>
+                          )}
+                          {/* timer for remaining time before next stage */}
+                        </div>
                         <hr />
-                        <br />
+                        <div>
+                          <h1>{gameQuestion.answer}</h1>
+                          <h2>{gameQuestion.answerSubtext}</h2>
+                        </div>
                       </>
                     )}
-                    {isTeam1Answering && <h1>Red is Answering</h1>}
-                    {isTeam2Answering && <h1>Blue is Answering</h1>}
-                    {!isTeam1Answering && !isTeam2Answering && (
-                      <h1>Nobody is Answering ... ?</h1>
+                    {gameStage === GameStage.Ending && (
+                      <div>
+                        <h1>Game Over</h1>
+                        <h2>
+                          {team1ScoreHistory > team2ScoreHistory
+                            ? "Red Won!"
+                            : team1ScoreHistory < team2ScoreHistory
+                            ? "Blue Won!"
+                            : "It's a Tie!"}
+                        </h2>
+                        Red Score: {team1ScoreHistory}
+                        <br />
+                        Blue Score: {team2ScoreHistory}
+                        {/* timer for remaining time before next stage */}
+                      </div>
                     )}
-                    {/* timer for remaining time to answer */}
-                  </div>
-                )}
-                {gameStage === GameStage.Scoring && (
-                  <>
-                    <div>
-                      {isTeam1Answering && <h1>Red is Correct</h1>}
-                      {isTeam2Answering && <h1>Blue is Correct</h1>}
-                      {!isTeam1Answering && !isTeam2Answering && (
-                        <h1>Nobody Won the Points</h1>
-                      )}
-                      {/* timer for remaining time before next stage */}
-                    </div>
-                    <hr />
-                    <div>
-                      <h1>{gameQuestion.answer}</h1>
-                      <h2>{gameQuestion.answerSubtext}</h2>
-                    </div>
-                  </>
-                )}
-                {gameStage === GameStage.Ending && (
-                  <div>
-                    <h1>Game Over</h1>
-                    <h2>
-                      {team1ScoreHistory > team2ScoreHistory
-                        ? "Red Won!"
-                        : team1ScoreHistory < team2ScoreHistory
-                        ? "Blue Won!"
-                        : "It's a Tie!"}
-                    </h2>
-                    Red Score: {team1ScoreHistory}
-                    <br />
-                    Blue Score: {team2ScoreHistory}
-                    {/* timer for remaining time before next stage */}
-                  </div>
-                )}
+                  </DialogContent>
+                </Dialog>
               </>
             )}
           </>
