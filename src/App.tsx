@@ -210,45 +210,40 @@ const App = () => {
                 <div className="flex flex-col items-center gap-4 flex-grow h-full">
                   <h2>{gameQuestion.questionText}</h2>
                   <div className="flex-grow flex flex-row justify-center w-full">
-                    {/* TODO: Figure out a better way to do this */}
-                    {/* Video player doesn't change the player vars for start and end */}
-                    {/* Only when it's instantiated */}
-                    {gameStage !== GameStage.Scoring && (
-                      <ReactPlayer
-                        playing={!isPaused}
-                        controls={false}
-                        progressInterval={500}
-                        onEnded={() => handleVideoEnd()}
-                        onProgress={(e: OnProgressProps) =>
-                          handleVideoProgress(e)
-                        }
-                        className="react-player"
-                        width="80%"
-                        url={
-                          "https://www.youtube.com/watch?v=" +
-                          gameQuestion.videoYouTubeID
-                        }
-                        config={{
-                          youtube: {
-                            playerVars: {
-                              // start and end need a whole number
-                              start: !lastVideoTime
-                                ? Math.floor(gameQuestion.videoStartTime)
-                                : Math.floor(lastVideoTime),
-                              end: Math.floor(gameQuestion.videoEndTime),
-                              rel: 0,
-                            },
+                    <ReactPlayer
+                      key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
+                      playing={!isPaused}
+                      controls={false}
+                      progressInterval={500}
+                      onEnded={() => handleVideoEnd()}
+                      onProgress={(e: OnProgressProps) =>
+                        handleVideoProgress(e)
+                      }
+                      className="react-player"
+                      width="80%"
+                      url={
+                        "https://www.youtube.com/watch?v=" +
+                        gameQuestion.videoYouTubeID
+                      }
+                      config={{
+                        youtube: {
+                          playerVars: {
+                            // start and end need a whole number
+                            start: !lastVideoTime
+                              ? Math.floor(gameQuestion.videoStartTime)
+                              : Math.floor(lastVideoTime),
+                            end: Math.floor(gameQuestion.videoEndTime),
+                            rel: 0,
                           },
-                        }}
-                      ></ReactPlayer>
-                    )}
+                        },
+                      }}
+                    ></ReactPlayer>
                   </div>
                   {/* timer for remaining time in video */}
                   <div className="flex-grow-0 w-full">
                     <Progress value={videoProgress} />
                   </div>
                 </div>
-                {/* )} */}
                 <Dialog open={gameStage !== GameStage.Playing}>
                   <DialogContent className="min-w-[80%] min-h-[80%] flex flex-col items-center gap-4 flex-grow text-center bg-amber-200">
                     {gameStage === GameStage.Waiting && (
