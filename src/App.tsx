@@ -18,6 +18,8 @@ import { Progress } from "./components/ui/progress";
 import DebugDialog from "./components/debug-dialog";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent } from "./components/ui/dialog";
+import ShadedIndicator from "./components/shaded-indicator";
+import { TeamTheme } from "./types/theme_types";
 
 const App = () => {
   // check browser settings
@@ -168,20 +170,17 @@ const App = () => {
         {currentGame && (
           <>
             <div className="flex flex-row justify-between items-center gap-4">
-              <div
-                className={
-                  "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
-                  (canTeam1Answer &&
+              <ShadedIndicator
+                text="BUZZER"
+                theme={TeamTheme.RED}
+                isShaded={
+                  canTeam1Answer &&
                   ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
                     (gameStage === GameStage.Playing &&
                       !isTeam1Answering &&
                       !isTeam2Answering))
-                    ? "border-red-800 bg-red-500 text-white"
-                    : "border-red-400 bg-red-300 text-white")
                 }
-              >
-                BUZZER
-              </div>
+              />
               <div className="flex-grow flex flex-col justify-between overflow-hidden">
                 <div className="font-bold text-xl truncate">
                   {currentGame.title}
@@ -190,20 +189,17 @@ const App = () => {
                   {questionId + 1}/{currentGame.questions.length}
                 </div>
               </div>
-              <div
-                className={
-                  "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl " +
-                  (canTeam2Answer &&
+              <ShadedIndicator
+                text="BUZZER"
+                theme={TeamTheme.BLUE}
+                isShaded={
+                  canTeam2Answer &&
                   ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
                     (gameStage === GameStage.Playing &&
                       !isTeam1Answering &&
                       !isTeam2Answering))
-                    ? "border-blue-800 bg-blue-600 text-white"
-                    : "border-blue-400 bg-blue-300 text-white")
                 }
-              >
-                BUZZER
-              </div>
+              />
             </div>
             {gameQuestion && (
               <>
@@ -245,7 +241,43 @@ const App = () => {
                   </div>
                 </div>
                 <Dialog open={gameStage !== GameStage.Playing}>
-                  <DialogContent className="min-w-[80%] min-h-[80%] flex flex-col items-center gap-4 flex-grow text-center bg-amber-200">
+                  <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
+                    <div className="flex flex-row justify-between items-center gap-4 w-full">
+                      <ShadedIndicator
+                        text="BUZZER"
+                        theme={TeamTheme.RED}
+                        isShaded={
+                          canTeam1Answer &&
+                          ((gameStage === GameStage.Answering &&
+                            !isTeam1Answering &&
+                            !isTeam2Answering) ||
+                            (gameStage === GameStage.Playing &&
+                              !isTeam1Answering &&
+                              !isTeam2Answering))
+                        }
+                      />
+                      <div className="flex-grow flex flex-col justify-between overflow-hidden">
+                        <div className="font-bold text-xl truncate">
+                          {currentGame.title}
+                        </div>
+                        <div>
+                          {questionId + 1}/{currentGame.questions.length}
+                        </div>
+                      </div>
+                      <ShadedIndicator
+                        text="BUZZER"
+                        theme={TeamTheme.BLUE}
+                        isShaded={
+                          canTeam2Answer &&
+                          ((gameStage === GameStage.Answering &&
+                            !isTeam1Answering &&
+                            !isTeam2Answering) ||
+                            (gameStage === GameStage.Playing &&
+                              !isTeam1Answering &&
+                              !isTeam2Answering))
+                        }
+                      />
+                    </div>
                     {gameStage === GameStage.Waiting && (
                       <div>
                         <h1>{gameQuestion.questionText}</h1>
