@@ -181,12 +181,23 @@ const App = () => {
                       !isTeam2Answering))
                 }
               />
-              <div className="flex-grow flex flex-col justify-between overflow-hidden">
-                <div className="font-bold text-xl truncate">
-                  {currentGame.title}
+              <div className="flex flex-row flex-grow items-center justify-between gap-4">
+                <div className="text-red-300 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                  <h1>{team1ScoreHistory}</h1>
                 </div>
-                <div>
-                  {questionId + 1}/{currentGame.questions.length}
+                <div className="flex-grow flex flex-col justify-between overflow-hidden">
+                  <div className="font-bold text-xl truncate">
+                    <h2>{currentGame.title}</h2>
+                  </div>
+                  <div>
+                    <h2>
+                      {questionId + 1}/{currentGame.questions.length}
+                    </h2>
+                  </div>
+                  <div></div>
+                </div>
+                <div className="text-blue-300 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                  <h1>{team2ScoreHistory}</h1>
                 </div>
               </div>
               <ShadedIndicator
@@ -256,12 +267,23 @@ const App = () => {
                               !isTeam2Answering))
                         }
                       />
-                      <div className="flex-grow flex flex-col justify-between overflow-hidden">
-                        <div className="font-bold text-xl truncate">
-                          {currentGame.title}
+                      <div className="flex flex-row flex-grow items-center justify-between gap-4">
+                        <div className="text-red-300 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                          <h1>{team1ScoreHistory}</h1>
                         </div>
-                        <div>
-                          {questionId + 1}/{currentGame.questions.length}
+                        <div className="flex-grow flex flex-col justify-between overflow-hidden">
+                          <div className="font-bold text-xl truncate">
+                            <h2>{currentGame.title}</h2>
+                          </div>
+                          <div>
+                            <h2>
+                              {questionId + 1}/{currentGame.questions.length}
+                            </h2>
+                          </div>
+                          <div></div>
+                        </div>
+                        <div className="text-blue-300 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                          <h1>{team2ScoreHistory}</h1>
                         </div>
                       </div>
                       <ShadedIndicator
