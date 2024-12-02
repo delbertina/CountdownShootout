@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ButtonData, Game, GameStage } from "../types/game_types";
 import { Games } from "../data/game_data";
+import { devtools } from "zustand/middleware";
 
 interface GameState {
   currentGame: Game | undefined;
@@ -42,7 +43,7 @@ interface GameState {
   toggleDebugDialog: () => void;
 }
 
-export const useGameStore = create<GameState>((set, get) => ({
+export const useGameStore = create<GameState>()(devtools((set, get) => ({
   currentGame: undefined,
   questionId: 0,
   lastVideoTime: 0,
@@ -373,4 +374,4 @@ export const useGameStore = create<GameState>((set, get) => ({
       isPaused:
         state.stage === GameStage.Playing ? !state.isDebugOpen : state.isPaused,
     })),
-}));
+})));
