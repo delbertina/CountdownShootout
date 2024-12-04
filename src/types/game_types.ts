@@ -18,10 +18,37 @@ export enum GameStage {
 // - ???
 // - Middle = Resume
 
-export const ButtonData = [
-  ["Zero", "One", "Two"],
-  ["Three", "Four", "Five"],
-  ["Six", "Seven", "Eight"],
+export enum DebugButton {
+  RESET_QUIZ = "Reset Quiz",
+  BACK_QUESTION = "Question -1",
+  FORWARD_QUESTION = "Question +1",
+  CLEAR_SCORE = "Clear Last Score",
+  REMOVE_SCORE = "Remove Last Score",
+  ADD_SCORE = "Add New Score",
+  INCREASE_RED_SCORE = "Last Red Score +1",
+  DECREASE_RED_SCORE = "Last Red Score -1",
+  INCREASE_BLUE_SCORE = "Last Blue Score +1",
+  DECREASE_BLUE_SCORE = "Last Blue Score - 1",
+  CLOSE = "X",
+}
+
+export const ButtonData: DebugButton[][] = [
+  [
+    DebugButton.RESET_QUIZ,
+    DebugButton.BACK_QUESTION,
+    DebugButton.FORWARD_QUESTION,
+  ],
+  [DebugButton.CLEAR_SCORE, DebugButton.REMOVE_SCORE, DebugButton.ADD_SCORE],
+  [
+    DebugButton.INCREASE_RED_SCORE,
+    DebugButton.CLOSE,
+    DebugButton.DECREASE_RED_SCORE,
+  ],
+  [
+    DebugButton.INCREASE_BLUE_SCORE,
+    DebugButton.CLOSE,
+    DebugButton.DECREASE_BLUE_SCORE,
+  ],
 ];
 
 export interface Game {
