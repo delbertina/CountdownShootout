@@ -3,7 +3,44 @@ import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 
-interface GameState {
+// Partial game state for reset question
+interface GameStatePartialQuestion {
+  stage: GameStage;
+  lastVideoTime: number;
+  canTeam1Answer: boolean;
+  canTeam2Answer: boolean;
+  isTeam1Answering: boolean;
+  isTeam2Answering: boolean;
+  isSuddenDeath: boolean;
+}
+
+// Partial game state for reset game
+interface GameStatePartial extends GameStatePartialQuestion {
+  questionId: number;
+  team1ScoreHistory: number[];
+  team2ScoreHistory: number[];
+  isPaused: boolean;
+}
+
+const newGameQuestionState: GameStatePartialQuestion = {
+  stage: GameStage.Waiting,
+  lastVideoTime: 0,
+  canTeam1Answer: false,
+  canTeam2Answer: false,
+  isTeam1Answering: false,
+  isTeam2Answering: false,
+  isSuddenDeath: false,
+}
+
+const newGameState: GameStatePartial = {
+  questionId: 0,
+  team1ScoreHistory: [],
+  team2ScoreHistory: [],
+  isPaused: true,
+  ...newGameQuestionState
+}
+
+interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
   questionId: number;
   lastVideoTime: number;
@@ -47,22 +84,12 @@ interface GameState {
 export const useGameStore = create<GameState>()(
   devtools((set, get) => ({
     currentGame: undefined,
-    questionId: 0,
-    lastVideoTime: 0,
-    team1ScoreHistory: [],
-    team2ScoreHistory: [],
-    stage: GameStage.Waiting,
-    isPaused: true,
+    ...newGameState,
     lastStageChangeTime: 0,
     lastTeam1Press: 0,
     lastTeam2Press: 0,
-    canTeam1Answer: false,
-    canTeam2Answer: false,
-    isTeam1Answering: false,
-    isTeam2Answering: false,
-    isSuddenDeath: false,
-    tempButtonCol: 1,
-    tempButtonRow: 1,
+    tempButtonCol: 0,
+    tempButtonRow: 0,
     isDebugOpen: false,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
@@ -336,12 +363,8 @@ export const useGameStore = create<GameState>()(
             state.currentGame.questions.length > state.questionId + 1
               ? // if we're playing a game, & there's more questions
                 {
-                  stage: GameStage.Waiting,
                   questionId: state.questionId + 1,
-                  lastVideoTime: 0,
-                  isTeam1Answering: false,
-                  isTeam2Answering: false,
-                  isSuddenDeath: false,
+                  ...newGameQuestionState
                 }
               : // if there are no more questions, end the game
                 {
@@ -355,11 +378,8 @@ export const useGameStore = create<GameState>()(
           break;
         case GameStage.Ending:
           set(() => ({
-            stage: GameStage.Waiting,
             currentGame: undefined,
-            team1ScoreHistory: [],
-            team2ScoreHistory: [],
-            questionId: 0,
+            ...newGameState,
           }));
           break;
         default:
@@ -384,12 +404,22 @@ export const useGameStore = create<GameState>()(
         ButtonData[get().tempButtonRow][get().tempButtonCol];
       console.log("selectDebugButton", selectedButton);
       switch (selectedButton) {
-        case DebugButton.RESET_QUIZ:
+        case DebugButton.ABANDON_QUIZ:
           set(() => ({
-            currentQuiz: undefined,
-            questionId: 0,
-            team1ScoreHistory: [],
-            team2ScoreHistory: [],
+            currentGame: undefined,
+            ...newGameState,
+          }));
+          break;
+        case DebugButton.RESTART_QUIZ:
+          if (!get().currentGame) return;
+          set(() => ({
+            ...newGameState
+          }));
+          break;
+        case DebugButton.SCORE_QUIZ:
+          if (!get().currentGame) return;
+          set(() => ({
+            stage: GameStage.Ending,
           }));
           break;
         case DebugButton.BACK_QUESTION:

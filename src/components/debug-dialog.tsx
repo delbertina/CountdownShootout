@@ -40,7 +40,7 @@ const DebugDialog = () => {
                   <div key={j} className="flex-grow flex-shrink basis-0">
                     <button
                       className={
-                        "w-full hover:border-transparent focus:outline-none focus:ring-0 " +
+                        "w-full h-full hover:border-transparent focus:outline-none focus:ring-0 " +
                         (selectedButtonCol === j && selectedButtonRow === i
                           ? "bg-red-500"
                           : "bg-blue-500")

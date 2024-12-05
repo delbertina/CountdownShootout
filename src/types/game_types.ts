@@ -19,7 +19,9 @@ export enum GameStage {
 // - Middle = Resume
 
 export enum DebugButton {
-  RESET_QUIZ = "Reset Quiz",
+  RESTART_QUIZ = "Restart Quiz",
+  ABANDON_QUIZ = "Abandon Quiz",
+  SCORE_QUIZ = "Score Quiz",
   BACK_QUESTION = "Question -1",
   FORWARD_QUESTION = "Question +1",
   CLEAR_SCORE = "Clear Last Score",
@@ -33,11 +35,8 @@ export enum DebugButton {
 }
 
 export const ButtonData: DebugButton[][] = [
-  [
-    DebugButton.RESET_QUIZ,
-    DebugButton.BACK_QUESTION,
-    DebugButton.FORWARD_QUESTION,
-  ],
+  [DebugButton.ABANDON_QUIZ, DebugButton.RESTART_QUIZ, DebugButton.SCORE_QUIZ],
+  [DebugButton.BACK_QUESTION, DebugButton.CLOSE, DebugButton.FORWARD_QUESTION],
   [DebugButton.CLEAR_SCORE, DebugButton.REMOVE_SCORE, DebugButton.ADD_SCORE],
   [
     DebugButton.INCREASE_RED_SCORE,
