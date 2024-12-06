@@ -7,7 +7,7 @@ import { Games } from "./data/game_data";
 import {
   Card,
   CardContent,
-  // CardFooter,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
@@ -146,21 +146,20 @@ const App = () => {
                 <div key={i}>
                   <Card
                     title={game.title}
-                    className="w-96 h-48"
+                    className="w-96 h-48 flex flex-col"
                     onClick={() => {
-                      console.log("Game Selected", game);
                       selectQuiz(game.id);
                     }}
                   >
                     <CardHeader>
                       <CardTitle>{game.title}</CardTitle>
                     </CardHeader>
-                    <CardContent className="text-left">
+                    <CardContent className="text-left flex-grow">
                       {game.description}
                     </CardContent>
-                    {/* <CardFooter className="font-light italic">
+                    <CardFooter className="font-light italic">
                       {"Last Played: 1/1/2022"}
-                    </CardFooter> */}
+                    </CardFooter>
                   </Card>
                 </div>
               ))}
