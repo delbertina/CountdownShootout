@@ -30,15 +30,15 @@ const newGameQuestionState: GameStatePartialQuestion = {
   isTeam1Answering: false,
   isTeam2Answering: false,
   isSuddenDeath: false,
-}
+};
 
 const newGameState: GameStatePartial = {
   questionId: 0,
   team1ScoreHistory: [],
   team2ScoreHistory: [],
   isPaused: true,
-  ...newGameQuestionState
-}
+  ...newGameQuestionState,
+};
 
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
@@ -363,8 +363,8 @@ export const useGameStore = create<GameState>()(
             state.currentGame.questions.length > state.questionId + 1
               ? // if we're playing a game, & there's more questions
                 {
+                  ...newGameQuestionState,
                   questionId: state.questionId + 1,
-                  ...newGameQuestionState
                 }
               : // if there are no more questions, end the game
                 {
@@ -378,8 +378,8 @@ export const useGameStore = create<GameState>()(
           break;
         case GameStage.Ending:
           set(() => ({
-            currentGame: undefined,
             ...newGameState,
+            currentGame: undefined,
           }));
           break;
         default:
@@ -406,14 +406,14 @@ export const useGameStore = create<GameState>()(
       switch (selectedButton) {
         case DebugButton.ABANDON_QUIZ:
           set(() => ({
-            currentGame: undefined,
             ...newGameState,
+            currentGame: undefined,
           }));
           break;
         case DebugButton.RESTART_QUIZ:
           if (!get().currentGame) return;
           set(() => ({
-            ...newGameState
+            ...newGameState,
           }));
           break;
         case DebugButton.SCORE_QUIZ:
@@ -473,7 +473,7 @@ export const useGameStore = create<GameState>()(
           set((state) => ({
             team1ScoreHistory: [
               ...state.team1ScoreHistory.slice(0, -1),
-              (state.team1ScoreHistory.at(-1)??0) + 1,
+              (state.team1ScoreHistory.at(-1) ?? 0) + 1,
             ],
           }));
           break;
@@ -482,7 +482,7 @@ export const useGameStore = create<GameState>()(
           set((state) => ({
             team1ScoreHistory: [
               ...state.team1ScoreHistory.slice(0, -1),
-              (state.team1ScoreHistory.at(-1)??0) - 1,
+              (state.team1ScoreHistory.at(-1) ?? 0) - 1,
             ],
           }));
           break;
@@ -491,7 +491,7 @@ export const useGameStore = create<GameState>()(
           set((state) => ({
             team2ScoreHistory: [
               ...state.team2ScoreHistory.slice(0, -1),
-              (state.team2ScoreHistory.at(-1)??0) + 1,
+              (state.team2ScoreHistory.at(-1) ?? 0) + 1,
             ],
           }));
           break;
@@ -500,7 +500,7 @@ export const useGameStore = create<GameState>()(
           set((state) => ({
             team2ScoreHistory: [
               ...state.team2ScoreHistory.slice(0, -1),
-              (state.team2ScoreHistory.at(-1)??0) - 1,
+              (state.team2ScoreHistory.at(-1) ?? 0) - 1,
             ],
           }));
           break;

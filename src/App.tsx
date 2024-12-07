@@ -140,7 +140,7 @@ const App = () => {
       <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
         {!currentGame && (
           <>
-            <h2 className="font-bold flex-grow-0">Question Sets</h2>
+            <h2 className="font-bold flex-grow-0">Game List</h2>
             <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
               {Games.map((game, i) => (
                 <div key={i}>
