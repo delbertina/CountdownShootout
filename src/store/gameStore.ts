@@ -78,6 +78,18 @@ interface GameState extends GameStatePartial {
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
   toggleDebugDialog: () => void;
+  debugAbandonQuiz: () => void;
+  debugRestartQuiz: () => void;
+  debugScoreQuiz: () => void;
+  debugBackQuestion: () => void;
+  debugForwardQuestion: () => void;
+  debugClearScore: () => void;
+  debugRemoveScore: () => void;
+  debugAddScore: () => void;
+  debugIncreaseRedScore: () => void;
+  debugDecreaseRedScore: () => void;
+  debugIncreaseBlueScore: () => void;
+  debugDecreaseBlueScore: () => void;
   selectDebugButton: () => void;
 }
 
@@ -399,110 +411,145 @@ export const useGameStore = create<GameState>()(
             ? !state.isDebugOpen
             : state.isPaused,
       })),
-    selectDebugButton: () => {
-      const selectedButton =
-        ButtonData[get().tempButtonRow][get().tempButtonCol];
-      console.log("selectDebugButton", selectedButton);
-      switch (selectedButton) {
-        case DebugButton.ABANDON_QUIZ:
-          set(() => ({
-            ...newGameState,
-            currentGame: undefined,
-          }));
-          break;
-        case DebugButton.RESTART_QUIZ:
-          if (!get().currentGame) return;
-          set(() => ({
-            ...newGameState,
-          }));
-          break;
-        case DebugButton.SCORE_QUIZ:
-          if (!get().currentGame) return;
-          set(() => ({
-            stage: GameStage.Ending,
-          }));
-          break;
-        case DebugButton.BACK_QUESTION:
-          if (get().questionId === 0) return;
-          set((state) => ({
-            stage: GameStage.Waiting,
-            questionId: state.questionId - 1,
-            team1ScoreHistory:
-              state.team1ScoreHistory.length >= state.questionId + 1
-                ? state.team1ScoreHistory.slice(0, -1)
-                : state.team1ScoreHistory,
-            team2ScoreHistory:
-              state.team2ScoreHistory.length >= state.questionId + 1
-                ? state.team2ScoreHistory.slice(0, -1)
-                : state.team2ScoreHistory,
-          }));
-          break;
-        case DebugButton.FORWARD_QUESTION:
-          if (
-            !get().currentGame ||
-            get().questionId >= (get().currentGame?.questions.length ?? 0) - 1
-          )
-            return;
-          set((state) => ({
-            stage: GameStage.Waiting,
-            questionId: state.questionId + 1,
-            team1ScoreHistory: [...state.team1ScoreHistory, 0],
-            team2ScoreHistory: [...state.team2ScoreHistory, 0],
-          }));
-          break;
-        case DebugButton.CLEAR_SCORE:
-          set((state) => ({
-            team1ScoreHistory: [...state.team1ScoreHistory.slice(0, -1), 0],
-            team2ScoreHistory: [...state.team2ScoreHistory.slice(0, -1), 0],
-          }));
-          break;
-        case DebugButton.REMOVE_SCORE:
-          set((state) => ({
-            team1ScoreHistory: state.team1ScoreHistory.slice(0, -1),
-            team2ScoreHistory: state.team2ScoreHistory.slice(0, -1),
-          }));
-          break;
-        case DebugButton.ADD_SCORE:
-          set((state) => ({
-            team1ScoreHistory: [...state.team1ScoreHistory, 0],
-            team2ScoreHistory: [...state.team2ScoreHistory, 0],
-          }));
-          break;
-        case DebugButton.INCREASE_RED_SCORE:
-          if (get().team1ScoreHistory.length === 0) return;
+    debugAbandonQuiz: () => {
+      set(() => ({
+        ...newGameState,
+        currentGame: undefined,
+      }));
+    },
+    debugRestartQuiz: () => {
+      if (!get().currentGame) return;
+      set(() => ({
+        ...newGameState,
+      }));
+    },
+    debugScoreQuiz: () => {
+      if (!get().currentGame) return;
+      set(() => ({
+        stage: GameStage.Ending,
+      }));
+    },
+    debugBackQuestion: () => {
+      if (get().questionId === 0) return;
+      set((state) => ({
+        stage: GameStage.Waiting,
+        questionId: state.questionId - 1,
+        team1ScoreHistory:
+          state.team1ScoreHistory.length >= state.questionId + 1
+            ? state.team1ScoreHistory.slice(0, -1)
+            : state.team1ScoreHistory,
+        team2ScoreHistory:
+          state.team2ScoreHistory.length >= state.questionId + 1
+            ? state.team2ScoreHistory.slice(0, -1)
+            : state.team2ScoreHistory,
+      }));
+    },
+    debugForwardQuestion: () => {
+      if (
+        !get().currentGame ||
+        get().questionId >= (get().currentGame?.questions.length ?? 0) - 1
+      )
+        return;
+      set((state) => ({
+        stage: GameStage.Waiting,
+        questionId: state.questionId + 1,
+        team1ScoreHistory: [...state.team1ScoreHistory, 0],
+        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+      }));
+    },
+    debugClearScore: () => {
+      set((state) => ({
+        team1ScoreHistory: [...state.team1ScoreHistory.slice(0, -1), 0],
+        team2ScoreHistory: [...state.team2ScoreHistory.slice(0, -1), 0],
+      }));
+    },
+    debugRemoveScore: () => {
+      set((state) => ({
+        team1ScoreHistory: state.team1ScoreHistory.slice(0, -1),
+        team2ScoreHistory: state.team2ScoreHistory.slice(0, -1),
+      }));
+    },
+    debugAddScore: () => {
+      set((state) => ({
+        team1ScoreHistory: [...state.team1ScoreHistory, 0],
+        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+      }));
+    },
+    debugIncreaseRedScore: () => {
+      if (get().team1ScoreHistory.length === 0) return;
           set((state) => ({
             team1ScoreHistory: [
               ...state.team1ScoreHistory.slice(0, -1),
               (state.team1ScoreHistory.at(-1) ?? 0) + 1,
             ],
           }));
-          break;
-        case DebugButton.DECREASE_RED_SCORE:
-          if (get().team1ScoreHistory.length === 0) return;
+    },
+    debugDecreaseRedScore: () => {
+      if (get().team1ScoreHistory.length === 0) return;
           set((state) => ({
             team1ScoreHistory: [
               ...state.team1ScoreHistory.slice(0, -1),
               (state.team1ScoreHistory.at(-1) ?? 0) - 1,
             ],
           }));
-          break;
-        case DebugButton.INCREASE_BLUE_SCORE:
-          if (get().team2ScoreHistory.length === 0) return;
+    },
+    debugIncreaseBlueScore: () => {
+      if (get().team2ScoreHistory.length === 0) return;
           set((state) => ({
             team2ScoreHistory: [
               ...state.team2ScoreHistory.slice(0, -1),
               (state.team2ScoreHistory.at(-1) ?? 0) + 1,
             ],
           }));
-          break;
-        case DebugButton.DECREASE_BLUE_SCORE:
-          if (get().team2ScoreHistory.length === 0) return;
+    },
+    debugDecreaseBlueScore: () => {
+      if (get().team2ScoreHistory.length === 0) return;
           set((state) => ({
             team2ScoreHistory: [
               ...state.team2ScoreHistory.slice(0, -1),
               (state.team2ScoreHistory.at(-1) ?? 0) - 1,
             ],
           }));
+    },
+    selectDebugButton: () => {
+      const selectedButton =
+        ButtonData[get().tempButtonRow][get().tempButtonCol];
+      switch (selectedButton) {
+        case DebugButton.ABANDON_QUIZ:
+          get().debugAbandonQuiz();
+          break;
+        case DebugButton.RESTART_QUIZ:
+          get().debugRestartQuiz();
+          break;
+        case DebugButton.SCORE_QUIZ:
+          get().debugScoreQuiz();
+          break;
+        case DebugButton.BACK_QUESTION:
+          get().debugBackQuestion();
+          break;
+        case DebugButton.FORWARD_QUESTION:
+          get().debugForwardQuestion();
+          break;
+        case DebugButton.CLEAR_SCORE:
+          get().debugClearScore();
+          break;
+        case DebugButton.REMOVE_SCORE:
+          get().debugRemoveScore();
+          break;
+        case DebugButton.ADD_SCORE:
+          get().debugAddScore();
+          break;
+        case DebugButton.INCREASE_RED_SCORE:
+          get().debugIncreaseRedScore();
+          break;
+        case DebugButton.DECREASE_RED_SCORE:
+          get().debugDecreaseRedScore();
+          break;
+        case DebugButton.INCREASE_BLUE_SCORE:
+          get().debugIncreaseBlueScore();
+          break;
+        case DebugButton.DECREASE_BLUE_SCORE:
+          get().debugDecreaseBlueScore();
           break;
         case DebugButton.CLOSE:
           get().toggleDebugDialog();
