@@ -1,11 +1,12 @@
+import GameListPage from "./pages/game-list-page";
+import HomePage from "./pages/home-page";
 import GameHeader from "./components/game-header";
-import GameCard from "./components/game-card";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import ReactPlayer from "react-player";
 import { GameStage } from "./types/game_types";
-import { Games } from "./data/game_data";
+
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import { OnProgressProps } from "react-player/base";
@@ -16,15 +17,6 @@ import { DialogContent } from "./components/ui/dialog";
 import { TeamTheme } from "./types/theme_types";
 
 const App = () => {
-  // check browser settings
-  const isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
-  const canAutoplay =
-    // @ts-expect-error experimental feature
-    !!navigator.getAutoplayPolicy &&
-    // @ts-expect-error experimental feature
-    navigator.getAutoplayPolicy("mediaelement") === "allowed";
-  const isGamepadDetected = useGameStore((state) => state.isGamepadDetected);
-
   const gameStage = useGameStore((state) => state.stage);
   const currentGame = useGameStore((state) => state.currentGame);
   const questionId = useGameStore((state) => state.questionId);
@@ -51,7 +43,7 @@ const App = () => {
     state.team2ScoreHistory.reduce((sum, current) => sum + current, 0)
   );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
-  const selectQuiz = useGameStore((state) => state.selectQuiz);
+
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
   const [videoProgress, setVideoProgress] = useState(0);
 
@@ -120,202 +112,171 @@ const App = () => {
 
   return (
     <>
-      <div className="welcome-screen whole-screen flex flex-col justify-center bg-slate-200">
-        <h1 className="font-bold">Welcome to Countdown Shootout</h1>
-        <h2>This game currently requires 3 controllers to play.</h2>
-        <h2>
-          This game requires "dom.gamepad.non_standard_events.enabled" to be
-          enabled in about:config in Firefox
-        </h2>
-        -<h2>Firefox Browser: {isFirefox ? "Good" : "Error"}</h2>
-        <h2>Can Autoplay: {canAutoplay ? "Good" : "Error"}</h2>
-        <h2>Gamepad Support: {isGamepadDetected ? "Good" : "Waiting ..."}</h2>
-      </div>
-      <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
-        {!currentGame && (
-          <>
-            <h2 className="font-bold flex-grow-0">Game List</h2>
-            <div className="flex flex-row flex-wrap justify-center content-start gap-4 flex-grow">
-              {Games.map((game, i) => (
-                <div key={i}>
-                  <GameCard
-                    title={game.title}
-                    description={game.description}
-                    selectQuiz={() => selectQuiz(game.id)}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-        {currentGame && (
-          <>
-            <GameHeader
-              leftIndicatorText="BUZZER"
-              leftIndicatorTheme={TeamTheme.RED}
-              leftIndicatorIsShaded={
-                canTeam1Answer &&
-                ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
-                  (gameStage === GameStage.Playing &&
-                    !isTeam1Answering &&
-                    !isTeam2Answering))
-              }
-              leftIndicatorScore={team1ScoreHistory}
-              rightIndicatorText="BUZZER"
-              rightIndicatorTheme={TeamTheme.BLUE}
-              rightIndicatorIsShaded={
-                canTeam2Answer &&
-                ((isSuddenDeath && !isTeam2Answering && !isTeam1Answering) ||
-                  (gameStage === GameStage.Playing &&
-                    !isTeam2Answering &&
-                    !isTeam1Answering))
-              }
-              rightIndicatorScore={team2ScoreHistory}
-              headerTitle={currentGame.title}
-              headerSubtitle={
-                questionId + 1 + "/" + currentGame.questions.length
-              }
-            />
-            {gameQuestion && (
-              <>
-                <div className="flex flex-col items-center gap-4 flex-grow h-full">
-                  <h2>{gameQuestion.questionText}</h2>
-                  <div className="flex-grow flex flex-row justify-center w-full">
-                    <ReactPlayer
-                      key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
-                      playing={!isPaused}
-                      controls={false}
-                      progressInterval={500}
-                      onEnded={() => handleVideoEnd()}
-                      onProgress={(e: OnProgressProps) =>
-                        handleVideoProgress(e)
-                      }
-                      className="react-player"
-                      width="80%"
-                      url={
-                        "https://www.youtube.com/watch?v=" +
-                        gameQuestion.videoYouTubeID
-                      }
-                      config={{
-                        youtube: {
-                          playerVars: {
-                            // start and end need a whole number
-                            start: !lastVideoTime
-                              ? Math.floor(gameQuestion.videoStartTime)
-                              : Math.floor(lastVideoTime),
-                            end: Math.floor(gameQuestion.videoEndTime),
-                            rel: 0,
-                          },
+      <HomePage />
+      {!currentGame && <GameListPage />}
+      {currentGame && (
+        <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
+          <GameHeader
+            leftIndicatorText="BUZZER"
+            leftIndicatorTheme={TeamTheme.RED}
+            leftIndicatorIsShaded={
+              canTeam1Answer &&
+              ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
+                (gameStage === GameStage.Playing &&
+                  !isTeam1Answering &&
+                  !isTeam2Answering))
+            }
+            leftIndicatorScore={team1ScoreHistory}
+            rightIndicatorText="BUZZER"
+            rightIndicatorTheme={TeamTheme.BLUE}
+            rightIndicatorIsShaded={
+              canTeam2Answer &&
+              ((isSuddenDeath && !isTeam2Answering && !isTeam1Answering) ||
+                (gameStage === GameStage.Playing &&
+                  !isTeam2Answering &&
+                  !isTeam1Answering))
+            }
+            rightIndicatorScore={team2ScoreHistory}
+            headerTitle={currentGame.title}
+            headerSubtitle={questionId + 1 + "/" + currentGame.questions.length}
+          />
+          {gameQuestion && (
+            <>
+              <div className="flex flex-col items-center gap-4 flex-grow h-full">
+                <h2>{gameQuestion.questionText}</h2>
+                <div className="flex-grow flex flex-row justify-center w-full">
+                  <ReactPlayer
+                    key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
+                    playing={!isPaused}
+                    controls={false}
+                    progressInterval={500}
+                    onEnded={() => handleVideoEnd()}
+                    onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
+                    className="react-player"
+                    width="80%"
+                    url={
+                      "https://www.youtube.com/watch?v=" +
+                      gameQuestion.videoYouTubeID
+                    }
+                    config={{
+                      youtube: {
+                        playerVars: {
+                          // start and end need a whole number
+                          start: !lastVideoTime
+                            ? Math.floor(gameQuestion.videoStartTime)
+                            : Math.floor(lastVideoTime),
+                          end: Math.floor(gameQuestion.videoEndTime),
+                          rel: 0,
                         },
-                      }}
-                    ></ReactPlayer>
-                  </div>
-                  {/* timer for remaining time in video */}
-                  <div className="flex-grow-0 w-full">
-                    <Progress value={videoProgress} />
-                  </div>
+                      },
+                    }}
+                  ></ReactPlayer>
                 </div>
-                <Dialog open={gameStage !== GameStage.Playing}>
-                  <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
-                    <GameHeader
-                      leftIndicatorText="BUZZER"
-                      leftIndicatorTheme={TeamTheme.RED}
-                      leftIndicatorIsShaded={
-                        canTeam1Answer &&
-                        ((gameStage === GameStage.Answering &&
+                {/* timer for remaining time in video */}
+                <div className="flex-grow-0 w-full">
+                  <Progress value={videoProgress} />
+                </div>
+              </div>
+              <Dialog open={gameStage !== GameStage.Playing}>
+                <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
+                  <GameHeader
+                    leftIndicatorText="BUZZER"
+                    leftIndicatorTheme={TeamTheme.RED}
+                    leftIndicatorIsShaded={
+                      canTeam1Answer &&
+                      ((gameStage === GameStage.Answering &&
+                        !isTeam1Answering &&
+                        !isTeam2Answering) ||
+                        (gameStage === GameStage.Playing &&
                           !isTeam1Answering &&
-                          !isTeam2Answering) ||
-                          (gameStage === GameStage.Playing &&
-                            !isTeam1Answering &&
-                            !isTeam2Answering))
-                      }
-                      leftIndicatorScore={team1ScoreHistory}
-                      rightIndicatorText="BUZZER"
-                      rightIndicatorTheme={TeamTheme.BLUE}
-                      rightIndicatorIsShaded={
-                        canTeam2Answer &&
-                        ((gameStage === GameStage.Answering &&
+                          !isTeam2Answering))
+                    }
+                    leftIndicatorScore={team1ScoreHistory}
+                    rightIndicatorText="BUZZER"
+                    rightIndicatorTheme={TeamTheme.BLUE}
+                    rightIndicatorIsShaded={
+                      canTeam2Answer &&
+                      ((gameStage === GameStage.Answering &&
+                        !isTeam1Answering &&
+                        !isTeam2Answering) ||
+                        (gameStage === GameStage.Playing &&
                           !isTeam1Answering &&
-                          !isTeam2Answering) ||
-                          (gameStage === GameStage.Playing &&
-                            !isTeam1Answering &&
-                            !isTeam2Answering))
-                      }
-                      rightIndicatorScore={team2ScoreHistory}
-                      headerTitle={currentGame.title}
-                      headerSubtitle={
-                        questionId + 1 + "/" + currentGame.questions.length
-                      }
-                    />
-                    {gameStage === GameStage.Waiting && (
+                          !isTeam2Answering))
+                    }
+                    rightIndicatorScore={team2ScoreHistory}
+                    headerTitle={currentGame.title}
+                    headerSubtitle={
+                      questionId + 1 + "/" + currentGame.questions.length
+                    }
+                  />
+                  {gameStage === GameStage.Waiting && (
+                    <div>
+                      <h1>{gameQuestion.questionText}</h1>
+                      <h2>
+                        {gameQuestion.videoEndTime -
+                          gameQuestion.videoStartTime}{" "}
+                        seconds
+                      </h2>
+                      {/* timer for remaining time before question starts */}
+                    </div>
+                  )}
+                  {gameStage === GameStage.Answering && (
+                    <div>
+                      {isSuddenDeath && (
+                        <>
+                          <h1>SUDDEN DEATH</h1>
+                          <br />
+                          <hr />
+                          <br />
+                        </>
+                      )}
+                      {isTeam1Answering && <h1>Red is Answering</h1>}
+                      {isTeam2Answering && <h1>Blue is Answering</h1>}
+                      {!isTeam1Answering && !isTeam2Answering && (
+                        <h1>Nobody is Answering ... ?</h1>
+                      )}
+                      {/* timer for remaining time to answer */}
+                    </div>
+                  )}
+                  {gameStage === GameStage.Scoring && (
+                    <>
                       <div>
-                        <h1>{gameQuestion.questionText}</h1>
-                        <h2>
-                          {gameQuestion.videoEndTime -
-                            gameQuestion.videoStartTime}{" "}
-                          seconds
-                        </h2>
-                        {/* timer for remaining time before question starts */}
-                      </div>
-                    )}
-                    {gameStage === GameStage.Answering && (
-                      <div>
-                        {isSuddenDeath && (
-                          <>
-                            <h1>SUDDEN DEATH</h1>
-                            <br />
-                            <hr />
-                            <br />
-                          </>
-                        )}
-                        {isTeam1Answering && <h1>Red is Answering</h1>}
-                        {isTeam2Answering && <h1>Blue is Answering</h1>}
+                        {isTeam1Answering && <h1>Red is Correct</h1>}
+                        {isTeam2Answering && <h1>Blue is Correct</h1>}
                         {!isTeam1Answering && !isTeam2Answering && (
-                          <h1>Nobody is Answering ... ?</h1>
+                          <h1>Nobody Won the Points</h1>
                         )}
-                        {/* timer for remaining time to answer */}
-                      </div>
-                    )}
-                    {gameStage === GameStage.Scoring && (
-                      <>
-                        <div>
-                          {isTeam1Answering && <h1>Red is Correct</h1>}
-                          {isTeam2Answering && <h1>Blue is Correct</h1>}
-                          {!isTeam1Answering && !isTeam2Answering && (
-                            <h1>Nobody Won the Points</h1>
-                          )}
-                          {/* timer for remaining time before next stage */}
-                        </div>
-                        <hr />
-                        <div>
-                          <h1>{gameQuestion.answer}</h1>
-                          <h2>{gameQuestion.answerSubtext}</h2>
-                        </div>
-                      </>
-                    )}
-                    {gameStage === GameStage.Ending && (
-                      <div>
-                        <h1>Game Over</h1>
-                        <h2>
-                          {team1ScoreHistory > team2ScoreHistory
-                            ? "Red Won!"
-                            : team1ScoreHistory < team2ScoreHistory
-                            ? "Blue Won!"
-                            : "It's a Tie!"}
-                        </h2>
-                        Red Score: {team1ScoreHistory}
-                        <br />
-                        Blue Score: {team2ScoreHistory}
                         {/* timer for remaining time before next stage */}
                       </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              </>
-            )}
-          </>
-        )}
-      </div>
+                      <hr />
+                      <div>
+                        <h1>{gameQuestion.answer}</h1>
+                        <h2>{gameQuestion.answerSubtext}</h2>
+                      </div>
+                    </>
+                  )}
+                  {gameStage === GameStage.Ending && (
+                    <div>
+                      <h1>Game Over</h1>
+                      <h2>
+                        {team1ScoreHistory > team2ScoreHistory
+                          ? "Red Won!"
+                          : team1ScoreHistory < team2ScoreHistory
+                          ? "Blue Won!"
+                          : "It's a Tie!"}
+                      </h2>
+                      Red Score: {team1ScoreHistory}
+                      <br />
+                      Blue Score: {team2ScoreHistory}
+                      {/* timer for remaining time before next stage */}
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
+        </div>
+      )}
       <Toaster />
       <DebugDialog />
     </>
