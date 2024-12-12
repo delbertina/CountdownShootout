@@ -14,11 +14,15 @@ const App = () => {
   const { toast } = useToast();
   const lastTeam1Press = useGameStore((state) => state.lastTeam1Press);
   const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
+  const team1Theme = useGameStore((state) => state.team1Theme);
+  const team2Theme = useGameStore((state) => state.team2Theme);
 
-  const throwToast = (isRed: boolean) => {
+  const throwToast = (isTeam1: boolean) => {
     toast({
-      title: isRed ? "Red Team Buzzed" : "Blue Team Buzzed",
-      variant: isRed ? "red" : "blue",
+      title: isTeam1
+        ? team1Theme + " Team Buzzed"
+        : team2Theme + " Team Buzzed",
+      variant: isTeam1 ? team1Theme : team2Theme,
     });
   };
 

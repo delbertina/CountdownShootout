@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "../../lib/utils"
+import { TeamTheme } from "../../types/theme_types"
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -30,8 +31,8 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
-        red: "border-red-500 bg-red-500 text-red-foreground",
-        blue: "border-blue-500 bg-blue-500 text-blue-foreground",
+        [TeamTheme.RED]: "border-red-500 bg-red-500 text-red-foreground",
+        [TeamTheme.BLUE]: "border-blue-500 bg-blue-500 text-blue-foreground",
       },
     },
     defaultVariants: {

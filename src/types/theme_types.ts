@@ -1,6 +1,6 @@
 export enum TeamTheme {
-    BLUE = "BLUE",
-    RED = "RED",
+    BLUE = "Blue",
+    RED = "Red",
 }
 
 export const getShadedClass = (type: TeamTheme) => {

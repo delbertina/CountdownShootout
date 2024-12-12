@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
+import { TeamTheme } from "../types/theme_types";
 
 // Partial game state for reset question
 interface GameStatePartialQuestion {
@@ -46,6 +47,8 @@ interface GameState extends GameStatePartial {
   lastVideoTime: number;
   team1ScoreHistory: number[];
   team2ScoreHistory: number[];
+  team1Theme: TeamTheme;
+  team2Theme: TeamTheme;
   stage: GameStage;
   isPaused: boolean;
   lastStageChangeTime: number;
@@ -100,6 +103,8 @@ export const useGameStore = create<GameState>()(
     lastStageChangeTime: 0,
     lastTeam1Press: 0,
     lastTeam2Press: 0,
+    team1Theme: TeamTheme.RED,
+    team2Theme: TeamTheme.BLUE,
     tempButtonCol: 0,
     tempButtonRow: 0,
     isDebugOpen: false,
