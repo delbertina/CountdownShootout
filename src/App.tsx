@@ -7,6 +7,7 @@ import { useGameStore } from "./store/gameStore";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import DebugDialog from "./components/debug-dialog";
+import TeamOptionsPage from "./pages/team-options-page";
 
 const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -65,6 +66,7 @@ const App = () => {
   return (
     <>
       <HomePage />
+      <TeamOptionsPage />
       {!currentGame && <GameListPage />}
       {currentGame && <GamePlayPage />}
       <Toaster />
