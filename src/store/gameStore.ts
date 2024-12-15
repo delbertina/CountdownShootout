@@ -94,6 +94,7 @@ interface GameState extends GameStatePartial {
   debugIncreaseBlueScore: () => void;
   debugDecreaseBlueScore: () => void;
   selectDebugButton: () => void;
+  selectTeamColor: (teamId: number, team: TeamTheme) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -482,39 +483,39 @@ export const useGameStore = create<GameState>()(
     },
     debugIncreaseRedScore: () => {
       if (get().team1ScoreHistory.length === 0) return;
-          set((state) => ({
-            team1ScoreHistory: [
-              ...state.team1ScoreHistory.slice(0, -1),
-              (state.team1ScoreHistory.at(-1) ?? 0) + 1,
-            ],
-          }));
+      set((state) => ({
+        team1ScoreHistory: [
+          ...state.team1ScoreHistory.slice(0, -1),
+          (state.team1ScoreHistory.at(-1) ?? 0) + 1,
+        ],
+      }));
     },
     debugDecreaseRedScore: () => {
       if (get().team1ScoreHistory.length === 0) return;
-          set((state) => ({
-            team1ScoreHistory: [
-              ...state.team1ScoreHistory.slice(0, -1),
-              (state.team1ScoreHistory.at(-1) ?? 0) - 1,
-            ],
-          }));
+      set((state) => ({
+        team1ScoreHistory: [
+          ...state.team1ScoreHistory.slice(0, -1),
+          (state.team1ScoreHistory.at(-1) ?? 0) - 1,
+        ],
+      }));
     },
     debugIncreaseBlueScore: () => {
       if (get().team2ScoreHistory.length === 0) return;
-          set((state) => ({
-            team2ScoreHistory: [
-              ...state.team2ScoreHistory.slice(0, -1),
-              (state.team2ScoreHistory.at(-1) ?? 0) + 1,
-            ],
-          }));
+      set((state) => ({
+        team2ScoreHistory: [
+          ...state.team2ScoreHistory.slice(0, -1),
+          (state.team2ScoreHistory.at(-1) ?? 0) + 1,
+        ],
+      }));
     },
     debugDecreaseBlueScore: () => {
       if (get().team2ScoreHistory.length === 0) return;
-          set((state) => ({
-            team2ScoreHistory: [
-              ...state.team2ScoreHistory.slice(0, -1),
-              (state.team2ScoreHistory.at(-1) ?? 0) - 1,
-            ],
-          }));
+      set((state) => ({
+        team2ScoreHistory: [
+          ...state.team2ScoreHistory.slice(0, -1),
+          (state.team2ScoreHistory.at(-1) ?? 0) - 1,
+        ],
+      }));
     },
     selectDebugButton: () => {
       const selectedButton =
@@ -561,6 +562,18 @@ export const useGameStore = create<GameState>()(
           break;
         default:
           break;
+      }
+    },
+    selectTeamColor(teamId, theme) {
+      if (teamId === 1 && get().team2Theme !== theme) {
+        set(() => ({
+          team1Theme: theme,
+        }));
+      } 
+      if (teamId === 2 && get().team1Theme !== theme) {
+        set(() => ({
+          team2Theme: theme,
+        }));
       }
     },
   }))
