@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import GameHeader from "../components/game-header";
-import { TeamTheme } from "../types/theme_types";
 import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
@@ -30,6 +29,8 @@ const GamePlayPage = () => {
   const team2ScoreHistory = useGameStore((state) =>
     state.team2ScoreHistory.reduce((sum, current) => sum + current, 0)
   );
+  const team1Theme = useGameStore((state) => state.team1Theme);
+  const team2Theme = useGameStore((state) => state.team2Theme);
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -53,7 +54,7 @@ const GamePlayPage = () => {
     <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
       <GameHeader
         leftIndicatorText="BUZZER"
-        leftIndicatorTheme={TeamTheme.RED}
+        leftIndicatorTheme={team1Theme}
         leftIndicatorIsShaded={
           canTeam1Answer &&
           ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
@@ -63,7 +64,7 @@ const GamePlayPage = () => {
         }
         leftIndicatorScore={team1ScoreHistory}
         rightIndicatorText="BUZZER"
-        rightIndicatorTheme={TeamTheme.BLUE}
+        rightIndicatorTheme={team2Theme}
         rightIndicatorIsShaded={
           canTeam2Answer &&
           ((isSuddenDeath && !isTeam2Answering && !isTeam1Answering) ||
@@ -116,7 +117,7 @@ const GamePlayPage = () => {
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
               <GameHeader
                 leftIndicatorText="BUZZER"
-                leftIndicatorTheme={TeamTheme.RED}
+                leftIndicatorTheme={team1Theme}
                 leftIndicatorIsShaded={
                   canTeam1Answer &&
                   ((gameStage === GameStage.Answering &&
@@ -128,7 +129,7 @@ const GamePlayPage = () => {
                 }
                 leftIndicatorScore={team1ScoreHistory}
                 rightIndicatorText="BUZZER"
-                rightIndicatorTheme={TeamTheme.BLUE}
+                rightIndicatorTheme={team2Theme}
                 rightIndicatorIsShaded={
                   canTeam2Answer &&
                   ((gameStage === GameStage.Answering &&
