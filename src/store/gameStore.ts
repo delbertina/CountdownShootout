@@ -568,11 +568,14 @@ export const useGameStore = create<GameState>()(
       if (teamId === 1 && get().team2Theme !== theme) {
         set(() => ({
           team1Theme: theme,
+          // Pop up the toast
+          lastTeam1Press: Date.now(),
         }));
       } 
       if (teamId === 2 && get().team1Theme !== theme) {
         set(() => ({
           team2Theme: theme,
+          lastTeam2Press: Date.now(),
         }));
       }
     },
