@@ -12,7 +12,7 @@ const ShadedIndicator = (props: ShadedIndicatorProps) => {
     <div
       onClick={props.onClick}
       className={
-        "flex-grow-0 flex-shrink-0 p-6 border-4 rounded-3xl font-bold text-2xl select-none cursor-pointer " +
+        "flex-grow-0 flex-shrink-0 w-48 p-6 border-4 rounded-3xl font-bold text-2xl select-none cursor-pointer " +
         (props.isShaded
           ? getShadedClass(props.theme)
           : getUnShadedClass(props.theme))
