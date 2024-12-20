@@ -4,6 +4,7 @@ import { useGameStore } from "../store/gameStore";
 import { TeamTheme } from "../types/theme_types";
 import { Button } from "../components/ui/button";
 import { useMemo } from "react";
+import { getFirstNames, getSecondNames } from "../data/name_data";
 
 const TeamOptionsPage = () => {
   const team1Theme = useGameStore((state) => state.team1Theme);
@@ -18,6 +19,14 @@ const TeamOptionsPage = () => {
   );
   const selectTeamColor = useGameStore((state) => state.selectTeamColor);
   const totalThemes = useMemo(() => Object.values(TeamTheme).length, []);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const team1FirstNames = getFirstNames(3);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const team1SecondNames = getSecondNames(3);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const team2FirstNames = getFirstNames(3);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const team2SecondNames = getSecondNames(3);  
 
   const increaseThemeIndex = (teamId: number) => {
     if (teamId === 1) {
@@ -79,7 +88,7 @@ const TeamOptionsPage = () => {
         {[1, 2].map((team) => (
           <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-center gap-4">
-              <h2>Team {team}</h2>
+              <h2>{team === 1 ? team1Theme : team2Theme} Team</h2>
               <Button>
                 <Pencil />
               </Button>
