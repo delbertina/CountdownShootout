@@ -1,9 +1,9 @@
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import ShadedIndicator from "../components/shaded-indicator";
 import { useGameStore } from "../store/gameStore";
 import { TeamTheme } from "../types/theme_types";
 import { Button } from "../components/ui/button";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getFirstNames, getSecondNames } from "../data/name_data";
 
 const TeamOptionsPage = () => {
@@ -18,15 +18,45 @@ const TeamOptionsPage = () => {
     [team2Theme]
   );
   const selectTeamColor = useGameStore((state) => state.selectTeamColor);
-  const totalThemes = useMemo(() => Object.values(TeamTheme).length, []);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const team1FirstNames = getFirstNames(3);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const team1SecondNames = getSecondNames(3);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const team2FirstNames = getFirstNames(3);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const team2SecondNames = getSecondNames(3);  
+  const totalThemes = Object.values(TeamTheme).length;
+  const [team1FirstNames, setTeam1FirstNames] = useState(getFirstNames(3));
+  const [team1SecondNames, setTeam1SecondNames] = useState(getSecondNames(3));
+  const [team2FirstNames, setTeam2FirstNames] = useState(getFirstNames(3));
+  const [team2SecondNames, setTeam2SecondNames] = useState(getSecondNames(3));
+  const [team1FirstIndex, setTeam1FirstIndex] = useState(0);
+  const [team1SecondIndex, setTeam1SecondIndex] = useState(0);
+  const [team2FirstIndex, setTeam2FirstIndex] = useState(0);
+  const [team2SecondIndex, setTeam2SecondIndex] = useState(0);
+
+  const rerollNames = (teamId: number) => {
+    if (teamId === 1) {
+      setTeam1FirstNames(getFirstNames(3));
+      setTeam1SecondNames(getSecondNames(3));
+      setTeam1FirstIndex(0);
+      setTeam1SecondIndex(0);
+    } else if (teamId === 2) {
+      setTeam2FirstNames(getFirstNames(3));
+      setTeam2SecondNames(getSecondNames(3));
+      setTeam2FirstIndex(0);
+      setTeam2SecondIndex(0);
+    }
+  }
+
+  const setFirstName = (teamId: number, index: number) => {
+    if (teamId === 1) {
+      setTeam1FirstIndex(index);
+    } else if (teamId === 2) {
+      setTeam2FirstIndex(index);
+    }
+  }
+
+  const setSecondName = (teamId: number, index: number) => {
+    if (teamId === 1) {
+      setTeam1SecondIndex(index);
+    } else if (teamId === 2) {
+      setTeam2SecondIndex(index);
+    }
+  }
 
   const increaseThemeIndex = (teamId: number) => {
     if (teamId === 1) {
@@ -89,16 +119,63 @@ const TeamOptionsPage = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-center gap-4">
               <h2>{team === 1 ? team1Theme : team2Theme} Team</h2>
-              <Button>
-                <Pencil />
+              <Button onClick={() => rerollNames(team)}>
+                <RefreshCw />
               </Button>
             </div>
             {/*  */}
             {/* TODO: Add the ability to set the team name */}
             {/*  */}
+            <div className="flex flex-col gap-4 items-center">
+              <div className="flex flex-row gap-4">
+                {(team === 1 ? team1FirstNames : team2FirstNames).map(
+                  (firstName, i) => (
+                    <Button
+                      variant={
+                        (
+                          team === 1
+                            ? team1FirstIndex === i
+                            : team2FirstIndex === i
+                        )
+                          ? "destructive"
+                          : "default"
+                      }
+                      onClick={() => setFirstName(team, i)}
+                    >
+                      {firstName}
+                    </Button>
+                  )
+                )}
+              </div>
+              <div className="flex flex-row gap-4">
+                {(team === 1 ? team1SecondNames : team2SecondNames).map(
+                  (secondName, i) => (
+                    <Button
+                      variant={
+                        (
+                          team === 1
+                            ? team1SecondIndex === i
+                            : team2SecondIndex === i
+                        )
+                          ? "destructive"
+                          : "default"
+                      }
+                      onClick={() => setSecondName(team, i)}
+                    >
+                      {secondName}
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
             {/* Display a row of both the shaded and unshaded indicators */}
             <div className="flex flex-row items-center gap-4">
-              <Button className="h-full" onClick={() => decreaseThemeIndex(team)}><ChevronLeft /></Button>
+              <Button
+                className="h-full"
+                onClick={() => decreaseThemeIndex(team)}
+              >
+                <ChevronLeft />
+              </Button>
               <div>
                 {[true, false].map((isShaded) => (
                   <div className="flex flex-row flex-wrap justify-center">
@@ -145,7 +222,12 @@ const TeamOptionsPage = () => {
                   </div>
                 ))}
               </div>
-              <Button className="h-full" onClick={() => increaseThemeIndex(team)}><ChevronRight /></Button>
+              <Button
+                className="h-full"
+                onClick={() => increaseThemeIndex(team)}
+              >
+                <ChevronRight />
+              </Button>
             </div>
           </div>
         ))}
