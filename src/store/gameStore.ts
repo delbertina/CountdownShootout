@@ -564,7 +564,7 @@ export const useGameStore = create<GameState>()(
           break;
       }
     },
-    selectTeamColor(teamId, theme) {
+    selectTeamColor: (teamId, theme) => {
       if (teamId === 1 && get().team2Theme !== theme) {
         set(() => ({
           team1Theme: theme,

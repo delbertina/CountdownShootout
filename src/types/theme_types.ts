@@ -64,3 +64,5 @@ export const getUnShadedClass = (type: TeamTheme) => {
             return "border-red-400 bg-red-300 text-white";
     }
 }
+
+export const totalThemes = Object.values(TeamTheme).length;
