@@ -8,56 +8,70 @@ import { TeamTheme } from "../types/theme_types";
 interface GameStatePartialQuestion {
   stage: GameStage;
   lastVideoTime: number;
-  canTeam1Answer: boolean;
-  canTeam2Answer: boolean;
-  isTeam1Answering: boolean;
-  isTeam2Answering: boolean;
   isSuddenDeath: boolean;
 }
 
 // Partial game state for reset game
 interface GameStatePartial extends GameStatePartialQuestion {
   questionId: number;
-  team1ScoreHistory: number[];
-  team2ScoreHistory: number[];
   isPaused: boolean;
 }
 
 const newGameQuestionState: GameStatePartialQuestion = {
   stage: GameStage.Waiting,
   lastVideoTime: 0,
-  canTeam1Answer: false,
-  canTeam2Answer: false,
-  isTeam1Answering: false,
-  isTeam2Answering: false,
   isSuddenDeath: false,
 };
 
 const newGameState: GameStatePartial = {
   questionId: 0,
-  team1ScoreHistory: [],
-  team2ScoreHistory: [],
   isPaused: true,
   ...newGameQuestionState,
 };
 
+interface TeamState {
+  id: number;
+  name: string;
+  theme: TeamTheme;
+  // default to false to use theme color as name
+  isUsingCustomName: boolean;
+  scoreHistory: number[];
+  lastPress: number;
+  canAnswer: boolean;
+  isAnswering: boolean;
+}
+
+const initialTeamState: TeamState[] = [
+  {
+    id: 1,
+    name: "",
+    theme: TeamTheme.RED,
+    isUsingCustomName: false,
+    scoreHistory: [],
+    lastPress: 0,
+    canAnswer: false,
+    isAnswering: false,
+  },
+  {
+    id: 2,
+    name: "",
+    theme: TeamTheme.BLUE,
+    isUsingCustomName: false,
+    scoreHistory: [],
+    lastPress: 0,
+    canAnswer: false,
+    isAnswering: false,
+  },
+];
+
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
+  teams: TeamState[];
   questionId: number;
   lastVideoTime: number;
-  team1ScoreHistory: number[];
-  team2ScoreHistory: number[];
-  team1Theme: TeamTheme;
-  team2Theme: TeamTheme;
   stage: GameStage;
   isPaused: boolean;
   lastStageChangeTime: number;
-  lastTeam1Press: number;
-  lastTeam2Press: number;
-  canTeam1Answer: boolean;
-  canTeam2Answer: boolean;
-  isTeam1Answering: boolean;
-  isTeam2Answering: boolean;
   isSuddenDeath: boolean;
   tempButtonCol: number;
   tempButtonRow: number;
@@ -100,23 +114,20 @@ interface GameState extends GameStatePartial {
 export const useGameStore = create<GameState>()(
   devtools((set, get) => ({
     currentGame: undefined,
+    teams: initialTeamState,
     ...newGameState,
     lastStageChangeTime: 0,
-    lastTeam1Press: 0,
-    lastTeam2Press: 0,
-    team1Theme: TeamTheme.RED,
-    team2Theme: TeamTheme.BLUE,
     tempButtonCol: 0,
     tempButtonRow: 0,
     isDebugOpen: false,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       }
@@ -128,11 +139,11 @@ export const useGameStore = create<GameState>()(
     },
     symbolLeft: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       }
@@ -140,11 +151,11 @@ export const useGameStore = create<GameState>()(
     },
     symbolUp: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       } else {
@@ -155,11 +166,11 @@ export const useGameStore = create<GameState>()(
     symbolDown: (gamepadIndex: number) => {
       const stage = useGameStore.getState().stage;
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
       } else {
         if (get().isDebugOpen) {
@@ -571,7 +582,7 @@ export const useGameStore = create<GameState>()(
           // Pop up the toast
           lastTeam1Press: Date.now(),
         }));
-      } 
+      }
       if (teamId === 2 && get().team1Theme !== theme) {
         set(() => ({
           team2Theme: theme,
