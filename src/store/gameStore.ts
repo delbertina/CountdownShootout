@@ -257,41 +257,48 @@ export const useGameStore = create<GameState>()(
         !(
           stage === GameStage.Playing ||
           (stage === GameStage.Answering &&
-            !get().isTeam1Answering &&
-            !get().isTeam2Answering)
+            !get().teams.some((team) => team.isAnswering))
         )
       )
         return;
       // The game master cannot answer
       if (gamepadIndex === 0) return;
-      const can1Ans = get().canTeam1Answer;
-      const can2Ans = get().canTeam2Answer;
+      const foundTeam = get().teams.find((team) => team.id === gamepadIndex);
+      if (!foundTeam) return;
       // If team 1 pressed the button
-      if (gamepadIndex === 1) {
-        // if they can't answer, return
-        if (!can1Ans) return;
+      if (foundTeam.canAnswer) {
         // if they can answer, set that they're answering
         // if the other team has answered, reset to allow either to answer later
         // else just prevent the same team from answering until the other team answers
-        set({
+        //
+        const answerableTeams = get().teams.filter((team) => team.canAnswer);
+        // if the length of the answerable teams is 1, then that means only this
+        // team can answer and is answering so reset to allow any team to answer
+        if (answerableTeams.length === 1) {
+          set((state) => ({
+            stage: GameStage.Answering,
+            isPaused: true,
+            teams: state.teams.map((team) =>
+              // if the team is the one that just pressed, set them to be answering
+              // set all to be able to answer
+              team.id === gamepadIndex
+                ? { ...team, isAnswering: true, canAnswer: true }
+                : { ...team, canAnswer: true }
+            ),
+          }));
+        }
+        // else there are still other teams that can answer
+        set((state) => ({
           stage: GameStage.Answering,
           isPaused: true,
-          isTeam1Answering: true,
-          isTeam2Answering: false,
-          canTeam1Answer: !can2Ans,
-          canTeam2Answer: true,
-        });
-      }
-      if (gamepadIndex === 2) {
-        if (!can2Ans) return;
-        set({
-          stage: GameStage.Answering,
-          isPaused: true,
-          isTeam1Answering: false,
-          isTeam2Answering: true,
-          canTeam1Answer: true,
-          canTeam2Answer: !can1Ans,
-        });
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex
+              ? // if the team is the one that just pressed, set them to be answering
+                // set this team to not be able to answer again and don't mess with the others
+                { ...team, isAnswering: true, canAnswer: false }
+              : team
+          ),
+        }));
       }
     },
     correctAnswer: () => {

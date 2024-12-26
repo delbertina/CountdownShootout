@@ -12,13 +12,12 @@ export interface TeamOptionsProps {
 
 const TeamOptions = (props: TeamOptionsProps) => {
     const selectTeamColor = useGameStore((state) => state.selectTeamColor);
-    // TODO: update this & state to use arrays to make this dynamic for 2+ teams
-    const teamTheme = useGameStore((state) => props.teamId === 1 ? state.team1Theme : state.team2Theme);
+    const teamTheme = useGameStore((state) => state.teams.filter((team) => team.id === props.teamId)[0].theme);
       const teamThemeIndex = useMemo(
         () => Object.values(TeamTheme).indexOf(teamTheme),
         [teamTheme]
       );
-    const selectedTeamThemes = useGameStore((state) => props.teamId === 1 ? [state.team2Theme] : [state.team1Theme]);
+    const selectedTeamThemes = useGameStore((state) => state.teams.filter((team) => team.id !== props.teamId).map((team) => team.theme));
     const teamThemesFiltered = useMemo(
         () => Object.values(TeamTheme).filter((theme) => !selectedTeamThemes.includes(theme)),
         [selectedTeamThemes]

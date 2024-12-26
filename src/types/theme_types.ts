@@ -66,3 +66,5 @@ export const getUnShadedClass = (type: TeamTheme) => {
 }
 
 export const totalThemes = Object.values(TeamTheme).length;
+
+export const TeamThemeIndexed = Object.values(TeamTheme).map((theme, index) => ({ theme, index }));

@@ -14,8 +14,7 @@ const DebugDialog = () => {
   const currentGame = useGameStore((state) => state.currentGame);
   const selectedButtonCol = useGameStore((state) => state.tempButtonCol);
   const selectedButtonRow = useGameStore((state) => state.tempButtonRow);
-  const team1ScoreHistory = useGameStore((state) => state.team1ScoreHistory);
-  const team2ScoreHistory = useGameStore((state) => state.team2ScoreHistory);
+  const teamsScoreHistory = useGameStore((state) => state.teams.map(team => team.scoreHistory));
   const isDebugOpen = useGameStore((state) => state.isDebugOpen);
   const toggleDebugDialog = useGameStore((state) => state.toggleDebugDialog);
 
@@ -30,8 +29,9 @@ const DebugDialog = () => {
         </DialogHeader>
         <div>Stage: "{gameStage}"</div>
         <div>Current Question: {currentQuestion} / {currentGame?.questions.length??"No Game Selected"}</div>
-        <div>Team 1 Score History: {JSON.stringify(team1ScoreHistory)}</div>
-        <div>Team 2 Score History: {JSON.stringify(team2ScoreHistory)}</div>
+        {teamsScoreHistory.map((scoreHistory, i) => (
+          <div key={i}>Team {i + 1} Score History: {JSON.stringify(scoreHistory)}</div>
+        ))}
         <div className="flex flex-col">
           <div className="flex flex-col gap-2">
             {ButtonData.map((buttonRow, i) => (
