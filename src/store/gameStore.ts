@@ -303,46 +303,51 @@ export const useGameStore = create<GameState>()(
     },
     correctAnswer: () => {
       const stage = get().stage;
-      if (stage !== GameStage.Scoring && stage !== GameStage.Answering) return;
+      if (stage !== GameStage.Answering) return;
       set((state) => ({
         stage: GameStage.Scoring,
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory,
-          state.isTeam1Answering ? 1 : 0,
-        ],
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory,
-          state.isTeam2Answering ? 1 : 0,
-        ],
-        canTeam1Answer: false,
-        canTeam2Answer: false,
+        teams: state.teams.map((team) => ({
+          ...team,
+          isAnswering: false,
+          scoreHistory: [...team.scoreHistory, team.isAnswering ? 1 : 0],
+        })),
       }));
     },
     incorrectAnswer: () => {
       const stage = get().stage;
       if (stage !== GameStage.Answering) return;
+      const canAnswerTeams = get().teams.filter((team) => team.canAnswer);
       set((state) =>
         // if it's sudden death
         state.isSuddenDeath
-          ? // if both teams have answered
-            !state.canTeam1Answer && !state.canTeam2Answer
-            ? // advance to the next stage
+          ? // if all teams have answered
+            canAnswerTeams.length === 0
+            ? // advance to the next stage & add 0 entry for each team score
               {
                 stage: GameStage.Scoring,
-                isTeam1Answering: false,
-                isTeam2Answering: false,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: false,
+                  scoreHistory: [...team.scoreHistory, 0],
+                })),
               }
-            : // else, stay and let the other team answer
+            : // else, stay and let the other teams answer
+            canAnswerTeams.length === 1
+            ? // if only one team can answer, they are now answering
               {
                 stage: GameStage.Answering,
-                // whichever team is left able to answer is now answering
-                isTeam1Answering: state.canTeam1Answer,
-                isTeam2Answering: state.canTeam2Answer,
-                // after this, neither team can answer again since it's sudden death
-                // so if the other teams answers incorrectly,
-                // it will hit the previous if statement and continue to scoring
-                canTeam1Answer: false,
-                canTeam2Answer: false,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: team.canAnswer,
+                })),
+              }
+            : // else there are still multiple teams that can answer
+              {
+                stage: GameStage.Answering,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: false,
+                })),
               }
           : // else just an incorrect answer during video playback
             {
@@ -360,8 +365,11 @@ export const useGameStore = create<GameState>()(
         stage: GameStage.Answering,
         isPaused: true,
         isSuddenDeath: true,
-        canTeam1Answer: true,
-        canTeam2Answer: true,
+        teams: get().teams.map((team) => ({
+          ...team,
+          isAnswering: false,
+          canAnswer: true,
+        })),
       });
     },
     updateLastVideoTime: (time: number) => {
@@ -377,8 +385,10 @@ export const useGameStore = create<GameState>()(
         case GameStage.Waiting:
           set({
             stage: GameStage.Playing,
-            canTeam1Answer: true,
-            canTeam2Answer: true,
+            teams: get().teams.map((team) => ({
+              ...team,
+              canAnswer: true,
+            })),
             isPaused: false,
           });
           break;
@@ -388,8 +398,10 @@ export const useGameStore = create<GameState>()(
         case GameStage.Answering:
           set({
             stage: GameStage.Scoring,
-            canTeam1Answer: false,
-            canTeam2Answer: false,
+            teams: get().teams.map((team) => ({
+              ...team,
+              canAnswer: false,
+            })),
             isPaused: true,
           });
           break;
