@@ -8,38 +8,37 @@ import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import DebugDialog from "./components/debug-dialog";
 import TeamOptionsPage from "./pages/team-options-page";
+import { getTeamDisplayName } from "./types/state_types";
 
 const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const { toast } = useToast();
-  const lastTeam1Press = useGameStore((state) => state.lastTeam1Press);
-  const lastTeam2Press = useGameStore((state) => state.lastTeam2Press);
-  const team1Theme = useGameStore((state) => state.team1Theme);
-  const team2Theme = useGameStore((state) => state.team2Theme);
+  const teamLastPresses = useGameStore((state) =>
+    state.teams.map((team) => ({ teamId: team.id, lastPress: team.lastPress }))
+  );
+  const teams = useGameStore((state) => state.teams);
 
-  const throwToast = (isTeam1: boolean) => {
+  const throwToast = (teamId: number) => {
+    const foundTeam = teams.find((team) => team.id === teamId);
+    if (!foundTeam) return;
     toast({
-      title: isTeam1
-        ? team1Theme + " Team Buzzed"
-        : team2Theme + " Team Buzzed",
-      variant: isTeam1 ? team1Theme : team2Theme,
+      title: getTeamDisplayName(foundTeam) + " Buzzed",
+      variant: foundTeam.theme,
     });
   };
 
   useEffect(() => {
-    if (lastTeam1Press > 0) {
-      throwToast(true);
+    const maxTeamPress = Math.max(
+      ...teamLastPresses.map((team) => team.lastPress)
+    );
+    if (teamLastPresses.some((team) => team.lastPress > 0)) {
+      throwToast(
+        teamLastPresses.find((team) => team.lastPress === maxTeamPress)!.teamId
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastTeam1Press]);
-
-  useEffect(() => {
-    if (lastTeam2Press > 0) {
-      throwToast(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastTeam2Press]);
+  }, [teamLastPresses]);
 
   // Only run the effect once - React 18 dev mode bug that they don't think is a bug
   const effectRan = useRef(false);

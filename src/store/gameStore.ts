@@ -3,66 +3,13 @@ import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
-
-// Partial game state for reset question
-interface GameStatePartialQuestion {
-  stage: GameStage;
-  lastVideoTime: number;
-  isSuddenDeath: boolean;
-}
-
-// Partial game state for reset game
-interface GameStatePartial extends GameStatePartialQuestion {
-  questionId: number;
-  isPaused: boolean;
-}
-
-const newGameQuestionState: GameStatePartialQuestion = {
-  stage: GameStage.Waiting,
-  lastVideoTime: 0,
-  isSuddenDeath: false,
-};
-
-const newGameState: GameStatePartial = {
-  questionId: 0,
-  isPaused: true,
-  ...newGameQuestionState,
-};
-
-interface TeamState {
-  id: number;
-  name: string;
-  theme: TeamTheme;
-  // default to false to use theme color as name
-  isUsingCustomName: boolean;
-  scoreHistory: number[];
-  lastPress: number;
-  canAnswer: boolean;
-  isAnswering: boolean;
-}
-
-const initialTeamState: TeamState[] = [
-  {
-    id: 1,
-    name: "",
-    theme: TeamTheme.RED,
-    isUsingCustomName: false,
-    scoreHistory: [],
-    lastPress: 0,
-    canAnswer: false,
-    isAnswering: false,
-  },
-  {
-    id: 2,
-    name: "",
-    theme: TeamTheme.BLUE,
-    isUsingCustomName: false,
-    scoreHistory: [],
-    lastPress: 0,
-    canAnswer: false,
-    isAnswering: false,
-  },
-];
+import {
+  GameStatePartial,
+  initialTeamState,
+  newGameQuestionState,
+  newGameState,
+  TeamState,
+} from "../types/state_types";
 
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
@@ -103,11 +50,9 @@ interface GameState extends GameStatePartial {
   debugClearScore: () => void;
   debugRemoveScore: () => void;
   debugAddScore: () => void;
-  debugIncreaseRedScore: () => void;
-  debugDecreaseRedScore: () => void;
-  debugIncreaseBlueScore: () => void;
-  debugDecreaseBlueScore: () => void;
-  selectDebugButton: () => void;
+  debugIncreaseTeamScore: (teamId: number) => void;
+  debugDecreaseTeamScore: (teamId: number) => void;
+  selectDebugButton: (teamId?: number) => void;
   selectTeamColor: (teamId: number, team: TeamTheme) => void;
 }
 
@@ -470,14 +415,10 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         stage: GameStage.Waiting,
         questionId: state.questionId - 1,
-        team1ScoreHistory:
-          state.team1ScoreHistory.length >= state.questionId + 1
-            ? state.team1ScoreHistory.slice(0, -1)
-            : state.team1ScoreHistory,
-        team2ScoreHistory:
-          state.team2ScoreHistory.length >= state.questionId + 1
-            ? state.team2ScoreHistory.slice(0, -1)
-            : state.team2ScoreHistory,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: team.scoreHistory.slice(0, -1),
+        })),
       }));
     },
     debugForwardQuestion: () => {
@@ -489,65 +430,69 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         stage: GameStage.Waiting,
         questionId: state.questionId + 1,
-        team1ScoreHistory: [...state.team1ScoreHistory, 0],
-        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory, 0],
+        })),
       }));
     },
     debugClearScore: () => {
       set((state) => ({
-        team1ScoreHistory: [...state.team1ScoreHistory.slice(0, -1), 0],
-        team2ScoreHistory: [...state.team2ScoreHistory.slice(0, -1), 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory.slice(0, -1), 0],
+        })),
       }));
     },
     debugRemoveScore: () => {
       set((state) => ({
-        team1ScoreHistory: state.team1ScoreHistory.slice(0, -1),
-        team2ScoreHistory: state.team2ScoreHistory.slice(0, -1),
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: team.scoreHistory.slice(0, -1),
+        })),
       }));
     },
     debugAddScore: () => {
       set((state) => ({
-        team1ScoreHistory: [...state.team1ScoreHistory, 0],
-        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory, 0],
+        })),
       }));
     },
-    debugIncreaseRedScore: () => {
-      if (get().team1ScoreHistory.length === 0) return;
+    debugIncreaseTeamScore: (teamId: number) => {
+      const foundTeam = get().teams.find((team) => team.id === teamId);
+      if (!foundTeam || foundTeam.scoreHistory.length === 0) return;
       set((state) => ({
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory.slice(0, -1),
-          (state.team1ScoreHistory.at(-1) ?? 0) + 1,
-        ],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory:
+            team.id === teamId
+              ? [
+                  ...team.scoreHistory.slice(0, -1),
+                  (team.scoreHistory.at(-1) ?? 0) + 1,
+                ]
+              : team.scoreHistory,
+        })),
       }));
     },
-    debugDecreaseRedScore: () => {
-      if (get().team1ScoreHistory.length === 0) return;
+    debugDecreaseTeamScore: (teamId: number) => {
+      const foundTeam = get().teams.find((team) => team.id === teamId);
+      if (!foundTeam || foundTeam.scoreHistory.length === 0) return;
       set((state) => ({
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory.slice(0, -1),
-          (state.team1ScoreHistory.at(-1) ?? 0) - 1,
-        ],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory:
+            team.id === teamId
+              ? [
+                  ...team.scoreHistory.slice(0, -1),
+                  (team.scoreHistory.at(-1) ?? 0) - 1,
+                ]
+              : team.scoreHistory,
+        })),
       }));
     },
-    debugIncreaseBlueScore: () => {
-      if (get().team2ScoreHistory.length === 0) return;
-      set((state) => ({
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory.slice(0, -1),
-          (state.team2ScoreHistory.at(-1) ?? 0) + 1,
-        ],
-      }));
-    },
-    debugDecreaseBlueScore: () => {
-      if (get().team2ScoreHistory.length === 0) return;
-      set((state) => ({
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory.slice(0, -1),
-          (state.team2ScoreHistory.at(-1) ?? 0) - 1,
-        ],
-      }));
-    },
-    selectDebugButton: () => {
+    selectDebugButton: (teamId?: number) => {
       const selectedButton =
         ButtonData[get().tempButtonRow][get().tempButtonCol];
       switch (selectedButton) {
@@ -575,17 +520,12 @@ export const useGameStore = create<GameState>()(
         case DebugButton.ADD_SCORE:
           get().debugAddScore();
           break;
-        case DebugButton.INCREASE_RED_SCORE:
-          get().debugIncreaseRedScore();
+        case DebugButton.INCREASE_TEAM_SCORE:
+          get().debugIncreaseTeamScore(teamId ?? 0);
           break;
-        case DebugButton.DECREASE_RED_SCORE:
-          get().debugDecreaseRedScore();
+        case DebugButton.DECREASE_TEAM_SCORE:
+          get().debugDecreaseTeamScore(teamId ?? 0);
           break;
-        case DebugButton.INCREASE_BLUE_SCORE:
-          get().debugIncreaseBlueScore();
-          break;
-        case DebugButton.DECREASE_BLUE_SCORE:
-          get().debugDecreaseBlueScore();
           break;
         case DebugButton.CLOSE:
           get().toggleDebugDialog();
@@ -595,19 +535,21 @@ export const useGameStore = create<GameState>()(
       }
     },
     selectTeamColor: (teamId, theme) => {
-      if (teamId === 1 && get().team2Theme !== theme) {
-        set(() => ({
-          team1Theme: theme,
-          // Pop up the toast
-          lastTeam1Press: Date.now(),
-        }));
-      }
-      if (teamId === 2 && get().team1Theme !== theme) {
-        set(() => ({
-          team2Theme: theme,
-          lastTeam2Press: Date.now(),
-        }));
-      }
+      const otherSelectedThemes = get()
+        .teams.filter((team) => team.id !== teamId)
+        .map((team) => team.theme);
+      const foundTeam = get().teams.find((team) => team.id === teamId);
+      // if the team doesn't exist or the theme is already selected, do nothing
+      if (!foundTeam) return;
+      if (otherSelectedThemes.includes(theme)) return;
+
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          theme: team.id === teamId ? theme : team.theme,
+          lastPress: team.id === teamId ? Date.now() : team.lastPress,
+        })),
+      }));
     },
   }))
 );
