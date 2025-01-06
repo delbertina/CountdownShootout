@@ -19,18 +19,8 @@ const GamePlayPage = () => {
     (state) => state.updateLastVideoTime
   );
   const lastVideoTime = useGameStore((state) => state.lastVideoTime);
-  const isTeam1Answering = useGameStore((state) => state.isTeam1Answering);
-  const isTeam2Answering = useGameStore((state) => state.isTeam2Answering);
-  const canTeam1Answer = useGameStore((state) => state.canTeam1Answer);
-  const canTeam2Answer = useGameStore((state) => state.canTeam2Answer);
-  const team1ScoreHistory = useGameStore((state) =>
-    state.team1ScoreHistory.reduce((sum, current) => sum + current, 0)
-  );
-  const team2ScoreHistory = useGameStore((state) =>
-    state.team2ScoreHistory.reduce((sum, current) => sum + current, 0)
-  );
-  const team1Theme = useGameStore((state) => state.team1Theme);
-  const team2Theme = useGameStore((state) => state.team2Theme);
+  const teams = useGameStore((state) => state.teams.map((team) => ({ ...team, scoreHistory: team.scoreHistory.reduce((sum, current) => sum + current, 0) })));
+  const canAnswer = useGameStore((state) => state.teams.filter((team) => !!team.canAnswer).map((team) => team.id));
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -53,26 +43,7 @@ const GamePlayPage = () => {
   return (
     <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
       <GameHeader
-        leftIndicatorText="BUZZER"
-        leftIndicatorTheme={team1Theme}
-        leftIndicatorIsShaded={
-          canTeam1Answer &&
-          ((isSuddenDeath && !isTeam1Answering && !isTeam2Answering) ||
-            (gameStage === GameStage.Playing &&
-              !isTeam1Answering &&
-              !isTeam2Answering))
-        }
-        leftIndicatorScore={team1ScoreHistory}
-        rightIndicatorText="BUZZER"
-        rightIndicatorTheme={team2Theme}
-        rightIndicatorIsShaded={
-          canTeam2Answer &&
-          ((isSuddenDeath && !isTeam2Answering && !isTeam1Answering) ||
-            (gameStage === GameStage.Playing &&
-              !isTeam2Answering &&
-              !isTeam1Answering))
-        }
-        rightIndicatorScore={team2ScoreHistory}
+        indicatorText="BUZZER"
         headerTitle={currentGame?.title ?? ""}
         headerSubtitle={questionId + 1 + "/" + currentGame?.questions.length}
       />
