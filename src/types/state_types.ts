@@ -26,12 +26,15 @@ const newGameState: GameStatePartial = {
   ...newGameQuestionState,
 };
 
-interface TeamState {
+interface TeamStatePartial {
   id: number;
   name: string;
   theme: TeamTheme;
   // default to false to use theme color as name
   isUsingCustomName: boolean;
+}
+
+interface TeamState extends TeamStatePartial {
   scoreHistory: number[];
   lastPress: number;
   canAnswer: boolean;
@@ -61,7 +64,7 @@ const initialTeamState: TeamState[] = [
   },
 ];
 
-const getTeamDisplayName = (team: TeamState) =>
+const getTeamDisplayName = (team: TeamStatePartial) =>
   team.isUsingCustomName
     ? team.name
       ? team.name

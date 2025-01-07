@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import GameHeader from "../components/game-header";
@@ -6,6 +6,7 @@ import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { GameStage } from "../types/game_types";
+import { getTeamDisplayName } from "../types/state_types";
 
 const GamePlayPage = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -19,8 +20,22 @@ const GamePlayPage = () => {
     (state) => state.updateLastVideoTime
   );
   const lastVideoTime = useGameStore((state) => state.lastVideoTime);
-  const teams = useGameStore((state) => state.teams.map((team) => ({ ...team, scoreHistory: team.scoreHistory.reduce((sum, current) => sum + current, 0) })));
-  const canAnswer = useGameStore((state) => state.teams.filter((team) => !!team.canAnswer).map((team) => team.id));
+  const teams = useGameStore((state) =>
+    state.teams.map((team) => ({
+      ...team,
+      scoreHistory: team.scoreHistory.reduce(
+        (sum, current) => sum + current,
+        0
+      ),
+    }))
+  );
+  const maxScore = useMemo(
+    () => Math.max(...teams.map((team) => team.scoreHistory)),
+    [teams]
+  );
+  const isAnswering = useGameStore((state) =>
+    state.teams.some((team) => !!team.isAnswering)
+  );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -87,30 +102,7 @@ const GamePlayPage = () => {
           <Dialog open={gameStage !== GameStage.Playing}>
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
               <GameHeader
-                leftIndicatorText="BUZZER"
-                leftIndicatorTheme={team1Theme}
-                leftIndicatorIsShaded={
-                  canTeam1Answer &&
-                  ((gameStage === GameStage.Answering &&
-                    !isTeam1Answering &&
-                    !isTeam2Answering) ||
-                    (gameStage === GameStage.Playing &&
-                      !isTeam1Answering &&
-                      !isTeam2Answering))
-                }
-                leftIndicatorScore={team1ScoreHistory}
-                rightIndicatorText="BUZZER"
-                rightIndicatorTheme={team2Theme}
-                rightIndicatorIsShaded={
-                  canTeam2Answer &&
-                  ((gameStage === GameStage.Answering &&
-                    !isTeam1Answering &&
-                    !isTeam2Answering) ||
-                    (gameStage === GameStage.Playing &&
-                      !isTeam1Answering &&
-                      !isTeam2Answering))
-                }
-                rightIndicatorScore={team2ScoreHistory}
+                indicatorText="BUZZER"
                 headerTitle={currentGame?.title ?? ""}
                 headerSubtitle={
                   questionId + 1 + "/" + currentGame?.questions.length
@@ -136,22 +128,24 @@ const GamePlayPage = () => {
                       <br />
                     </>
                   )}
-                  {isTeam1Answering && <h1>Red is Answering</h1>}
-                  {isTeam2Answering && <h1>Blue is Answering</h1>}
-                  {!isTeam1Answering && !isTeam2Answering && (
-                    <h1>Nobody is Answering ... ?</h1>
-                  )}
+                  {teams
+                    .filter((team) => !!team.canAnswer)
+                    .map((team) => (
+                      <h1>{getTeamDisplayName(team)} is answering</h1>
+                    ))}
+                  {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                   {/* timer for remaining time to answer */}
                 </div>
               )}
               {gameStage === GameStage.Scoring && (
                 <>
                   <div>
-                    {isTeam1Answering && <h1>Red is Correct</h1>}
-                    {isTeam2Answering && <h1>Blue is Correct</h1>}
-                    {!isTeam1Answering && !isTeam2Answering && (
-                      <h1>Nobody Won the Points</h1>
-                    )}
+                    {teams
+                      .filter((team) => !!team.canAnswer)
+                      .map((team) => (
+                        <h1>{getTeamDisplayName(team)} is correct</h1>
+                      ))}
+                    {!isAnswering && <h1>Nobody won the points</h1>}
                     {/* timer for remaining time before next stage */}
                   </div>
                   <hr />
@@ -165,15 +159,19 @@ const GamePlayPage = () => {
                 <div>
                   <h1>Game Over</h1>
                   <h2>
-                    {team1ScoreHistory > team2ScoreHistory
-                      ? "Red Won!"
-                      : team1ScoreHistory < team2ScoreHistory
-                      ? "Blue Won!"
-                      : "It's a Tie!"}
+                    {teams
+                      .filter((team) => team.scoreHistory === maxScore)
+                      .map((team) => (
+                        <h1>{getTeamDisplayName(team)} Won!</h1>
+                      ))}
                   </h2>
-                  Red Score: {team1ScoreHistory}
-                  <br />
-                  Blue Score: {team2ScoreHistory}
+                  {teams.map((team) => (
+                    <>
+                      <h1>{getTeamDisplayName(team)} Score: </h1>
+                      {team.scoreHistory}
+                      <br />
+                    </>
+                  ))}
                   {/* timer for remaining time before next stage */}
                 </div>
               )}
