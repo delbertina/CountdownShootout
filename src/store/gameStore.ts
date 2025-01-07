@@ -54,6 +54,8 @@ interface GameState extends GameStatePartial {
   debugDecreaseTeamScore: (teamId: number) => void;
   selectDebugButton: (teamId?: number) => void;
   selectTeamColor: (teamId: number, team: TeamTheme) => void;
+  addTeam: () => void;
+  removeTeam: (teamId: number) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -549,6 +551,34 @@ export const useGameStore = create<GameState>()(
           theme: team.id === teamId ? theme : team.theme,
           lastPress: team.id === teamId ? Date.now() : team.lastPress,
         })),
+      }));
+    },
+    addTeam: () => {
+      const selectedThemes = get().teams.map((team) => team.theme);
+      set((state) => ({
+        teams: [
+          ...state.teams,
+          {
+            id: Math.max(...state.teams.map((team) => team.id)) + 1,
+            name: "",
+            theme:
+              Object.values(TeamTheme).find(
+                (theme) => !selectedThemes.includes(theme)
+              ) ?? TeamTheme.RED,
+            isUsingCustomName: false,
+            scoreHistory: [],
+            lastPress: 0,
+            canAnswer: false,
+            isAnswering: false,
+          },
+        ],
+      }));
+    },
+    removeTeam: (teamId) => {
+      // if there's 2 (or less somehow) teams, we can't remove any
+      if (get().teams.length <= 2) return;
+      set((state) => ({
+        teams: state.teams.filter((team) => team.id !== teamId),
       }));
     },
   }))

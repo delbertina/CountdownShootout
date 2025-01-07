@@ -13,7 +13,7 @@ const HomePage = () => {
   return (
     <div className="welcome-screen whole-screen flex flex-col justify-center bg-slate-200">
       <h1 className="font-bold">Welcome to Countdown Shootout</h1>
-      <h2>This game currently requires 3 controllers to play.</h2>
+      <h2>This game requires 3+ controllers to play. One for the host & one for every team playing.</h2>
       <h2>
         This game requires "dom.gamepad.non_standard_events.enabled" to be
         enabled in about:config in Firefox
