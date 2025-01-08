@@ -13,18 +13,20 @@ export interface TeamOptionsProps {
 const TeamOptions = (props: TeamOptionsProps) => {
   const selectTeamColor = useGameStore((state) => state.selectTeamColor);
   const removeTeam = useGameStore((state) => state.removeTeam);
-  const teamTheme = useGameStore(
-    (state) => state.teams.filter((team) => team.id === props.teamId)[0].theme
+  const teams = useGameStore((state) => state.teams);
+  const teamTheme = useMemo(
+    () => teams.filter((team) => team.id === props.teamId)[0].theme,
+    [teams, props.teamId]
   );
   const teamThemeIndex = useMemo(
     () => Object.values(TeamTheme).indexOf(teamTheme),
     [teamTheme]
   );
-  const selectedTeamThemes = useGameStore((state) =>
-    state.teams
+  const selectedTeamThemes = useMemo(() =>
+    teams
       .filter((team) => team.id !== props.teamId)
       .map((team) => team.theme)
-  );
+  , [teams, props.teamId]);
   const teamThemesFiltered = useMemo(
     () =>
       Object.values(TeamTheme).filter(
@@ -75,7 +77,10 @@ const TeamOptions = (props: TeamOptionsProps) => {
         <Button onClick={() => rerollNames()}>
           <RefreshCw />
         </Button>
-        <Button onClick={() => removeTeam(props.teamId)}>
+        <Button
+          onClick={() => removeTeam(props.teamId)}
+          disabled={teams.length <= 2}
+        >
           <X />
         </Button>
       </div>
@@ -83,6 +88,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
         <div className="flex flex-row gap-4">
           {teamFirstNames.map((firstName, i) => (
             <Button
+              key={i}
               variant={teamFirstIndex === i ? "destructive" : "default"}
               onClick={() => setFirstName(i)}
             >
@@ -93,6 +99,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
         <div className="flex flex-row gap-4">
           {teamSecondNames.map((secondName, i) => (
             <Button
+              key={i}
               variant={teamSecondIndex === i ? "destructive" : "default"}
               onClick={() => setSecondName(i)}
             >
@@ -108,7 +115,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
         </Button>
         <div>
           {[true, false].map((isShaded) => (
-            <div className="flex flex-row flex-wrap justify-center">
+            <div key={isShaded ? 1 : 0} className="flex flex-row flex-wrap justify-center">
               {/* Display each of the color options */}
               {[
                 teamThemeIndex == 0 ? totalThemes - 1 : teamThemeIndex - 1,
@@ -118,6 +125,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
                 .map((index) => Object.values(TeamTheme)[index])
                 .map((theme) => (
                   <div
+                    key={theme}
                     className={
                       "padding-4 border-4 border-dashed " +
                       (teamTheme === theme

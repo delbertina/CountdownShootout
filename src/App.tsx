@@ -1,7 +1,7 @@
 import GamePlayPage from "./pages/game-play-page";
 import GameListPage from "./pages/game-list-page";
 import HomePage from "./pages/home-page";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import "./App.css";
 import { useGameStore } from "./store/gameStore";
 import { Toaster } from "./components/ui/toaster";
@@ -14,10 +14,10 @@ const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const { toast } = useToast();
-  const teamLastPresses = useGameStore((state) =>
-    state.teams.map((team) => ({ teamId: team.id, lastPress: team.lastPress }))
-  );
   const teams = useGameStore((state) => state.teams);
+  const teamLastPresses = useMemo(() =>
+    teams.map((team) => ({ teamId: team.id, lastPress: team.lastPress }))
+  , [teams]);
 
   const throwToast = (teamId: number) => {
     const foundTeam = teams.find((team) => team.id === teamId);

@@ -10,7 +10,7 @@ export interface ShadedIndicatorProps {
 const ShadedIndicator = (props: ShadedIndicatorProps) => {
   return (
     <div
-      onClick={props.onClick}
+      // onClick={props.onClick()}
       className={
         "flex-grow-0 flex-shrink-0 w-48 p-6 border-4 rounded-3xl font-bold text-2xl select-none cursor-pointer " +
         (props.isShaded
