@@ -22,11 +22,13 @@ const TeamOptions = (props: TeamOptionsProps) => {
     () => Object.values(TeamTheme).indexOf(teamTheme),
     [teamTheme]
   );
-  const selectedTeamThemes = useMemo(() =>
-    teams
-      .filter((team) => team.id !== props.teamId)
-      .map((team) => team.theme)
-  , [teams, props.teamId]);
+  const selectedTeamThemes = useMemo(
+    () =>
+      teams
+        .filter((team) => team.id !== props.teamId)
+        .map((team) => team.theme),
+    [teams, props.teamId]
+  );
   const teamThemesFiltered = useMemo(
     () =>
       Object.values(TeamTheme).filter(
@@ -78,6 +80,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
           <RefreshCw />
         </Button>
         <Button
+          variant={"destructive"}
           onClick={() => removeTeam(props.teamId)}
           disabled={teams.length <= 2}
         >
@@ -115,7 +118,10 @@ const TeamOptions = (props: TeamOptionsProps) => {
         </Button>
         <div>
           {[true, false].map((isShaded) => (
-            <div key={isShaded ? 1 : 0} className="flex flex-row flex-wrap justify-center">
+            <div
+              key={isShaded ? 1 : 0}
+              className="flex flex-row flex-wrap justify-center"
+            >
               {/* Display each of the color options */}
               {[
                 teamThemeIndex == 0 ? totalThemes - 1 : teamThemeIndex - 1,

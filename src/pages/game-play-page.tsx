@@ -20,22 +20,19 @@ const GamePlayPage = () => {
     (state) => state.updateLastVideoTime
   );
   const lastVideoTime = useGameStore((state) => state.lastVideoTime);
-  const teams = useGameStore((state) =>
-    state.teams.map((team) => ({
-      ...team,
-      scoreHistory: team.scoreHistory.reduce(
-        (sum, current) => sum + current,
-        0
-      ),
-    }))
-  );
+  const teams = useGameStore((state) => state.teams);
   const maxScore = useMemo(
-    () => Math.max(...teams.map((team) => team.scoreHistory)),
+    () =>
+      Math.max(
+        ...teams.map((team) =>
+          team.scoreHistory.reduce((sum, current) => sum + current, 0)
+        )
+      ),
     [teams]
   );
-  const isAnswering = useGameStore((state) =>
-    state.teams.some((team) => !!team.isAnswering)
-  );
+  const isAnswering = useMemo(() =>
+    teams.some((team) => !!team.isAnswering)
+  ,[teams]);
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -160,7 +157,13 @@ const GamePlayPage = () => {
                   <h1>Game Over</h1>
                   <h2>
                     {teams
-                      .filter((team) => team.scoreHistory === maxScore)
+                      .filter(
+                        (team) =>
+                          team.scoreHistory.reduce(
+                            (sum, current) => sum + current,
+                            0
+                          ) === maxScore
+                      )
                       .map((team) => (
                         <h1>{getTeamDisplayName(team)} Won!</h1>
                       ))}
@@ -168,7 +171,10 @@ const GamePlayPage = () => {
                   {teams.map((team) => (
                     <>
                       <h1>{getTeamDisplayName(team)} Score: </h1>
-                      {team.scoreHistory}
+                      {team.scoreHistory.reduce(
+                        (sum, current) => sum + current,
+                        0
+                      )}
                       <br />
                     </>
                   ))}

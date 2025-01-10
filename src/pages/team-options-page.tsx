@@ -8,7 +8,11 @@ const TeamOptionsPage = () => {
   return (
     <div className="whole-screen flex flex-col gap-4 justify-center bg-slate-300">
       <h1 className="font-bold">Team Options</h1>
-      <Button onClick={() => addTeam()}>Add Team</Button>
+      <div>
+        <Button onClick={() => addTeam()} disabled={teams.length >= 8}>
+          Add Team
+        </Button>
+      </div>
       <h2>Select team name & color</h2>
       <hr />
       {/* Display the same section for each team */}

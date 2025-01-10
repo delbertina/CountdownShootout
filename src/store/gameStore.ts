@@ -555,6 +555,10 @@ export const useGameStore = create<GameState>()(
     },
     addTeam: () => {
       const selectedThemes = get().teams.map((team) => team.theme);
+      const teamLen = selectedThemes.length;
+      // Limit it to 8 teams to avoid having to test more & having to add more colors
+      if (teamLen >= 8) return;
+      
       set((state) => ({
         teams: [
           ...state.teams,
