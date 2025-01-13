@@ -15,9 +15,11 @@ const App = () => {
   const gamepadButtonPress = useGameStore((state) => state.gamepadButtonPress);
   const { toast } = useToast();
   const teams = useGameStore((state) => state.teams);
-  const teamLastPresses = useMemo(() =>
-    teams.map((team) => ({ teamId: team.id, lastPress: team.lastPress }))
-  , [teams]);
+  const teamLastPresses = useMemo(
+    () => teams.map((team) => ({ teamId: team.id, lastPress: team.lastPress })),
+    [teams]
+  );
+  const lastToastTime = useRef(0);
 
   const throwToast = (teamId: number) => {
     const foundTeam = teams.find((team) => team.id === teamId);
@@ -32,10 +34,14 @@ const App = () => {
     const maxTeamPress = Math.max(
       ...teamLastPresses.map((team) => team.lastPress)
     );
-    if (teamLastPresses.some((team) => team.lastPress > 0)) {
+    if (
+      maxTeamPress > lastToastTime.current &&
+      teamLastPresses.some((team) => team.lastPress > 0)
+    ) {
       throwToast(
         teamLastPresses.find((team) => team.lastPress === maxTeamPress)!.teamId
       );
+      lastToastTime.current = maxTeamPress;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamLastPresses]);

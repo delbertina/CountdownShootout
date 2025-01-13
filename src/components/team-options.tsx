@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, RefreshCw, X } from "lucide-react";
-import { TeamTheme, totalThemes } from "../types/theme_types";
+import { TeamTheme } from "../types/theme_types";
 import { Button } from "./ui/button";
 import { getFirstNames, getSecondNames } from "../data/name_data";
 import { useMemo, useState } from "react";
@@ -18,10 +18,6 @@ const TeamOptions = (props: TeamOptionsProps) => {
     () => teams.filter((team) => team.id === props.teamId)[0].theme,
     [teams, props.teamId]
   );
-  const teamThemeIndex = useMemo(
-    () => Object.values(TeamTheme).indexOf(teamTheme),
-    [teamTheme]
-  );
   const selectedTeamThemes = useMemo(
     () =>
       teams
@@ -35,6 +31,11 @@ const TeamOptions = (props: TeamOptionsProps) => {
         (theme) => !selectedTeamThemes.includes(theme)
       ),
     [selectedTeamThemes]
+  );
+  const totalThemes = useMemo(() => teamThemesFiltered.length, [teamThemesFiltered]);
+  const teamThemeIndex = useMemo(
+    () => Object.values(teamThemesFiltered).indexOf(teamTheme),
+    [teamThemesFiltered, teamTheme]
   );
   const [teamFirstNames, setTeamFirstNames] = useState(getFirstNames(3));
   const [teamSecondNames, setTeamSecondNames] = useState(getSecondNames(3));
@@ -128,7 +129,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
                 teamThemeIndex,
                 (teamThemeIndex + 1) % totalThemes,
               ]
-                .map((index) => Object.values(TeamTheme)[index])
+                .map((index) => Object.values(teamThemesFiltered)[index])
                 .map((theme) => (
                   <div
                     key={theme}
