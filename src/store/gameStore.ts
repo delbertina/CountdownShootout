@@ -20,8 +20,9 @@ interface GameState extends GameStatePartial {
   isPaused: boolean;
   lastStageChangeTime: number;
   isSuddenDeath: boolean;
-  tempButtonCol: number;
-  tempButtonRow: number;
+  debugButtonCol: number;
+  debugButtonRow: number;
+  debugTeamSelector: number;
   isDebugOpen: boolean;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
@@ -50,9 +51,11 @@ interface GameState extends GameStatePartial {
   debugClearScore: () => void;
   debugRemoveScore: () => void;
   debugAddScore: () => void;
-  debugIncreaseTeamScore: (teamId: number) => void;
-  debugDecreaseTeamScore: (teamId: number) => void;
-  selectDebugButton: (teamId?: number) => void;
+  debugIncreaseTeamSelector: () => void;
+  debugDecreaseTeamSelector: () => void;
+  debugIncreaseTeamScore: () => void;
+  debugDecreaseTeamScore: () => void;
+  selectDebugButton: () => void;
   selectTeamColor: (teamId: number, team: TeamTheme) => void;
   addTeam: () => void;
   removeTeam: (teamId: number) => void;
@@ -64,8 +67,9 @@ export const useGameStore = create<GameState>()(
     teams: initialTeamState,
     ...newGameState,
     lastStageChangeTime: 0,
-    tempButtonCol: 0,
-    tempButtonRow: 0,
+    debugButtonCol: 0,
+    debugButtonRow: 0,
+    debugTeamSelector: 0,
     isDebugOpen: false,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
@@ -135,31 +139,31 @@ export const useGameStore = create<GameState>()(
     arrowRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonCol:
-          state.tempButtonCol === ButtonData[0].length - 1
+        debugButtonCol:
+          state.debugButtonCol === ButtonData[0].length - 1
             ? ButtonData[0].length - 1
-            : state.tempButtonCol + 1,
+            : state.debugButtonCol + 1,
       }));
     },
     arrowLeft: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonCol: state.tempButtonCol === 0 ? 0 : state.tempButtonCol - 1,
+        debugButtonCol: state.debugButtonCol === 0 ? 0 : state.debugButtonCol - 1,
       }));
     },
     arrowUp: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonRow: state.tempButtonRow === 0 ? 0 : state.tempButtonRow - 1,
+        debugButtonRow: state.debugButtonRow === 0 ? 0 : state.debugButtonRow - 1,
       }));
     },
     arrowDown: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonRow:
-          state.tempButtonRow === ButtonData.length - 1
+        debugButtonRow:
+          state.debugButtonRow === ButtonData.length - 1
             ? ButtonData.length - 1
-            : state.tempButtonRow + 1,
+            : state.debugButtonRow + 1,
       }));
     },
     gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => {
@@ -395,15 +399,25 @@ export const useGameStore = create<GameState>()(
             : state.isPaused,
       })),
     debugAbandonQuiz: () => {
-      set(() => ({
+      console.log("Abandoning quiz & clearing team state. Previous: ", get().teams);
+      set((state) => ({
         ...newGameState,
         currentGame: undefined,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [],
+        }))
       }));
     },
     debugRestartQuiz: () => {
       if (!get().currentGame) return;
-      set(() => ({
+      console.log("Restarting quiz & clearing team state. Previous: ", get().teams);
+      set((state) => ({
         ...newGameState,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [],
+        }))
       }));
     },
     debugScoreQuiz: () => {
@@ -462,30 +476,40 @@ export const useGameStore = create<GameState>()(
         })),
       }));
     },
-    debugIncreaseTeamScore: (teamId: number) => {
-      const foundTeam = get().teams.find((team) => team.id === teamId);
-      if (!foundTeam || foundTeam.scoreHistory.length === 0) return;
+    debugIncreaseTeamSelector() {
       set((state) => ({
-        teams: state.teams.map((team) => ({
+        debugTeamSelector: (state.debugTeamSelector + 1) % state.teams.length,
+      }));
+    },
+    debugDecreaseTeamSelector() {
+      set((state) => ({
+        debugTeamSelector:
+          (state.debugTeamSelector - 1 + state.teams.length) %
+          state.teams.length,
+      }));
+    },
+    debugIncreaseTeamScore: () => {
+      const selectedTeam = get().debugTeamSelector;
+      set((state) => ({
+        teams: [...state.teams.map((team, i) => ({
           ...team,
           scoreHistory:
-            team.id === teamId
+            i === selectedTeam
               ? [
                   ...team.scoreHistory.slice(0, -1),
                   (team.scoreHistory.at(-1) ?? 0) + 1,
                 ]
               : team.scoreHistory,
-        })),
+        }))],
       }));
     },
-    debugDecreaseTeamScore: (teamId: number) => {
-      const foundTeam = get().teams.find((team) => team.id === teamId);
-      if (!foundTeam || foundTeam.scoreHistory.length === 0) return;
+    debugDecreaseTeamScore: () => {
+      const selectedTeam = get().debugTeamSelector;
       set((state) => ({
-        teams: state.teams.map((team) => ({
+        teams: state.teams.map((team, i) => ({
           ...team,
           scoreHistory:
-            team.id === teamId
+            i === selectedTeam
               ? [
                   ...team.scoreHistory.slice(0, -1),
                   (team.scoreHistory.at(-1) ?? 0) - 1,
@@ -494,9 +518,9 @@ export const useGameStore = create<GameState>()(
         })),
       }));
     },
-    selectDebugButton: (teamId?: number) => {
+    selectDebugButton: () => {
       const selectedButton =
-        ButtonData[get().tempButtonRow][get().tempButtonCol];
+        ButtonData[get().debugButtonRow][get().debugButtonCol];
       switch (selectedButton) {
         case DebugButton.ABANDON_QUIZ:
           get().debugAbandonQuiz();
@@ -522,11 +546,17 @@ export const useGameStore = create<GameState>()(
         case DebugButton.ADD_SCORE:
           get().debugAddScore();
           break;
+        case DebugButton.INCREASE_TEAM_SELECTOR:
+          get().debugIncreaseTeamSelector();
+          break;
+        case DebugButton.DECREASE_TEAM_SELECTOR:
+          get().debugDecreaseTeamSelector();
+          break;
         case DebugButton.INCREASE_TEAM_SCORE:
-          get().debugIncreaseTeamScore(teamId ?? 0);
+          get().debugIncreaseTeamScore();
           break;
         case DebugButton.DECREASE_TEAM_SCORE:
-          get().debugDecreaseTeamScore(teamId ?? 0);
+          get().debugDecreaseTeamScore();
           break;
           break;
         case DebugButton.CLOSE:

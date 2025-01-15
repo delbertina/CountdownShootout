@@ -27,6 +27,8 @@ export enum DebugButton {
   CLEAR_SCORE = "Clear Last Score",
   REMOVE_SCORE = "Remove Last Score",
   ADD_SCORE = "Add New Score",
+  INCREASE_TEAM_SELECTOR = "Team Selector +1",
+  DECREASE_TEAM_SELECTOR = "Team Selector -1",
   INCREASE_TEAM_SCORE = "Last Score +1",
   DECREASE_TEAM_SCORE = "Last Score -1",
   CLOSE = "X",
@@ -37,14 +39,9 @@ export const ButtonData: DebugButton[][] = [
   [DebugButton.BACK_QUESTION, DebugButton.CLOSE, DebugButton.FORWARD_QUESTION],
   [DebugButton.CLEAR_SCORE, DebugButton.REMOVE_SCORE, DebugButton.ADD_SCORE],
   [
-    DebugButton.INCREASE_TEAM_SCORE,
-    DebugButton.CLOSE,
     DebugButton.DECREASE_TEAM_SCORE,
-  ],
-  [
+    DebugButton.INCREASE_TEAM_SELECTOR,
     DebugButton.INCREASE_TEAM_SCORE,
-    DebugButton.CLOSE,
-    DebugButton.DECREASE_TEAM_SCORE,
   ],
 ];
 
