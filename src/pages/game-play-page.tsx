@@ -53,7 +53,7 @@ const GamePlayPage = () => {
     startSuddenDeath();
   };
   return (
-    <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-8">
+    <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
       <GameHeader
         indicatorText="BUZZER"
         headerTitle={currentGame?.title ?? ""}
@@ -61,9 +61,8 @@ const GamePlayPage = () => {
       />
       {gameQuestion && (
         <>
-          <div className="flex flex-col items-center gap-4 flex-grow h-full">
-            <h2>{gameQuestion.questionText}</h2>
-            <div className="flex-grow flex flex-row justify-center w-full">
+          <div className="flex flex-col items-center justify-between gap-4 flex-grow h-full w-[70%]">
+            <div className="flex-grow flex flex-row w-full">
               <ReactPlayer
                 key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
                 playing={!isPaused}
@@ -72,7 +71,7 @@ const GamePlayPage = () => {
                 onEnded={() => handleVideoEnd()}
                 onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
                 className="react-player"
-                width="80%"
+                width="100%"
                 url={
                   "https://www.youtube.com/watch?v=" +
                   gameQuestion.videoYouTubeID
@@ -126,7 +125,7 @@ const GamePlayPage = () => {
                     </>
                   )}
                   {teams
-                    .filter((team) => !!team.canAnswer)
+                    .filter((team) => !!team.isAnswering)
                     .map((team) => (
                       <h1>{getTeamDisplayName(team)} is answering</h1>
                     ))}
@@ -138,7 +137,7 @@ const GamePlayPage = () => {
                 <>
                   <div>
                     {teams
-                      .filter((team) => !!team.canAnswer)
+                      .filter((team) => !!team.isAnswering)
                       .map((team) => (
                         <h1>{getTeamDisplayName(team)} is correct</h1>
                       ))}
