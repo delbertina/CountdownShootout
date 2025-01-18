@@ -7,6 +7,8 @@ import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { GameStage } from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
+import ShadedIndicator from "../components/shaded-indicator";
+import { padNumber } from "../lib/utils";
 
 const GamePlayPage = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -30,9 +32,10 @@ const GamePlayPage = () => {
       ),
     [teams]
   );
-  const isAnswering = useMemo(() =>
-    teams.some((team) => !!team.isAnswering)
-  ,[teams]);
+  const isAnswering = useMemo(
+    () => teams.some((team) => !!team.isAnswering),
+    [teams]
+  );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
@@ -54,45 +57,118 @@ const GamePlayPage = () => {
   };
   return (
     <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
-      <GameHeader
+      {/* <GameHeader
         indicatorText="BUZZER"
         headerTitle={currentGame?.title ?? ""}
         headerSubtitle={questionId + 1 + "/" + currentGame?.questions.length}
-      />
+      /> */}
       {gameQuestion && (
         <>
-          <div className="flex flex-col items-center justify-between gap-4 flex-grow h-full w-[70%]">
-            <div className="flex-grow flex flex-row w-full">
-              <ReactPlayer
-                key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
-                playing={!isPaused}
-                controls={false}
-                progressInterval={500}
-                onEnded={() => handleVideoEnd()}
-                onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
-                className="react-player"
-                width="100%"
-                url={
-                  "https://www.youtube.com/watch?v=" +
-                  gameQuestion.videoYouTubeID
-                }
-                config={{
-                  youtube: {
-                    playerVars: {
-                      // start and end need a whole number
-                      start: !lastVideoTime
-                        ? Math.floor(gameQuestion.videoStartTime)
-                        : Math.floor(lastVideoTime),
-                      end: Math.floor(gameQuestion.videoEndTime),
-                      rel: 0,
-                    },
-                  },
-                }}
-              ></ReactPlayer>
+          <div className="flex flex-row h-full w-full gap-4 grow">
+            <div className="flex flex-col gap-4">
+              {teams
+                .filter((_team, i) => i % 2 === 0)
+                .map((team) => (
+                  <div className="flex flex-row gap-4">
+                    <ShadedIndicator
+                      text={"BUZZER"}
+                      theme={team.theme}
+                      isShaded={
+                        // if the team can answer,
+                        // nobody is answering currently,
+                        // and it's either sudden death or the playing stage
+                        team.canAnswer &&
+                        !isAnswering &&
+                        (isSuddenDeath || gameStage === GameStage.Playing)
+                      }
+                    />
+                    <div className="text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                      <h1>
+                        {padNumber(team.scoreHistory.reduce(
+                          (sum, current) => sum + current,
+                          0
+                        ), 2)}
+                      </h1>
+                    </div>
+                  </div>
+                ))}
             </div>
-            {/* timer for remaining time in video */}
-            <div className="flex-grow-0 w-full">
-              <Progress value={videoProgress} />
+            <div className="flex flex-col grow gap-4">
+              <div className="flex flex-col justify-between overflow-hidden grow-0">
+                <div className="font-bold text-xl truncate">
+                  <h2>{currentGame?.title ?? ""}</h2>
+                </div>
+                <div>
+                  <h2>
+                    {questionId + 1 + "/" + currentGame?.questions.length}
+                  </h2>
+                </div>
+                <div>
+                  <h2>{gameQuestion.questionText}</h2>
+                </div>
+              </div>
+              <div className="flex-grow flex flex-col justify-end w-full gap-4">
+              <div>
+                <ReactPlayer
+                  key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
+                  playing={!isPaused}
+                  controls={false}
+                  progressInterval={500}
+                  onEnded={() => handleVideoEnd()}
+                  onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
+                  className="react-player"
+                  width="100%"
+                  url={
+                    "https://www.youtube.com/watch?v=" +
+                    gameQuestion.videoYouTubeID
+                  }
+                  config={{
+                    youtube: {
+                      playerVars: {
+                        // start and end need a whole number
+                        start: !lastVideoTime
+                          ? Math.floor(gameQuestion.videoStartTime)
+                          : Math.floor(lastVideoTime),
+                        end: Math.floor(gameQuestion.videoEndTime),
+                        rel: 0,
+                      },
+                    },
+                  }}
+                ></ReactPlayer>
+              </div>
+              {/* timer for remaining time in video */}
+              <div className="flex-grow-0 w-full">
+                <Progress value={videoProgress} />
+              </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {teams
+                .filter((_team, i) => i % 2 === 1)
+                .map((team) => (
+                  <div className="flex flex-row gap-4">
+                    <div className="text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                      <h1>
+                        {padNumber(team.scoreHistory.reduce(
+                          (sum, current) => sum + current,
+                          0
+                        ), 2)}
+                      </h1>
+                    </div>
+                    <ShadedIndicator
+                      text={"BUZZER"}
+                      theme={team.theme}
+                      isShaded={
+                        // if the team can answer,
+                        // nobody is answering currently,
+                        // and it's either sudden death or the playing stage
+                        team.canAnswer &&
+                        !isAnswering &&
+                        (isSuddenDeath || gameStage === GameStage.Playing)
+                      }
+                    />
+                  </div>
+                ))}
             </div>
           </div>
           <Dialog open={gameStage !== GameStage.Playing}>
