@@ -6,13 +6,12 @@ import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { GameStage } from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
-import GameHeaderLeft from "../components/ui/header/game-header-side";
-import GameHeaderTop from "../components/ui/header/game-header-top";
+import { GameHeader } from "../components/ui/game-header";
 
 const GamePlayPage = () => {
-  const currentGame = useGameStore((state) => state.currentGame);
+  // const currentGame = useGameStore((state) => state.currentGame);
   const gameStage = useGameStore((state) => state.stage);
-  const questionId = useGameStore((state) => state.questionId);
+  // const questionId = useGameStore((state) => state.questionId);
   const gameQuestion = useGameStore(
     (state) => state.currentGame?.questions[state.questionId]
   );
@@ -58,22 +57,8 @@ const GamePlayPage = () => {
     <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
       {gameQuestion && (
         <>
-          <div className="flex flex-row h-full w-full gap-4 grow">
-            <GameHeaderLeft
-              isLeft={true}
-              teams={teams.filter((_team, i) => i % 2 === 0)}
-              isAnswering={isAnswering}
-              isSuddenDeath={isSuddenDeath}
-              gameStage={gameStage}
-            />
-            <div className="flex flex-col grow gap-4">
-              <GameHeaderTop
-                headerTitle={currentGame?.title ?? ""}
-                headerSubtitle={
-                  questionId + 1 + "/" + currentGame?.questions.length
-                }
-                headerBody={gameQuestion.questionText}
-              />
+          <GameHeader
+            content={
               <div className="flex-grow flex flex-col justify-end w-full gap-4">
                 <div>
                   <ReactPlayer
@@ -108,119 +93,93 @@ const GamePlayPage = () => {
                   <Progress value={videoProgress} />
                 </div>
               </div>
-            </div>
-            <GameHeaderLeft
-              isLeft={true}
-              teams={teams.filter((_team, i) => i % 2 === 1)}
-              isAnswering={isAnswering}
-              isSuddenDeath={isSuddenDeath}
-              gameStage={gameStage}
-            />
-          </div>
+            }
+          ></GameHeader>
           <Dialog open={gameStage !== GameStage.Playing}>
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
-              <div className="flex flex-row h-full w-full gap-4 grow">
-                <GameHeaderLeft
-                  isLeft={true}
-                  teams={teams.filter((_team, i) => i % 2 === 0)}
-                  isAnswering={isAnswering}
-                  isSuddenDeath={isSuddenDeath}
-                  gameStage={gameStage}
-                />
-                <div className="flex flex-col grow gap-4">
-                  <GameHeaderTop
-                    headerTitle={currentGame?.title ?? ""}
-                    headerSubtitle={
-                      questionId + 1 + "/" + currentGame?.questions.length
-                    }
-                    headerBody={gameQuestion.questionText}
-                  />
-                  {gameStage === GameStage.Waiting && (
-                    <div>
-                      <h1>{gameQuestion.questionText}</h1>
-                      <h2>
-                        {gameQuestion.videoEndTime -
-                          gameQuestion.videoStartTime}{" "}
-                        seconds
-                      </h2>
-                      {/* timer for remaining time before question starts */}
-                    </div>
-                  )}
-                  {gameStage === GameStage.Answering && (
-                    <div>
-                      {isSuddenDeath && (
-                        <>
-                          <h1>SUDDEN DEATH</h1>
-                          <br />
-                          <hr />
-                          <br />
-                        </>
-                      )}
-                      {teams
-                        .filter((team) => !!team.isAnswering)
-                        .map((team) => (
-                          <h1>{getTeamDisplayName(team)} is answering</h1>
-                        ))}
-                      {!isAnswering && <h1>Nobody is answering ... ?</h1>}
-                      {/* timer for remaining time to answer */}
-                    </div>
-                  )}
-                  {gameStage === GameStage.Scoring && (
-                    <>
+              <GameHeader
+                content={
+                  <>
+                    {gameStage === GameStage.Waiting && (
                       <div>
+                        <h1>{gameQuestion.questionText}</h1>
+                        <h2>
+                          {gameQuestion.videoEndTime -
+                            gameQuestion.videoStartTime}{" "}
+                          seconds
+                        </h2>
+                        {/* timer for remaining time before question starts */}
+                      </div>
+                    )}
+                    {gameStage === GameStage.Answering && (
+                      <div>
+                        {isSuddenDeath && (
+                          <>
+                            <h1>SUDDEN DEATH</h1>
+                            <br />
+                            <hr />
+                            <br />
+                          </>
+                        )}
                         {teams
                           .filter((team) => !!team.isAnswering)
                           .map((team) => (
-                            <h1>{getTeamDisplayName(team)} is correct</h1>
+                            <h1>{getTeamDisplayName(team)} is answering</h1>
                           ))}
-                        {!isAnswering && <h1>Nobody won the points</h1>}
+                        {!isAnswering && <h1>Nobody is answering ... ?</h1>}
+                        {/* timer for remaining time to answer */}
+                      </div>
+                    )}
+                    {gameStage === GameStage.Scoring && (
+                      <>
+                        <div>
+                          {teams
+                            .filter((team) => !!team.isAnswering)
+                            .map((team) => (
+                              <h1>{getTeamDisplayName(team)} is correct</h1>
+                            ))}
+                          {!isAnswering && <h1>Nobody won the points</h1>}
+                          {/* timer for remaining time before next stage */}
+                        </div>
+                        <hr />
+                        <div>
+                          <h1>{gameQuestion.answer}</h1>
+                          <h2>{gameQuestion.answerSubtext}</h2>
+                        </div>
+                      </>
+                    )}
+                    {gameStage === GameStage.Ending && (
+                      <div>
+                        <h1>Game Over</h1>
+                        <h2>
+                          {teams
+                            .filter(
+                              (team) =>
+                                team.scoreHistory.reduce(
+                                  (sum, current) => sum + current,
+                                  0
+                                ) === maxScore
+                            )
+                            .map((team) => (
+                              <h1>{getTeamDisplayName(team)} Won!</h1>
+                            ))}
+                        </h2>
+                        {teams.map((team) => (
+                          <>
+                            <h1>{getTeamDisplayName(team)} Score: </h1>
+                            {team.scoreHistory.reduce(
+                              (sum, current) => sum + current,
+                              0
+                            )}
+                            <br />
+                          </>
+                        ))}
                         {/* timer for remaining time before next stage */}
                       </div>
-                      <hr />
-                      <div>
-                        <h1>{gameQuestion.answer}</h1>
-                        <h2>{gameQuestion.answerSubtext}</h2>
-                      </div>
-                    </>
-                  )}
-                  {gameStage === GameStage.Ending && (
-                    <div>
-                      <h1>Game Over</h1>
-                      <h2>
-                        {teams
-                          .filter(
-                            (team) =>
-                              team.scoreHistory.reduce(
-                                (sum, current) => sum + current,
-                                0
-                              ) === maxScore
-                          )
-                          .map((team) => (
-                            <h1>{getTeamDisplayName(team)} Won!</h1>
-                          ))}
-                      </h2>
-                      {teams.map((team) => (
-                        <>
-                          <h1>{getTeamDisplayName(team)} Score: </h1>
-                          {team.scoreHistory.reduce(
-                            (sum, current) => sum + current,
-                            0
-                          )}
-                          <br />
-                        </>
-                      ))}
-                      {/* timer for remaining time before next stage */}
-                    </div>
-                  )}
-                </div>
-                <GameHeaderLeft
-                  isLeft={true}
-                  teams={teams.filter((_team, i) => i % 2 === 1)}
-                  isAnswering={isAnswering}
-                  isSuddenDeath={isSuddenDeath}
-                  gameStage={gameStage}
-                />
-              </div>
+                    )}
+                  </>
+                }
+              ></GameHeader>
             </DialogContent>
           </Dialog>
         </>
