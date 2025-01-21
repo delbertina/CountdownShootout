@@ -1,10 +1,18 @@
-import { ChevronLeft, ChevronRight, RefreshCw, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Power,
+  PowerOff,
+  RefreshCw,
+  X,
+} from "lucide-react";
 import { TeamTheme } from "../types/theme_types";
 import { Button } from "./ui/button";
 import { getFirstNames, getSecondNames } from "../data/name_data";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import ShadedIndicator from "./shaded-indicator";
+import { getTeamDisplayName } from "../types/state_types";
 
 export interface TeamOptionsProps {
   teamId: number;
@@ -13,9 +21,13 @@ export interface TeamOptionsProps {
 const TeamOptions = (props: TeamOptionsProps) => {
   const selectTeamColor = useGameStore((state) => state.selectTeamColor);
   const removeTeam = useGameStore((state) => state.removeTeam);
+  const toggleTeamCustomName = useGameStore(
+    (state) => state.toggleTeamCustomName
+  );
+  const setTeamCustomName = useGameStore((state) => state.setTeamCustomName);
   const teams = useGameStore((state) => state.teams);
-  const teamTheme = useMemo(
-    () => teams.filter((team) => team.id === props.teamId)[0].theme,
+  const selectedTeam = useMemo(
+    () => teams.filter((team) => team.id === props.teamId)[0],
     [teams, props.teamId]
   );
   const selectedTeamThemes = useMemo(
@@ -32,15 +44,19 @@ const TeamOptions = (props: TeamOptionsProps) => {
       ),
     [selectedTeamThemes]
   );
-  const totalThemes = useMemo(() => teamThemesFiltered.length, [teamThemesFiltered]);
+  const totalThemes = useMemo(
+    () => teamThemesFiltered.length,
+    [teamThemesFiltered]
+  );
   const teamThemeIndex = useMemo(
-    () => Object.values(teamThemesFiltered).indexOf(teamTheme),
-    [teamThemesFiltered, teamTheme]
+    () => Object.values(teamThemesFiltered).indexOf(selectedTeam.theme),
+    [teamThemesFiltered, selectedTeam]
   );
   const [teamFirstNames, setTeamFirstNames] = useState(getFirstNames(3));
   const [teamSecondNames, setTeamSecondNames] = useState(getSecondNames(3));
   const [teamFirstIndex, setTeamFirstIndex] = useState(0);
   const [teamSecondIndex, setTeamSecondIndex] = useState(0);
+  const didMount = useRef(false);
 
   const rerollNames = () => {
     setTeamFirstNames(getFirstNames(3));
@@ -73,13 +89,29 @@ const TeamOptions = (props: TeamOptionsProps) => {
     );
   };
 
+  const getTeamCustomName = (
+  ): string => {
+    return (
+      "The " +
+      (teamFirstNames[teamFirstIndex]) +
+      " " +
+      (teamSecondNames[teamSecondIndex])
+    );
+  };
+
+  useEffect(() => {
+    // Return early, if this is the first render:
+    if ( !didMount.current ) {
+      didMount.current = true;
+      return;
+    }
+    setTeamCustomName(props.teamId, getTeamCustomName());
+  }, [teamFirstIndex, teamSecondIndex]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-center gap-4">
-        <h2>{teamTheme} Team</h2>
-        <Button onClick={() => rerollNames()}>
-          <RefreshCw />
-        </Button>
+        <h2>{getTeamDisplayName(selectedTeam)}</h2>
         <Button
           variant={"destructive"}
           onClick={() => removeTeam(props.teamId)}
@@ -89,27 +121,42 @@ const TeamOptions = (props: TeamOptionsProps) => {
         </Button>
       </div>
       <div className="flex flex-col gap-4 items-center">
-        <div className="flex flex-row gap-4">
-          {teamFirstNames.map((firstName, i) => (
-            <Button
-              key={i}
-              variant={teamFirstIndex === i ? "destructive" : "default"}
-              onClick={() => setFirstName(i)}
-            >
-              {firstName}
-            </Button>
-          ))}
-        </div>
-        <div className="flex flex-row gap-4">
-          {teamSecondNames.map((secondName, i) => (
-            <Button
-              key={i}
-              variant={teamSecondIndex === i ? "destructive" : "default"}
-              onClick={() => setSecondName(i)}
-            >
-              {secondName}
-            </Button>
-          ))}
+        <div className="flex flex-row items-center gap-4">
+          <Button
+            variant={selectedTeam.isUsingCustomName ? "destructive" : "default"}
+            onClick={() =>
+              toggleTeamCustomName(props.teamId, getTeamCustomName())
+            }
+          >
+            {selectedTeam.isUsingCustomName ? <Power /> : <PowerOff />}
+          </Button>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-row gap-4">
+              {teamFirstNames.map((firstName, i) => (
+                <Button
+                  key={i}
+                  variant={teamFirstIndex === i ? "destructive" : "default"}
+                  onClick={() => setFirstName(i)}
+                >
+                  {firstName}
+                </Button>
+              ))}
+            </div>
+            <div className="flex flex-row gap-4">
+              {teamSecondNames.map((secondName, i) => (
+                <Button
+                  key={i}
+                  variant={teamSecondIndex === i ? "destructive" : "default"}
+                  onClick={() => setSecondName(i)}
+                >
+                  {secondName}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <Button onClick={() => rerollNames()}>
+            <RefreshCw />
+          </Button>
         </div>
       </div>
       {/* Display a row of both the shaded and unshaded indicators */}
@@ -135,7 +182,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
                     key={theme}
                     className={
                       "padding-4 border-4 border-dashed " +
-                      (teamTheme === theme
+                      (selectedTeam.theme === theme
                         ? "border-black bg-gray-500"
                         : "border-transparent")
                     }

@@ -57,6 +57,8 @@ interface GameState extends GameStatePartial {
   debugDecreaseTeamScore: () => void;
   selectDebugButton: () => void;
   selectTeamColor: (teamId: number, team: TeamTheme) => void;
+  toggleTeamCustomName: (teamId: number, customName?: string) => void;
+  setTeamCustomName: (teamId: number, customName: string) => void;
   addTeam: () => void;
   removeTeam: (teamId: number) => void;
 }
@@ -148,13 +150,15 @@ export const useGameStore = create<GameState>()(
     arrowLeft: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        debugButtonCol: state.debugButtonCol === 0 ? 0 : state.debugButtonCol - 1,
+        debugButtonCol:
+          state.debugButtonCol === 0 ? 0 : state.debugButtonCol - 1,
       }));
     },
     arrowUp: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        debugButtonRow: state.debugButtonRow === 0 ? 0 : state.debugButtonRow - 1,
+        debugButtonRow:
+          state.debugButtonRow === 0 ? 0 : state.debugButtonRow - 1,
       }));
     },
     arrowDown: (gamepadIndex: number) => {
@@ -399,25 +403,31 @@ export const useGameStore = create<GameState>()(
             : state.isPaused,
       })),
     debugAbandonQuiz: () => {
-      console.log("Abandoning quiz & clearing team state. Previous: ", get().teams);
+      console.log(
+        "Abandoning quiz & clearing team state. Previous: ",
+        get().teams
+      );
       set((state) => ({
         ...newGameState,
         currentGame: undefined,
         teams: state.teams.map((team) => ({
           ...team,
           scoreHistory: [],
-        }))
+        })),
       }));
     },
     debugRestartQuiz: () => {
       if (!get().currentGame) return;
-      console.log("Restarting quiz & clearing team state. Previous: ", get().teams);
+      console.log(
+        "Restarting quiz & clearing team state. Previous: ",
+        get().teams
+      );
       set((state) => ({
         ...newGameState,
         teams: state.teams.map((team) => ({
           ...team,
           scoreHistory: [],
-        }))
+        })),
       }));
     },
     debugScoreQuiz: () => {
@@ -491,16 +501,18 @@ export const useGameStore = create<GameState>()(
     debugIncreaseTeamScore: () => {
       const selectedTeam = get().debugTeamSelector;
       set((state) => ({
-        teams: [...state.teams.map((team, i) => ({
-          ...team,
-          scoreHistory:
-            i === selectedTeam
-              ? [
-                  ...team.scoreHistory.slice(0, -1),
-                  (team.scoreHistory.at(-1) ?? 0) + 1,
-                ]
-              : team.scoreHistory,
-        }))],
+        teams: [
+          ...state.teams.map((team, i) => ({
+            ...team,
+            scoreHistory:
+              i === selectedTeam
+                ? [
+                    ...team.scoreHistory.slice(0, -1),
+                    (team.scoreHistory.at(-1) ?? 0) + 1,
+                  ]
+                : team.scoreHistory,
+          })),
+        ],
       }));
     },
     debugDecreaseTeamScore: () => {
@@ -583,12 +595,37 @@ export const useGameStore = create<GameState>()(
         })),
       }));
     },
+    toggleTeamCustomName: (teamId, customName) => {
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          name:
+            team.id === teamId && !team.isUsingCustomName && customName
+              ? customName
+              : team.name,
+          isUsingCustomName:
+            team.id === teamId
+              ? !team.isUsingCustomName
+              : team.isUsingCustomName,
+        })),
+      }));
+    },
+    setTeamCustomName: (teamId, customName) => {
+      if (!customName) return;
+      console.log("set team name", teamId, customName);
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          name: team.id === teamId ? customName : team.name,
+        })),
+      }));
+    },
     addTeam: () => {
       const selectedThemes = get().teams.map((team) => team.theme);
       const teamLen = selectedThemes.length;
       // Limit it to 8 teams to avoid having to test more & having to add more colors
       if (teamLen >= 8) return;
-      
+
       set((state) => ({
         teams: [
           ...state.teams,
