@@ -6,7 +6,7 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import { TeamTheme } from "../types/theme_types";
+import { ShadedIndicatorVariant, TeamTheme } from "../types/theme_types";
 import { Button } from "./ui/button";
 import { getFirstNames, getSecondNames } from "../data/name_data";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -92,7 +92,6 @@ const TeamOptions = (props: TeamOptionsProps) => {
   const getTeamCustomName = (
   ): string => {
     return (
-      "The " +
       (teamFirstNames[teamFirstIndex]) +
       " " +
       (teamSecondNames[teamSecondIndex])
@@ -106,10 +105,11 @@ const TeamOptions = (props: TeamOptionsProps) => {
       return;
     }
     setTeamCustomName(props.teamId, getTeamCustomName());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamFirstIndex, teamSecondIndex]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div className="flex flex-row justify-center gap-4">
         <h2>{getTeamDisplayName(selectedTeam)}</h2>
         <Button
@@ -120,8 +120,8 @@ const TeamOptions = (props: TeamOptionsProps) => {
           <X />
         </Button>
       </div>
-      <div className="flex flex-col gap-4 items-center">
-        <div className="flex flex-row items-center gap-4">
+      <div className="flex flex-col items-center">
+        <div className="flex flex-row items-center gap-2">
           <Button
             variant={selectedTeam.isUsingCustomName ? "destructive" : "default"}
             onClick={() =>
@@ -130,8 +130,8 @@ const TeamOptions = (props: TeamOptionsProps) => {
           >
             {selectedTeam.isUsingCustomName ? <Power /> : <PowerOff />}
           </Button>
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex flex-row gap-4">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-row gap-2">
               {teamFirstNames.map((firstName, i) => (
                 <Button
                   key={i}
@@ -142,7 +142,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
                 </Button>
               ))}
             </div>
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-2">
               {teamSecondNames.map((secondName, i) => (
                 <Button
                   key={i}
@@ -160,12 +160,12 @@ const TeamOptions = (props: TeamOptionsProps) => {
         </div>
       </div>
       {/* Display a row of both the shaded and unshaded indicators */}
-      <div className="flex flex-row items-center gap-4">
-        <Button className="h-full" onClick={() => decreaseThemeIndex()}>
+      <div className="flex flex-row items-center">
+        <Button size={"sm"} className="h-full" onClick={() => decreaseThemeIndex()}>
           <ChevronLeft />
         </Button>
         <div>
-          {[true, false].map((isShaded) => (
+          {[true].map((isShaded) => (
             <div
               key={isShaded ? 1 : 0}
               className="flex flex-row flex-wrap justify-center"
@@ -191,6 +191,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
                       text={theme}
                       theme={theme}
                       isShaded={isShaded}
+                      variant={ShadedIndicatorVariant.SKINNY}
                       onClick={() =>
                         useGameStore
                           .getState()
@@ -202,7 +203,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
             </div>
           ))}
         </div>
-        <Button className="h-full" onClick={() => increaseThemeIndex()}>
+        <Button size={"sm"} className="h-full" onClick={() => increaseThemeIndex()}>
           <ChevronRight />
         </Button>
       </div>

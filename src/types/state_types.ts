@@ -65,11 +65,12 @@ const initialTeamState: TeamState[] = [
 ];
 
 const getTeamDisplayName = (team: TeamStatePartial) =>
-  team.isUsingCustomName
+  "The " +
+  (team.isUsingCustomName
     ? team.name
       ? team.name
-      : "Team " + (team.id + 1)
-    : team.theme + " Team";
+      : (team.id + 1) + " Team"
+    : team.theme + " Team");
 
 export {
   newGameState,
