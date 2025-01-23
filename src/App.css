@@ -16,3 +16,31 @@
   height: auto !important;
   aspect-ratio: 16/9;
 }
+
+
+.button-container {
+  position: relative;
+  display: flex;
+  width: fit-content;
+}
+.front-button {
+  left: 20px;
+  position: absolute;
+  z-index: 2;
+}
+.back-button {
+  right: 20px;
+  position: absolute;
+  z-index: 2;
+}
+.inner-buttons {
+  --mask: linear-gradient(to right, 
+      rgba(0,0,0, 0) 1%,
+      rgba(0,0,0, 1) 30%, 
+      rgba(0,0,0, 1) 0,
+      rgba(0,0,0, 1) 70%, 
+      rgba(0,0,0, 0) 99%
+  );
+  -webkit-mask: var(--mask); 
+  mask: var(--mask);
+}

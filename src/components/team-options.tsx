@@ -160,15 +160,15 @@ const TeamOptions = (props: TeamOptionsProps) => {
         </div>
       </div>
       {/* Display a row of both the shaded and unshaded indicators */}
-      <div className="flex flex-row items-center">
-        <Button size={"sm"} className="h-full" onClick={() => decreaseThemeIndex()}>
+      <div className="button-container">
+        <Button size={"sm"} className="h-full front-button" onClick={() => decreaseThemeIndex()}>
           <ChevronLeft />
         </Button>
         <div>
           {[true].map((isShaded) => (
             <div
               key={isShaded ? 1 : 0}
-              className="flex flex-row flex-wrap justify-center"
+              className="flex flex-row justify-center inner-buttons"
             >
               {/* Display each of the color options */}
               {[
@@ -203,7 +203,7 @@ const TeamOptions = (props: TeamOptionsProps) => {
             </div>
           ))}
         </div>
-        <Button size={"sm"} className="h-full" onClick={() => increaseThemeIndex()}>
+        <Button size={"sm"} className="h-full back-button" onClick={() => increaseThemeIndex()}>
           <ChevronRight />
         </Button>
       </div>
