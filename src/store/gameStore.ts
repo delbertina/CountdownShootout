@@ -263,7 +263,6 @@ export const useGameStore = create<GameState>()(
         stage: GameStage.Scoring,
         teams: state.teams.map((team) => ({
           ...team,
-          isAnswering: false,
           scoreHistory: [...team.scoreHistory, team.isAnswering ? 1 : 0],
         })),
       }));
@@ -308,8 +307,10 @@ export const useGameStore = create<GameState>()(
             {
               stage: GameStage.Playing,
               isPaused: false,
-              isTeam1Answering: false,
-              isTeam2Answering: false,
+              teams: state.teams.map((team) => ({
+                ...team,
+                isAnswering: false,
+              })),
             }
       );
     },
@@ -353,9 +354,11 @@ export const useGameStore = create<GameState>()(
         case GameStage.Answering:
           set({
             stage: GameStage.Scoring,
+            isSuddenDeath: false,
             teams: get().teams.map((team) => ({
               ...team,
-              canAnswer: false,
+              canAnswer: true,
+              isAnswering: false,
             })),
             isPaused: true,
           });
@@ -373,8 +376,6 @@ export const useGameStore = create<GameState>()(
                 {
                   stage: GameStage.Ending,
                   lastVideoTime: 0,
-                  isTeam1Answering: false,
-                  isTeam2Answering: false,
                   isSuddenDeath: false,
                 }
           );
