@@ -220,40 +220,42 @@ export const useGameStore = create<GameState>()(
       if (gamepadIndex === 0) return;
       const foundTeam = get().teams.find((team) => team.id === gamepadIndex);
       if (!foundTeam) return;
-      // If team 1 pressed the button
+      // If a team pressed the button
       if (foundTeam.canAnswer) {
         // if they can answer, set that they're answering
-        // if the other team has answered, reset to allow either to answer later
-        // else just prevent the same team from answering until the other team answers
+        // if all other team has answered, reset to allow either to answer later
+        // else just prevent the same team from answering until the other teams answer
         //
         const answerableTeams = get().teams.filter((team) => team.canAnswer);
         // if the length of the answerable teams is 1, then that means only this
         // team can answer and is answering so reset to allow any team to answer
         if (answerableTeams.length === 1) {
+            set((state) => ({
+              stage: GameStage.Answering,
+              isPaused: true,
+              teams: state.teams.map((team) =>
+                // if the team is the one that just pressed, set them to be answering
+                // set all to be able to answer
+                team.id === gamepadIndex
+                  ? { ...team, isAnswering: true, canAnswer: true }
+                  : { ...team, canAnswer: true }
+              ),
+            }));
+        }
+        // else there are still other teams that can answer
+        else {
           set((state) => ({
             stage: GameStage.Answering,
             isPaused: true,
             teams: state.teams.map((team) =>
-              // if the team is the one that just pressed, set them to be answering
-              // set all to be able to answer
               team.id === gamepadIndex
-                ? { ...team, isAnswering: true, canAnswer: true }
-                : { ...team, canAnswer: true }
+                ? // if the team is the one that just pressed, set them to be answering
+                  // set this team to not be able to answer again and don't mess with the others
+                  { ...team, isAnswering: true, canAnswer: false }
+                : team
             ),
           }));
         }
-        // else there are still other teams that can answer
-        set((state) => ({
-          stage: GameStage.Answering,
-          isPaused: true,
-          teams: state.teams.map((team) =>
-            team.id === gamepadIndex
-              ? // if the team is the one that just pressed, set them to be answering
-                // set this team to not be able to answer again and don't mess with the others
-                { ...team, isAnswering: true, canAnswer: false }
-              : team
-          ),
-        }));
       }
     },
     correctAnswer: () => {
@@ -293,6 +295,7 @@ export const useGameStore = create<GameState>()(
                 teams: state.teams.map((team) => ({
                   ...team,
                   isAnswering: team.canAnswer,
+                  canAnswer: false,
                 })),
               }
             : // else there are still multiple teams that can answer
@@ -355,11 +358,6 @@ export const useGameStore = create<GameState>()(
           set({
             stage: GameStage.Scoring,
             isSuddenDeath: false,
-            teams: get().teams.map((team) => ({
-              ...team,
-              canAnswer: true,
-              isAnswering: false,
-            })),
             isPaused: true,
           });
           break;
@@ -371,6 +369,11 @@ export const useGameStore = create<GameState>()(
                 {
                   ...newGameQuestionState,
                   questionId: state.questionId + 1,
+                  teams: get().teams.map((team) => ({
+                    ...team,
+                    canAnswer: true,
+                    isAnswering: false,
+                  })),
                 }
               : // if there are no more questions, end the game
                 {
