@@ -164,14 +164,14 @@ const GamePlayPage = () => {
                               <h1>{getTeamDisplayName(team)} Won!</h1>
                             ))}
                         </h2>
+                        <br />
                         {teams.map((team) => (
                           <>
-                            <h1>{getTeamDisplayName(team)} Score: </h1>
+                            <p>{getTeamDisplayName(team)}{": "}
                             {team.scoreHistory.reduce(
                               (sum, current) => sum + current,
                               0
-                            )}
-                            <br />
+                            )}</p>
                           </>
                         ))}
                         {/* timer for remaining time before next stage */}
