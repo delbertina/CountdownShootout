@@ -3,64 +3,26 @@ import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
-
-// Partial game state for reset question
-interface GameStatePartialQuestion {
-  stage: GameStage;
-  lastVideoTime: number;
-  canTeam1Answer: boolean;
-  canTeam2Answer: boolean;
-  isTeam1Answering: boolean;
-  isTeam2Answering: boolean;
-  isSuddenDeath: boolean;
-}
-
-// Partial game state for reset game
-interface GameStatePartial extends GameStatePartialQuestion {
-  questionId: number;
-  team1ScoreHistory: number[];
-  team2ScoreHistory: number[];
-  isPaused: boolean;
-}
-
-const newGameQuestionState: GameStatePartialQuestion = {
-  stage: GameStage.Waiting,
-  lastVideoTime: 0,
-  canTeam1Answer: false,
-  canTeam2Answer: false,
-  isTeam1Answering: false,
-  isTeam2Answering: false,
-  isSuddenDeath: false,
-};
-
-const newGameState: GameStatePartial = {
-  questionId: 0,
-  team1ScoreHistory: [],
-  team2ScoreHistory: [],
-  isPaused: true,
-  ...newGameQuestionState,
-};
+import {
+  GameStatePartial,
+  initialTeamState,
+  newGameQuestionState,
+  newGameState,
+  TeamState,
+} from "../types/state_types";
 
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
+  teams: TeamState[];
   questionId: number;
   lastVideoTime: number;
-  team1ScoreHistory: number[];
-  team2ScoreHistory: number[];
-  team1Theme: TeamTheme;
-  team2Theme: TeamTheme;
   stage: GameStage;
   isPaused: boolean;
   lastStageChangeTime: number;
-  lastTeam1Press: number;
-  lastTeam2Press: number;
-  canTeam1Answer: boolean;
-  canTeam2Answer: boolean;
-  isTeam1Answering: boolean;
-  isTeam2Answering: boolean;
   isSuddenDeath: boolean;
-  tempButtonCol: number;
-  tempButtonRow: number;
+  debugButtonCol: number;
+  debugButtonRow: number;
+  debugTeamSelector: number;
   isDebugOpen: boolean;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
@@ -89,34 +51,36 @@ interface GameState extends GameStatePartial {
   debugClearScore: () => void;
   debugRemoveScore: () => void;
   debugAddScore: () => void;
-  debugIncreaseRedScore: () => void;
-  debugDecreaseRedScore: () => void;
-  debugIncreaseBlueScore: () => void;
-  debugDecreaseBlueScore: () => void;
+  debugIncreaseTeamSelector: () => void;
+  debugDecreaseTeamSelector: () => void;
+  debugIncreaseTeamScore: () => void;
+  debugDecreaseTeamScore: () => void;
   selectDebugButton: () => void;
   selectTeamColor: (teamId: number, team: TeamTheme) => void;
+  toggleTeamCustomName: (teamId: number, customName?: string) => void;
+  setTeamCustomName: (teamId: number, customName: string) => void;
+  addTeam: () => void;
+  removeTeam: (teamId: number) => void;
 }
 
 export const useGameStore = create<GameState>()(
   devtools((set, get) => ({
     currentGame: undefined,
+    teams: initialTeamState,
     ...newGameState,
     lastStageChangeTime: 0,
-    lastTeam1Press: 0,
-    lastTeam2Press: 0,
-    team1Theme: TeamTheme.RED,
-    team2Theme: TeamTheme.BLUE,
-    tempButtonCol: 0,
-    tempButtonRow: 0,
+    debugButtonCol: 0,
+    debugButtonRow: 0,
+    debugTeamSelector: 0,
     isDebugOpen: false,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       }
@@ -128,11 +92,11 @@ export const useGameStore = create<GameState>()(
     },
     symbolLeft: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       }
@@ -140,11 +104,11 @@ export const useGameStore = create<GameState>()(
     },
     symbolUp: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
         return;
       } else {
@@ -155,11 +119,11 @@ export const useGameStore = create<GameState>()(
     symbolDown: (gamepadIndex: number) => {
       const stage = useGameStore.getState().stage;
       if (gamepadIndex !== 0) {
-        if (gamepadIndex === 1) {
-          set(() => ({ lastTeam1Press: Date.now() }));
-        } else if (gamepadIndex === 2) {
-          set(() => ({ lastTeam2Press: Date.now() }));
-        }
+        set((state) => ({
+          teams: state.teams.map((team) =>
+            team.id === gamepadIndex ? { ...team, lastPress: Date.now() } : team
+          ),
+        }));
         get().answerQuestion(gamepadIndex);
       } else {
         if (get().isDebugOpen) {
@@ -177,31 +141,33 @@ export const useGameStore = create<GameState>()(
     arrowRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonCol:
-          state.tempButtonCol === ButtonData[0].length - 1
+        debugButtonCol:
+          state.debugButtonCol === ButtonData[0].length - 1
             ? ButtonData[0].length - 1
-            : state.tempButtonCol + 1,
+            : state.debugButtonCol + 1,
       }));
     },
     arrowLeft: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonCol: state.tempButtonCol === 0 ? 0 : state.tempButtonCol - 1,
+        debugButtonCol:
+          state.debugButtonCol === 0 ? 0 : state.debugButtonCol - 1,
       }));
     },
     arrowUp: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonRow: state.tempButtonRow === 0 ? 0 : state.tempButtonRow - 1,
+        debugButtonRow:
+          state.debugButtonRow === 0 ? 0 : state.debugButtonRow - 1,
       }));
     },
     arrowDown: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) return;
       set((state) => ({
-        tempButtonRow:
-          state.tempButtonRow === ButtonData.length - 1
+        debugButtonRow:
+          state.debugButtonRow === ButtonData.length - 1
             ? ButtonData.length - 1
-            : state.tempButtonRow + 1,
+            : state.debugButtonRow + 1,
       }));
     },
     gamepadButtonPress: (e: { gamepad: Gamepad; button: number }) => {
@@ -246,92 +212,108 @@ export const useGameStore = create<GameState>()(
         !(
           stage === GameStage.Playing ||
           (stage === GameStage.Answering &&
-            !get().isTeam1Answering &&
-            !get().isTeam2Answering)
+            !get().teams.some((team) => team.isAnswering))
         )
       )
         return;
       // The game master cannot answer
       if (gamepadIndex === 0) return;
-      const can1Ans = get().canTeam1Answer;
-      const can2Ans = get().canTeam2Answer;
-      // If team 1 pressed the button
-      if (gamepadIndex === 1) {
-        // if they can't answer, return
-        if (!can1Ans) return;
+      const foundTeam = get().teams.find((team) => team.id === gamepadIndex);
+      if (!foundTeam) return;
+      // If a team pressed the button
+      if (foundTeam.canAnswer) {
         // if they can answer, set that they're answering
-        // if the other team has answered, reset to allow either to answer later
-        // else just prevent the same team from answering until the other team answers
-        set({
-          stage: GameStage.Answering,
-          isPaused: true,
-          isTeam1Answering: true,
-          isTeam2Answering: false,
-          canTeam1Answer: !can2Ans,
-          canTeam2Answer: true,
-        });
-      }
-      if (gamepadIndex === 2) {
-        if (!can2Ans) return;
-        set({
-          stage: GameStage.Answering,
-          isPaused: true,
-          isTeam1Answering: false,
-          isTeam2Answering: true,
-          canTeam1Answer: true,
-          canTeam2Answer: !can1Ans,
-        });
+        // if all other team has answered, reset to allow either to answer later
+        // else just prevent the same team from answering until the other teams answer
+        //
+        const answerableTeams = get().teams.filter((team) => team.canAnswer);
+        // if the length of the answerable teams is 1, then that means only this
+        // team can answer and is answering so reset to allow any team to answer
+        if (answerableTeams.length === 1) {
+            set((state) => ({
+              stage: GameStage.Answering,
+              isPaused: true,
+              teams: state.teams.map((team) =>
+                // if the team is the one that just pressed, set them to be answering
+                // set all to be able to answer
+                team.id === gamepadIndex
+                  ? { ...team, isAnswering: true, canAnswer: true }
+                  : { ...team, canAnswer: true }
+              ),
+            }));
+        }
+        // else there are still other teams that can answer
+        else {
+          set((state) => ({
+            stage: GameStage.Answering,
+            isPaused: true,
+            teams: state.teams.map((team) =>
+              team.id === gamepadIndex
+                ? // if the team is the one that just pressed, set them to be answering
+                  // set this team to not be able to answer again and don't mess with the others
+                  { ...team, isAnswering: true, canAnswer: false }
+                : team
+            ),
+          }));
+        }
       }
     },
     correctAnswer: () => {
       const stage = get().stage;
-      if (stage !== GameStage.Scoring && stage !== GameStage.Answering) return;
+      if (stage !== GameStage.Answering) return;
       set((state) => ({
         stage: GameStage.Scoring,
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory,
-          state.isTeam1Answering ? 1 : 0,
-        ],
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory,
-          state.isTeam2Answering ? 1 : 0,
-        ],
-        canTeam1Answer: false,
-        canTeam2Answer: false,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory, team.isAnswering ? 1 : 0],
+        })),
       }));
     },
     incorrectAnswer: () => {
       const stage = get().stage;
       if (stage !== GameStage.Answering) return;
+      const canAnswerTeams = get().teams.filter((team) => team.canAnswer);
       set((state) =>
         // if it's sudden death
         state.isSuddenDeath
-          ? // if both teams have answered
-            !state.canTeam1Answer && !state.canTeam2Answer
-            ? // advance to the next stage
+          ? // if all teams have answered
+            canAnswerTeams.length === 0
+            ? // advance to the next stage & add 0 entry for each team score
               {
                 stage: GameStage.Scoring,
-                isTeam1Answering: false,
-                isTeam2Answering: false,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: false,
+                  scoreHistory: [...team.scoreHistory, 0],
+                })),
               }
-            : // else, stay and let the other team answer
+            : // else, stay and let the other teams answer
+            canAnswerTeams.length === 1
+            ? // if only one team can answer, they are now answering
               {
                 stage: GameStage.Answering,
-                // whichever team is left able to answer is now answering
-                isTeam1Answering: state.canTeam1Answer,
-                isTeam2Answering: state.canTeam2Answer,
-                // after this, neither team can answer again since it's sudden death
-                // so if the other teams answers incorrectly,
-                // it will hit the previous if statement and continue to scoring
-                canTeam1Answer: false,
-                canTeam2Answer: false,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: team.canAnswer,
+                  canAnswer: false,
+                })),
+              }
+            : // else there are still multiple teams that can answer
+              {
+                stage: GameStage.Answering,
+                teams: state.teams.map((team) => ({
+                  ...team,
+                  isAnswering: false,
+                })),
               }
           : // else just an incorrect answer during video playback
             {
               stage: GameStage.Playing,
               isPaused: false,
-              isTeam1Answering: false,
-              isTeam2Answering: false,
+              teams: state.teams.map((team) => ({
+                ...team,
+                isAnswering: false,
+              })),
             }
       );
     },
@@ -342,8 +324,11 @@ export const useGameStore = create<GameState>()(
         stage: GameStage.Answering,
         isPaused: true,
         isSuddenDeath: true,
-        canTeam1Answer: true,
-        canTeam2Answer: true,
+        teams: get().teams.map((team) => ({
+          ...team,
+          isAnswering: false,
+          canAnswer: true,
+        })),
       });
     },
     updateLastVideoTime: (time: number) => {
@@ -359,8 +344,10 @@ export const useGameStore = create<GameState>()(
         case GameStage.Waiting:
           set({
             stage: GameStage.Playing,
-            canTeam1Answer: true,
-            canTeam2Answer: true,
+            teams: get().teams.map((team) => ({
+              ...team,
+              canAnswer: true,
+            })),
             isPaused: false,
           });
           break;
@@ -370,8 +357,7 @@ export const useGameStore = create<GameState>()(
         case GameStage.Answering:
           set({
             stage: GameStage.Scoring,
-            canTeam1Answer: false,
-            canTeam2Answer: false,
+            isSuddenDeath: false,
             isPaused: true,
           });
           break;
@@ -383,13 +369,16 @@ export const useGameStore = create<GameState>()(
                 {
                   ...newGameQuestionState,
                   questionId: state.questionId + 1,
+                  teams: get().teams.map((team) => ({
+                    ...team,
+                    canAnswer: true,
+                    isAnswering: false,
+                  })),
                 }
               : // if there are no more questions, end the game
                 {
                   stage: GameStage.Ending,
                   lastVideoTime: 0,
-                  isTeam1Answering: false,
-                  isTeam2Answering: false,
                   isSuddenDeath: false,
                 }
           );
@@ -418,15 +407,31 @@ export const useGameStore = create<GameState>()(
             : state.isPaused,
       })),
     debugAbandonQuiz: () => {
-      set(() => ({
+      console.log(
+        "Abandoning quiz & clearing team state. Previous: ",
+        get().teams
+      );
+      set((state) => ({
         ...newGameState,
         currentGame: undefined,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [],
+        })),
       }));
     },
     debugRestartQuiz: () => {
       if (!get().currentGame) return;
-      set(() => ({
+      console.log(
+        "Restarting quiz & clearing team state. Previous: ",
+        get().teams
+      );
+      set((state) => ({
         ...newGameState,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [],
+        })),
       }));
     },
     debugScoreQuiz: () => {
@@ -440,14 +445,10 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         stage: GameStage.Waiting,
         questionId: state.questionId - 1,
-        team1ScoreHistory:
-          state.team1ScoreHistory.length >= state.questionId + 1
-            ? state.team1ScoreHistory.slice(0, -1)
-            : state.team1ScoreHistory,
-        team2ScoreHistory:
-          state.team2ScoreHistory.length >= state.questionId + 1
-            ? state.team2ScoreHistory.slice(0, -1)
-            : state.team2ScoreHistory,
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: team.scoreHistory.slice(0, -1),
+        })),
       }));
     },
     debugForwardQuestion: () => {
@@ -459,67 +460,83 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         stage: GameStage.Waiting,
         questionId: state.questionId + 1,
-        team1ScoreHistory: [...state.team1ScoreHistory, 0],
-        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory, 0],
+        })),
       }));
     },
     debugClearScore: () => {
       set((state) => ({
-        team1ScoreHistory: [...state.team1ScoreHistory.slice(0, -1), 0],
-        team2ScoreHistory: [...state.team2ScoreHistory.slice(0, -1), 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory.slice(0, -1), 0],
+        })),
       }));
     },
     debugRemoveScore: () => {
       set((state) => ({
-        team1ScoreHistory: state.team1ScoreHistory.slice(0, -1),
-        team2ScoreHistory: state.team2ScoreHistory.slice(0, -1),
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: team.scoreHistory.slice(0, -1),
+        })),
       }));
     },
     debugAddScore: () => {
       set((state) => ({
-        team1ScoreHistory: [...state.team1ScoreHistory, 0],
-        team2ScoreHistory: [...state.team2ScoreHistory, 0],
+        teams: state.teams.map((team) => ({
+          ...team,
+          scoreHistory: [...team.scoreHistory, 0],
+        })),
       }));
     },
-    debugIncreaseRedScore: () => {
-      if (get().team1ScoreHistory.length === 0) return;
+    debugIncreaseTeamSelector() {
       set((state) => ({
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory.slice(0, -1),
-          (state.team1ScoreHistory.at(-1) ?? 0) + 1,
+        debugTeamSelector: (state.debugTeamSelector + 1) % state.teams.length,
+      }));
+    },
+    debugDecreaseTeamSelector() {
+      set((state) => ({
+        debugTeamSelector:
+          (state.debugTeamSelector - 1 + state.teams.length) %
+          state.teams.length,
+      }));
+    },
+    debugIncreaseTeamScore: () => {
+      const selectedTeam = get().debugTeamSelector;
+      set((state) => ({
+        teams: [
+          ...state.teams.map((team, i) => ({
+            ...team,
+            scoreHistory:
+              i === selectedTeam
+                ? [
+                    ...team.scoreHistory.slice(0, -1),
+                    (team.scoreHistory.at(-1) ?? 0) + 1,
+                  ]
+                : team.scoreHistory,
+          })),
         ],
       }));
     },
-    debugDecreaseRedScore: () => {
-      if (get().team1ScoreHistory.length === 0) return;
+    debugDecreaseTeamScore: () => {
+      const selectedTeam = get().debugTeamSelector;
       set((state) => ({
-        team1ScoreHistory: [
-          ...state.team1ScoreHistory.slice(0, -1),
-          (state.team1ScoreHistory.at(-1) ?? 0) - 1,
-        ],
-      }));
-    },
-    debugIncreaseBlueScore: () => {
-      if (get().team2ScoreHistory.length === 0) return;
-      set((state) => ({
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory.slice(0, -1),
-          (state.team2ScoreHistory.at(-1) ?? 0) + 1,
-        ],
-      }));
-    },
-    debugDecreaseBlueScore: () => {
-      if (get().team2ScoreHistory.length === 0) return;
-      set((state) => ({
-        team2ScoreHistory: [
-          ...state.team2ScoreHistory.slice(0, -1),
-          (state.team2ScoreHistory.at(-1) ?? 0) - 1,
-        ],
+        teams: state.teams.map((team, i) => ({
+          ...team,
+          scoreHistory:
+            i === selectedTeam
+              ? [
+                  ...team.scoreHistory.slice(0, -1),
+                  (team.scoreHistory.at(-1) ?? 0) - 1,
+                ]
+              : team.scoreHistory,
+        })),
       }));
     },
     selectDebugButton: () => {
       const selectedButton =
-        ButtonData[get().tempButtonRow][get().tempButtonCol];
+        ButtonData[get().debugButtonRow][get().debugButtonCol];
       switch (selectedButton) {
         case DebugButton.ABANDON_QUIZ:
           get().debugAbandonQuiz();
@@ -545,17 +562,18 @@ export const useGameStore = create<GameState>()(
         case DebugButton.ADD_SCORE:
           get().debugAddScore();
           break;
-        case DebugButton.INCREASE_RED_SCORE:
-          get().debugIncreaseRedScore();
+        case DebugButton.INCREASE_TEAM_SELECTOR:
+          get().debugIncreaseTeamSelector();
           break;
-        case DebugButton.DECREASE_RED_SCORE:
-          get().debugDecreaseRedScore();
+        case DebugButton.DECREASE_TEAM_SELECTOR:
+          get().debugDecreaseTeamSelector();
           break;
-        case DebugButton.INCREASE_BLUE_SCORE:
-          get().debugIncreaseBlueScore();
+        case DebugButton.INCREASE_TEAM_SCORE:
+          get().debugIncreaseTeamScore();
           break;
-        case DebugButton.DECREASE_BLUE_SCORE:
-          get().debugDecreaseBlueScore();
+        case DebugButton.DECREASE_TEAM_SCORE:
+          get().debugDecreaseTeamScore();
+          break;
           break;
         case DebugButton.CLOSE:
           get().toggleDebugDialog();
@@ -564,20 +582,79 @@ export const useGameStore = create<GameState>()(
           break;
       }
     },
-    selectTeamColor(teamId, theme) {
-      if (teamId === 1 && get().team2Theme !== theme) {
-        set(() => ({
-          team1Theme: theme,
-          // Pop up the toast
-          lastTeam1Press: Date.now(),
-        }));
-      } 
-      if (teamId === 2 && get().team1Theme !== theme) {
-        set(() => ({
-          team2Theme: theme,
-          lastTeam2Press: Date.now(),
-        }));
-      }
+    selectTeamColor: (teamId, theme) => {
+      const otherSelectedThemes = get()
+        .teams.filter((team) => team.id !== teamId)
+        .map((team) => team.theme);
+      const foundTeam = get().teams.find((team) => team.id === teamId);
+      // if the team doesn't exist or the theme is already selected, do nothing
+      if (!foundTeam) return;
+      if (otherSelectedThemes.includes(theme)) return;
+
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          theme: team.id === teamId ? theme : team.theme,
+          lastPress: team.id === teamId ? Date.now() : team.lastPress,
+        })),
+      }));
+    },
+    toggleTeamCustomName: (teamId, customName) => {
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          name:
+            team.id === teamId && !team.isUsingCustomName && customName
+              ? customName
+              : team.name,
+          isUsingCustomName:
+            team.id === teamId
+              ? !team.isUsingCustomName
+              : team.isUsingCustomName,
+        })),
+      }));
+    },
+    setTeamCustomName: (teamId, customName) => {
+      if (!customName) return;
+      console.log("set team name", teamId, customName);
+      set((state) => ({
+        teams: state.teams.map((team) => ({
+          ...team,
+          name: team.id === teamId ? customName : team.name,
+        })),
+      }));
+    },
+    addTeam: () => {
+      const selectedThemes = get().teams.map((team) => team.theme);
+      const teamLen = selectedThemes.length;
+      // Limit it to 8 teams to avoid having to test more & having to add more colors
+      if (teamLen >= 8) return;
+
+      set((state) => ({
+        teams: [
+          ...state.teams,
+          {
+            id: Math.max(...state.teams.map((team) => team.id)) + 1,
+            name: "",
+            theme:
+              Object.values(TeamTheme).find(
+                (theme) => !selectedThemes.includes(theme)
+              ) ?? TeamTheme.RED,
+            isUsingCustomName: false,
+            scoreHistory: [],
+            lastPress: 0,
+            canAnswer: false,
+            isAnswering: false,
+          },
+        ],
+      }));
+    },
+    removeTeam: (teamId) => {
+      // if there's 2 (or less somehow) teams, we can't remove any
+      if (get().teams.length <= 2) return;
+      set((state) => ({
+        teams: state.teams.filter((team) => team.id !== teamId),
+      }));
     },
   }))
 );
