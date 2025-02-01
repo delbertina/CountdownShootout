@@ -42,8 +42,8 @@ const GamePlayPage = () => {
     if (isNaN(e.playedSeconds) || !gameQuestion) return;
     console.log(e, lastVideoTime);
     setVideoProgress(
-      ((e.playedSeconds - gameQuestion.videoStartTime) /
-        (gameQuestion.videoEndTime - gameQuestion.videoStartTime)) *
+      ((e.playedSeconds - gameQuestion.questionVideo.startTime) /
+        (gameQuestion.questionVideo.endTime - gameQuestion.questionVideo.startTime)) *
         100
     );
     updateLastVideoTime(e.playedSeconds);
@@ -62,7 +62,7 @@ const GamePlayPage = () => {
               <div className="flex-grow flex flex-col justify-end w-full gap-4">
                 <div>
                   <ReactPlayer
-                    key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
+                    key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}-${gameQuestion.questionVideo.endTime}`}
                     playing={!isPaused}
                     controls={false}
                     progressInterval={500}
@@ -72,16 +72,16 @@ const GamePlayPage = () => {
                     width="100%"
                     url={
                       "https://www.youtube.com/watch?v=" +
-                      gameQuestion.videoYouTubeID
+                      gameQuestion.questionVideo.youTubeID
                     }
                     config={{
                       youtube: {
                         playerVars: {
                           // start and end need a whole number
                           start: !lastVideoTime
-                            ? Math.floor(gameQuestion.videoStartTime)
+                            ? Math.floor(gameQuestion.questionVideo.startTime)
                             : Math.floor(lastVideoTime),
-                          end: Math.floor(gameQuestion.videoEndTime),
+                          end: Math.floor(gameQuestion.questionVideo.endTime),
                           rel: 0,
                         },
                       },
@@ -104,8 +104,8 @@ const GamePlayPage = () => {
                       <div>
                         <h1>{gameQuestion.questionText}</h1>
                         <h2>
-                          {gameQuestion.videoEndTime -
-                            gameQuestion.videoStartTime}{" "}
+                          {gameQuestion.questionVideo.endTime -
+                            gameQuestion.questionVideo.startTime}{" "}
                           seconds
                         </h2>
                         {/* timer for remaining time before question starts */}

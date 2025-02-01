@@ -62,13 +62,18 @@ export interface GameSettings {
   team2Theme?: GameTeamTheme;
 }
 
+export interface Video {
+  youTubeID: string;
+  startTime: number;
+  endTime: number;
+}
+
 export interface GameQuestion {
   questionText: string;
-  videoYouTubeID: string;
-  videoStartTime: number;
-  videoEndTime: number;
+  questionVideo: Video;
   answer: string;
   answerSubtext?: string;
+  answerEncore?: Video;
 }
 // New feature added in some very recent version, super cool
 type HEX = `#${string}`;
