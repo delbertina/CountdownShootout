@@ -62,7 +62,7 @@ const GamePlayPage = () => {
               <div className="flex-grow flex flex-col justify-end w-full gap-4">
                 <div>
                   <ReactPlayer
-                    key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}-${gameQuestion.questionVideo.endTime}`}
+                    key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}`}
                     playing={!isPaused}
                     controls={false}
                     progressInterval={500}

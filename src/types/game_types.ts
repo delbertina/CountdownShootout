@@ -56,10 +56,6 @@ export interface Game {
 export interface GameSettings {
   answerTimeout: number;
   pointsPerQuestion?: number;
-  team1Name?: string;
-  team2Name?: string;
-  team1Theme?: GameTeamTheme;
-  team2Theme?: GameTeamTheme;
 }
 
 export interface Video {
