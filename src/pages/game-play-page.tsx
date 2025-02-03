@@ -1,15 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
-import { GameStage } from "../types/game_types";
+import { DEFAULT_ANSWER_TIMEOUT, DEFAULT_INFO_TIMEOUT, GameStage } from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
 import { GameHeader } from "../components/ui/game-header";
 
 const GamePlayPage = () => {
-  // const currentGame = useGameStore((state) => state.currentGame);
+  const currentGame = useGameStore((state) => state.currentGame);
+  const infoTimeout = useMemo(() => currentGame?.settings?.infoTimeout??DEFAULT_INFO_TIMEOUT, [currentGame]);
+  const answerTimeout = useMemo(() => currentGame?.settings?.answerTimeout??DEFAULT_ANSWER_TIMEOUT, [currentGame]);
   const gameStage = useGameStore((state) => state.stage);
   // const questionId = useGameStore((state) => state.questionId);
   const gameQuestion = useGameStore(
@@ -40,7 +42,6 @@ const GamePlayPage = () => {
   const [videoProgress, setVideoProgress] = useState(0);
   const handleVideoProgress = (e: OnProgressProps): void => {
     if (isNaN(e.playedSeconds) || !gameQuestion) return;
-    console.log(e, lastVideoTime);
     setVideoProgress(
       ((e.playedSeconds - gameQuestion.questionVideo.startTime) /
         (gameQuestion.questionVideo.endTime - gameQuestion.questionVideo.startTime)) *
@@ -53,6 +54,20 @@ const GamePlayPage = () => {
     setVideoProgress(0);
     startSuddenDeath();
   };
+
+  useEffect(() => {
+    if (gameStage === GameStage.Answering) {
+      setTimeout(() => {
+        // call state method
+      }, answerTimeout);
+    }
+    else if (gameStage === GameStage.Waiting) {
+      setTimeout(() => {
+        // call state method
+      }, infoTimeout);
+    }
+  }, [gameStage]);
+
   return (
     <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
       {gameQuestion && (

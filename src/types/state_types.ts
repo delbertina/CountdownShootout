@@ -64,6 +64,17 @@ const initialTeamState: TeamState[] = [
   },
 ];
 
+const dummyTeamState: TeamState = {
+  id: 1,
+  name: "",
+  theme: TeamTheme.RED,
+  isUsingCustomName: false,
+  scoreHistory: [],
+  lastPress: 0,
+  canAnswer: false,
+  isAnswering: false,
+}
+
 const getTeamDisplayName = (team: TeamStatePartial) =>
   "The " +
   (team.isUsingCustomName
@@ -80,3 +91,4 @@ export {
 };
 
 export type { TeamState, GameStatePartial, GameStatePartialQuestion };
+export { dummyTeamState };

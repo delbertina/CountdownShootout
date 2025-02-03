@@ -53,8 +53,12 @@ export interface Game {
   questions: GameQuestion[];
 }
 
+export const DEFAULT_INFO_TIMEOUT = 15;
+export const DEFAULT_ANSWER_TIMEOUT = 15;
+
 export interface GameSettings {
-  answerTimeout: number;
+  infoTimeout?: number;
+  answerTimeout?: number;
   pointsPerQuestion?: number;
 }
 
