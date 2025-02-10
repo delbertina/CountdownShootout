@@ -14,12 +14,6 @@ import {
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
   teams: TeamState[];
-  questionId: number;
-  lastVideoTime: number;
-  stage: GameStage;
-  isPaused: boolean;
-  lastStageChangeTime: number;
-  isSuddenDeath: boolean;
   debugButtonCol: number;
   debugButtonRow: number;
   debugTeamSelector: number;
@@ -39,7 +33,6 @@ interface GameState extends GameStatePartial {
   incorrectAnswer: () => void;
   startSuddenDeath: () => void;
   updateLastVideoTime: (videoTime: number) => void;
-  resetLastStageChangeTime: () => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
   toggleDebugDialog: () => void;
@@ -68,7 +61,6 @@ export const useGameStore = create<GameState>()(
     currentGame: undefined,
     teams: initialTeamState,
     ...newGameState,
-    lastStageChangeTime: 0,
     debugButtonCol: 0,
     debugButtonRow: 0,
     debugTeamSelector: 0,
@@ -333,9 +325,6 @@ export const useGameStore = create<GameState>()(
     },
     updateLastVideoTime: (time: number) => {
       set({ lastVideoTime: time });
-    },
-    resetLastStageChangeTime: () => {
-      set({ lastStageChangeTime: Date.now() });
     },
     advanceStage: () => {
       if (!get().currentGame) return;

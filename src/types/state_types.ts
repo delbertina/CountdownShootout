@@ -5,6 +5,8 @@ import { TeamTheme } from "./theme_types";
 interface GameStatePartialQuestion {
   stage: GameStage;
   lastVideoTime: number;
+  lastInfoTime: number;
+  lastAnswerTime: number;
   isSuddenDeath: boolean;
 }
 
@@ -17,6 +19,8 @@ interface GameStatePartial extends GameStatePartialQuestion {
 const newGameQuestionState: GameStatePartialQuestion = {
   stage: GameStage.Waiting,
   lastVideoTime: 0,
+  lastInfoTime: 0,
+  lastAnswerTime: 0,
   isSuddenDeath: false,
 };
 
