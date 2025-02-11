@@ -54,6 +54,8 @@ interface GameState extends GameStatePartial {
   setTeamCustomName: (teamId: number, customName: string) => void;
   addTeam: () => void;
   removeTeam: (teamId: number) => void;
+  infoTimeoutEnded: () => void;
+  answerTimeoutEnded: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -644,6 +646,16 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         teams: state.teams.filter((team) => team.id !== teamId),
       }));
+    },
+    infoTimeoutEnded: () => {
+      if (get().stage === GameStage.Waiting) {
+        get().advanceStage();
+      }
+    },
+    answerTimeoutEnded: () => {
+      if (get().stage === GameStage.Answering) {
+        // do nothing and just display visually that the timer expired
+      }
     },
   }))
 );
