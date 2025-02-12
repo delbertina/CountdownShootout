@@ -12,9 +12,11 @@ const GamePlayPage = () => {
   const currentGame = useGameStore((state) => state.currentGame);
   const infoTimeout = useMemo(() => currentGame?.settings?.infoTimeout??DEFAULT_INFO_TIMEOUT, [currentGame]);
   const lastInfoTime = useGameStore((state) => state.lastInfoTime);
+  const [infoTimeoutProgress, setInfoTimeoutProgress] = useState(0);
   const infoTimeoutEnded = useGameStore((state) => state.infoTimeoutEnded);
   const answerTimeout = useMemo(() => currentGame?.settings?.answerTimeout??DEFAULT_ANSWER_TIMEOUT, [currentGame]);
   const lastAnswerTime = useGameStore((state) => state.lastAnswerTime);
+  const [answerTimeoutProgress, setAnswerTimeoutProgress] = useState(0);
   const answerTimeoutEnded = useGameStore((state) => state.answerTimeoutEnded);
   const gameStage = useGameStore((state) => state.stage);
   // const questionId = useGameStore((state) => state.questionId);
@@ -61,7 +63,14 @@ const GamePlayPage = () => {
 
   useEffect(() => {
     if (gameStage === GameStage.Answering) {
+      const tempInterval = setInterval(() => {
+        setAnswerTimeoutProgress(
+          ((Date.now() - lastAnswerTime) / answerTimeout) * 100
+        );
+      }, 500);
       setTimeout(() => {
+        clearInterval(tempInterval);
+        setAnswerTimeoutProgress(0);
         answerTimeoutEnded();
       }, answerTimeout);
     }
@@ -69,8 +78,15 @@ const GamePlayPage = () => {
   }, [lastAnswerTime]);
 
   useEffect(() => {
+    const tempInterval = setInterval(() => {
+      setInfoTimeoutProgress(
+        ((Date.now() - lastInfoTime) / infoTimeout) * 100
+      );
+    }, 500);
     if (gameStage === GameStage.Waiting) {
       setTimeout(() => {
+        clearInterval(tempInterval);
+        setInfoTimeoutProgress(0);
         infoTimeoutEnded();
       }, infoTimeout);
     }
@@ -133,6 +149,9 @@ const GamePlayPage = () => {
                           seconds
                         </h2>
                         {/* timer for remaining time before question starts */}
+                        <div className="flex-grow-0 w-full">
+                          <Progress value={infoTimeoutProgress} />
+                        </div>
                       </div>
                     )}
                     {gameStage === GameStage.Answering && (
@@ -152,6 +171,9 @@ const GamePlayPage = () => {
                           ))}
                         {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                         {/* timer for remaining time to answer */}
+                        <div className="flex-grow-0 w-full">
+                          <Progress value={answerTimeoutProgress} />
+                        </div>
                       </div>
                     )}
                     {gameStage === GameStage.Scoring && (
