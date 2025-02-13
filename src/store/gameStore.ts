@@ -226,6 +226,7 @@ export const useGameStore = create<GameState>()(
         if (answerableTeams.length === 1) {
             set((state) => ({
               stage: GameStage.Answering,
+              lastAnswerTime: Date.now(),
               isPaused: true,
               teams: state.teams.map((team) =>
                 // if the team is the one that just pressed, set them to be answering
@@ -240,6 +241,7 @@ export const useGameStore = create<GameState>()(
         else {
           set((state) => ({
             stage: GameStage.Answering,
+            lastAnswerTime: Date.now(),
             isPaused: true,
             teams: state.teams.map((team) =>
               team.id === gamepadIndex
@@ -286,6 +288,7 @@ export const useGameStore = create<GameState>()(
             ? // if only one team can answer, they are now answering
               {
                 stage: GameStage.Answering,
+                lastAnswerTime: Date.now(),
                 teams: state.teams.map((team) => ({
                   ...team,
                   isAnswering: team.canAnswer,
@@ -295,6 +298,7 @@ export const useGameStore = create<GameState>()(
             : // else there are still multiple teams that can answer
               {
                 stage: GameStage.Answering,
+                lastAnswerTime: Date.now(),
                 teams: state.teams.map((team) => ({
                   ...team,
                   isAnswering: false,
@@ -316,6 +320,7 @@ export const useGameStore = create<GameState>()(
       if (stage !== GameStage.Playing) return;
       set({
         stage: GameStage.Answering,
+        lastAnswerTime: Date.now(),
         isPaused: true,
         isSuddenDeath: true,
         teams: get().teams.map((team) => ({
@@ -343,7 +348,7 @@ export const useGameStore = create<GameState>()(
           });
           break;
         case GameStage.Playing:
-          set({ stage: GameStage.Answering, isPaused: true });
+          set({ stage: GameStage.Answering, isPaused: true, lastAnswerTime: Date.now() });
           break;
         case GameStage.Answering:
           set({
