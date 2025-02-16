@@ -653,7 +653,7 @@ export const useGameStore = create<GameState>()(
       }));
     },
     infoTimeoutEnded: () => {
-      if (get().stage === GameStage.Waiting) {
+      if (get().stage === GameStage.Waiting || get().stage === GameStage.Scoring) {
         get().advanceStage();
       }
     },

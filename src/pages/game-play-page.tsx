@@ -4,17 +4,27 @@ import { OnProgressProps } from "react-player/base";
 import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
 import { Dialog, DialogContent } from "../components/ui/dialog";
-import { DEFAULT_ANSWER_TIMEOUT, DEFAULT_INFO_TIMEOUT, GameStage } from "../types/game_types";
+import {
+  DEFAULT_ANSWER_TIMEOUT,
+  DEFAULT_INFO_TIMEOUT,
+  GameStage,
+} from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
 import { GameHeader } from "../components/ui/game-header";
 
 const GamePlayPage = () => {
   const currentGame = useGameStore((state) => state.currentGame);
-  const infoTimeout = useMemo(() => currentGame?.settings?.infoTimeout??DEFAULT_INFO_TIMEOUT, [currentGame]);
+  const infoTimeout = useMemo(
+    () => currentGame?.settings?.infoTimeout ?? DEFAULT_INFO_TIMEOUT,
+    [currentGame]
+  );
   const lastInfoTime = useGameStore((state) => state.lastInfoTime);
   const [infoTimeoutProgress, setInfoTimeoutProgress] = useState(0);
   const infoTimeoutEnded = useGameStore((state) => state.infoTimeoutEnded);
-  const answerTimeout = useMemo(() => currentGame?.settings?.answerTimeout??DEFAULT_ANSWER_TIMEOUT, [currentGame]);
+  const answerTimeout = useMemo(
+    () => currentGame?.settings?.answerTimeout ?? DEFAULT_ANSWER_TIMEOUT,
+    [currentGame]
+  );
   const lastAnswerTime = useGameStore((state) => state.lastAnswerTime);
   const [answerTimeoutProgress, setAnswerTimeoutProgress] = useState(0);
   const answerTimeoutEnded = useGameStore((state) => state.answerTimeoutEnded);
@@ -50,7 +60,8 @@ const GamePlayPage = () => {
     if (isNaN(e.playedSeconds) || !gameQuestion) return;
     setVideoProgress(
       ((e.playedSeconds - gameQuestion.questionVideo.startTime) /
-        (gameQuestion.questionVideo.endTime - gameQuestion.questionVideo.startTime)) *
+        (gameQuestion.questionVideo.endTime -
+          gameQuestion.questionVideo.startTime)) *
         100
     );
     updateLastVideoTime(e.playedSeconds);
@@ -62,7 +73,7 @@ const GamePlayPage = () => {
   };
 
   useEffect(() => {
-    if (gameStage === GameStage.Answering) {
+    if (gameStage === GameStage.Answering && lastAnswerTime !== 0) {
       const tempInterval = setInterval(() => {
         setAnswerTimeoutProgress(
           ((Date.now() - lastAnswerTime) / answerTimeout) * 100
@@ -74,24 +85,33 @@ const GamePlayPage = () => {
         answerTimeoutEnded();
       }, answerTimeout);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastAnswerTime]);
 
   useEffect(() => {
-    const tempInterval = setInterval(() => {
-      setInfoTimeoutProgress(
-        ((Date.now() - lastInfoTime) / infoTimeout) * 100
-      );
-    }, 500);
-    if (gameStage === GameStage.Waiting) {
+    if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
+      const tempInterval = setInterval(() => {
+        setInfoTimeoutProgress(
+          ((Date.now() - lastInfoTime) / infoTimeout) * 100
+        );
+      }, 500);
       setTimeout(() => {
         clearInterval(tempInterval);
         setInfoTimeoutProgress(0);
         infoTimeoutEnded();
       }, infoTimeout);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastInfoTime]);
+
+  //
+  // TODO: do intervals need to be cleaned up? Is it possible for them to go wrong?
+  //
+  useEffect(() => {
+    return () => {
+      console.log("cleaning up component");
+    };
+  }, []);
 
   return (
     <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
@@ -213,11 +233,14 @@ const GamePlayPage = () => {
                         <br />
                         {teams.map((team) => (
                           <>
-                            <p>{getTeamDisplayName(team)}{": "}
-                            {team.scoreHistory.reduce(
-                              (sum, current) => sum + current,
-                              0
-                            )}</p>
+                            <p>
+                              {getTeamDisplayName(team)}
+                              {": "}
+                              {team.scoreHistory.reduce(
+                                (sum, current) => sum + current,
+                                0
+                              )}
+                            </p>
                           </>
                         ))}
                         {/* timer for remaining time before next stage */}
