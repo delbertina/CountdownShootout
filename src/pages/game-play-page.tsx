@@ -169,9 +169,11 @@ const GamePlayPage = () => {
                           seconds
                         </h2>
                         {/* timer for remaining time before question starts */}
-                        <div className="flex-grow-0 w-full">
-                          <Progress value={infoTimeoutProgress} />
-                        </div>
+                        {infoTimeout > 0 && (
+                          <div className="flex-grow-0 w-full">
+                            <Progress value={infoTimeoutProgress} />
+                          </div>
+                        )}
                       </div>
                     )}
                     {gameStage === GameStage.Answering && (
@@ -191,9 +193,16 @@ const GamePlayPage = () => {
                           ))}
                         {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                         {/* timer for remaining time to answer */}
-                        <div className="flex-grow-0 w-full">
-                          <Progress value={answerTimeoutProgress} />
-                        </div>
+                        {answerTimeout > -1 && answerTimeout < 100 && (
+                          <div className="flex-grow-0 w-full">
+                            <Progress value={answerTimeoutProgress} />
+                          </div>
+                        )}
+                        {answerTimeout >= 100 && (
+                          <div>
+                            <h1>Time's up!</h1>
+                          </div>
+                        )}
                       </div>
                     )}
                     {gameStage === GameStage.Scoring && (
