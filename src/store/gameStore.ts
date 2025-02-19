@@ -392,7 +392,7 @@ export const useGameStore = create<GameState>()(
     selectQuiz(id: number) {
       const foundGame = Games.find((game) => game.id === id);
       if (!foundGame) return;
-      set({ currentGame: foundGame, questionId: 0 });
+      set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
     toggleDebugDialog: () =>
       set((state) => ({

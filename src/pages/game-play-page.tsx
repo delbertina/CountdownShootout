@@ -3,7 +3,7 @@ import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog";
 import {
   DEFAULT_ANSWER_TIMEOUT,
   DEFAULT_INFO_TIMEOUT,
@@ -11,6 +11,7 @@ import {
 } from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
 import { GameHeader } from "../components/ui/game-header";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const GamePlayPage = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -76,30 +77,32 @@ const GamePlayPage = () => {
     if (gameStage === GameStage.Answering && lastAnswerTime !== 0) {
       const tempInterval = setInterval(() => {
         setAnswerTimeoutProgress(
-          ((Date.now() - lastAnswerTime) / answerTimeout) * 100
+          ((Date.now() - lastAnswerTime) / (answerTimeout * 1000)) * 100
         );
       }, 500);
       setTimeout(() => {
         clearInterval(tempInterval);
         setAnswerTimeoutProgress(0);
         answerTimeoutEnded();
-      }, answerTimeout);
+      }, answerTimeout * 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastAnswerTime]);
 
   useEffect(() => {
+    console.log("lastInfoTime: " + lastInfoTime);
     if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
       const tempInterval = setInterval(() => {
+        console.log("infoTimeoutProgress: " + infoTimeoutProgress);
         setInfoTimeoutProgress(
-          ((Date.now() - lastInfoTime) / infoTimeout) * 100
+          ((Date.now() - lastInfoTime) / (infoTimeout * 1000)) * 100
         );
       }, 500);
       setTimeout(() => {
         clearInterval(tempInterval);
         setInfoTimeoutProgress(0);
         infoTimeoutEnded();
-      }, infoTimeout);
+      }, infoTimeout * 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastInfoTime]);
@@ -157,6 +160,7 @@ const GamePlayPage = () => {
           ></GameHeader>
           <Dialog open={gameStage !== GameStage.Playing}>
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
+              <VisuallyHidden><DialogTitle /></VisuallyHidden>
               <GameHeader
                 content={
                   <>
