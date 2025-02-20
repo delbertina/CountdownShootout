@@ -82,7 +82,7 @@ const GamePlayPage = () => {
       }, 500);
       setTimeout(() => {
         clearInterval(tempInterval);
-        setAnswerTimeoutProgress(0);
+        setAnswerTimeoutProgress(100);
         answerTimeoutEnded();
       }, answerTimeout * 1000);
     }
@@ -90,10 +90,8 @@ const GamePlayPage = () => {
   }, [lastAnswerTime]);
 
   useEffect(() => {
-    console.log("lastInfoTime: " + lastInfoTime);
     if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
       const tempInterval = setInterval(() => {
-        console.log("infoTimeoutProgress: " + infoTimeoutProgress);
         setInfoTimeoutProgress(
           ((Date.now() - lastInfoTime) / (infoTimeout * 1000)) * 100
         );
@@ -173,7 +171,7 @@ const GamePlayPage = () => {
                           seconds
                         </h2>
                         {/* timer for remaining time before question starts */}
-                        {infoTimeout > 0 && (
+                        {infoTimeoutProgress > 0 && (
                           <div className="flex-grow-0 w-full">
                             <Progress value={infoTimeoutProgress} />
                           </div>
@@ -197,12 +195,12 @@ const GamePlayPage = () => {
                           ))}
                         {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                         {/* timer for remaining time to answer */}
-                        {answerTimeout > -1 && answerTimeout < 100 && (
+                        {answerTimeoutProgress > -1 && answerTimeoutProgress < 100 && (
                           <div className="flex-grow-0 w-full">
                             <Progress value={answerTimeoutProgress} />
                           </div>
                         )}
-                        {answerTimeout >= 100 && (
+                        {answerTimeoutProgress >= 100 && (
                           <div>
                             <h1>Time's up!</h1>
                           </div>

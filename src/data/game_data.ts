@@ -7,6 +7,7 @@ export const Games: Game[] = [
     description: "Description 1",
     settings: {
       answerTimeout: 15,
+      infoTimeout: 5,
     },
     questions: [
       {
