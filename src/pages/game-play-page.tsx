@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import ReactPlayer from "react-player";
@@ -54,6 +54,7 @@ const GamePlayPage = () => {
     [teams]
   );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
+  const tempInterval: MutableRefObject<number | undefined> = useRef(undefined);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -75,13 +76,13 @@ const GamePlayPage = () => {
 
   useEffect(() => {
     if (gameStage === GameStage.Answering && lastAnswerTime !== 0) {
-      const tempInterval = setInterval(() => {
+      tempInterval.current = setInterval(() => {
         setAnswerTimeoutProgress(
           ((Date.now() - lastAnswerTime) / (answerTimeout * 1000)) * 100
         );
       }, 500);
       setTimeout(() => {
-        clearInterval(tempInterval);
+        clearInterval(tempInterval.current);
         setAnswerTimeoutProgress(100);
         answerTimeoutEnded();
       }, answerTimeout * 1000);
@@ -91,13 +92,13 @@ const GamePlayPage = () => {
 
   useEffect(() => {
     if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
-      const tempInterval = setInterval(() => {
+      tempInterval.current = setInterval(() => {
         setInfoTimeoutProgress(
           ((Date.now() - lastInfoTime) / (infoTimeout * 1000)) * 100
         );
       }, 500);
       setTimeout(() => {
-        clearInterval(tempInterval);
+        clearInterval(tempInterval.current);
         setInfoTimeoutProgress(0);
         infoTimeoutEnded();
       }, infoTimeout * 1000);
@@ -111,6 +112,7 @@ const GamePlayPage = () => {
   useEffect(() => {
     return () => {
       console.log("cleaning up component");
+      clearInterval(tempInterval.current);
     };
   }, []);
 
