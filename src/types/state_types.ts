@@ -5,6 +5,8 @@ import { TeamTheme } from "./theme_types";
 interface GameStatePartialQuestion {
   stage: GameStage;
   lastVideoTime: number;
+  lastInfoTime: number;
+  lastAnswerTime: number;
   isSuddenDeath: boolean;
 }
 
@@ -17,6 +19,8 @@ interface GameStatePartial extends GameStatePartialQuestion {
 const newGameQuestionState: GameStatePartialQuestion = {
   stage: GameStage.Waiting,
   lastVideoTime: 0,
+  lastInfoTime: 0,
+  lastAnswerTime: 0,
   isSuddenDeath: false,
 };
 
@@ -64,6 +68,17 @@ const initialTeamState: TeamState[] = [
   },
 ];
 
+const dummyTeamState: TeamState = {
+  id: 1,
+  name: "",
+  theme: TeamTheme.RED,
+  isUsingCustomName: false,
+  scoreHistory: [],
+  lastPress: 0,
+  canAnswer: false,
+  isAnswering: false,
+}
+
 const getTeamDisplayName = (team: TeamStatePartial) =>
   "The " +
   (team.isUsingCustomName
@@ -80,3 +95,4 @@ export {
 };
 
 export type { TeamState, GameStatePartial, GameStatePartialQuestion };
+export { dummyTeamState };

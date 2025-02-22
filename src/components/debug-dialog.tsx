@@ -8,6 +8,7 @@ import {
 import { ButtonData } from "../types/game_types";
 import { useGameStore } from "../store/gameStore";
 import { useMemo } from "react";
+import { dummyTeamState, getTeamDisplayName } from "../types/state_types";
 
 const DebugDialog = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -17,7 +18,10 @@ const DebugDialog = () => {
   const selectedButtonRow = useGameStore((state) => state.debugButtonRow);
   const selectedTeam = useGameStore((state) => state.debugTeamSelector);
   const teams = useGameStore((state) => state.teams);
-  const teamsScoreHistory = useMemo(() => teams.map(team => team.scoreHistory), [teams]);
+  const teamsScoreHistory = useMemo(
+    () => teams.map((team) => team.scoreHistory),
+    [teams]
+  );
   const isDebugOpen = useGameStore((state) => state.isDebugOpen);
   const toggleDebugDialog = useGameStore((state) => state.toggleDebugDialog);
 
@@ -31,9 +35,17 @@ const DebugDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <div>Stage: "{gameStage}"</div>
-        <div>Current Question: {currentQuestion} / {currentGame?.questions.length??"No Game Selected"}</div>
+        <div>
+          Current Question: {currentQuestion} /{" "}
+          {currentGame?.questions.length ?? "No Game Selected"}
+        </div>
         {teamsScoreHistory.map((scoreHistory, i) => (
-          <div className={selectedTeam === i ? "bg-red-300" : ""} key={i}>Team {i + 1} Score History: {JSON.stringify(scoreHistory)}</div>
+          <div className={selectedTeam === i ? "bg-red-300" : ""} key={i}>
+            {getTeamDisplayName(
+              teams.find((team) => team.id === i) ?? dummyTeamState
+            )}{" "}
+            Score History: {JSON.stringify(scoreHistory)}
+          </div>
         ))}
         <div className="flex flex-col">
           <div className="flex flex-col gap-2">

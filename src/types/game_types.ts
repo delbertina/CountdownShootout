@@ -53,22 +53,27 @@ export interface Game {
   questions: GameQuestion[];
 }
 
+export const DEFAULT_INFO_TIMEOUT = 5;
+export const DEFAULT_ANSWER_TIMEOUT = 5;
+
 export interface GameSettings {
-  answerTimeout: number;
+  infoTimeout?: number;
+  answerTimeout?: number;
   pointsPerQuestion?: number;
-  team1Name?: string;
-  team2Name?: string;
-  team1Theme?: GameTeamTheme;
-  team2Theme?: GameTeamTheme;
+}
+
+export interface Video {
+  youTubeID: string;
+  startTime: number;
+  endTime: number;
 }
 
 export interface GameQuestion {
   questionText: string;
-  videoYouTubeID: string;
-  videoStartTime: number;
-  videoEndTime: number;
+  questionVideo: Video;
   answer: string;
   answerSubtext?: string;
+  answerEncore?: Video;
 }
 // New feature added in some very recent version, super cool
 type HEX = `#${string}`;

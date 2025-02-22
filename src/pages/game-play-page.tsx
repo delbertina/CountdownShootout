@@ -1,15 +1,34 @@
-import { useMemo, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { OnProgressProps } from "react-player/base";
 import ReactPlayer from "react-player";
 import { Progress } from "../components/ui/progress";
-import { Dialog, DialogContent } from "../components/ui/dialog";
-import { GameStage } from "../types/game_types";
+import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog";
+import {
+  DEFAULT_ANSWER_TIMEOUT,
+  DEFAULT_INFO_TIMEOUT,
+  GameStage,
+} from "../types/game_types";
 import { getTeamDisplayName } from "../types/state_types";
 import { GameHeader } from "../components/ui/game-header";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const GamePlayPage = () => {
-  // const currentGame = useGameStore((state) => state.currentGame);
+  const currentGame = useGameStore((state) => state.currentGame);
+  const infoTimeout = useMemo(
+    () => currentGame?.settings?.infoTimeout ?? DEFAULT_INFO_TIMEOUT,
+    [currentGame]
+  );
+  const lastInfoTime = useGameStore((state) => state.lastInfoTime);
+  const [infoTimeoutProgress, setInfoTimeoutProgress] = useState(0);
+  const infoTimeoutEnded = useGameStore((state) => state.infoTimeoutEnded);
+  const answerTimeout = useMemo(
+    () => currentGame?.settings?.answerTimeout ?? DEFAULT_ANSWER_TIMEOUT,
+    [currentGame]
+  );
+  const lastAnswerTime = useGameStore((state) => state.lastAnswerTime);
+  const [answerTimeoutProgress, setAnswerTimeoutProgress] = useState(0);
+  const answerTimeoutEnded = useGameStore((state) => state.answerTimeoutEnded);
   const gameStage = useGameStore((state) => state.stage);
   // const questionId = useGameStore((state) => state.questionId);
   const gameQuestion = useGameStore(
@@ -35,15 +54,17 @@ const GamePlayPage = () => {
     [teams]
   );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
+  const tempInterval: MutableRefObject<number | undefined> = useRef(undefined);
+  const tempTimer: MutableRefObject<number | undefined> = useRef(undefined);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
   const [videoProgress, setVideoProgress] = useState(0);
   const handleVideoProgress = (e: OnProgressProps): void => {
     if (isNaN(e.playedSeconds) || !gameQuestion) return;
-    console.log(e, lastVideoTime);
     setVideoProgress(
-      ((e.playedSeconds - gameQuestion.videoStartTime) /
-        (gameQuestion.videoEndTime - gameQuestion.videoStartTime)) *
+      ((e.playedSeconds - gameQuestion.questionVideo.startTime) /
+        (gameQuestion.questionVideo.endTime -
+          gameQuestion.questionVideo.startTime)) *
         100
     );
     updateLastVideoTime(e.playedSeconds);
@@ -53,6 +74,54 @@ const GamePlayPage = () => {
     setVideoProgress(0);
     startSuddenDeath();
   };
+
+  useEffect(() => {
+    if (gameStage === GameStage.Answering && lastAnswerTime !== 0) {
+      clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
+      setAnswerTimeoutProgress(0);
+      tempInterval.current = setInterval(() => {
+        setAnswerTimeoutProgress(
+          ((Date.now() - lastAnswerTime) / (answerTimeout * 1000)) * 100
+        );
+      }, 500);
+      tempTimer.current = setTimeout(() => {
+        clearInterval(tempInterval.current);
+        clearTimeout(tempTimer.current);
+        setAnswerTimeoutProgress(100);
+        answerTimeoutEnded();
+      }, answerTimeout * 1000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastAnswerTime]);
+
+  useEffect(() => {
+    if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
+      clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
+      setInfoTimeoutProgress(0);
+      tempInterval.current = setInterval(() => {
+        setInfoTimeoutProgress(
+          ((Date.now() - lastInfoTime) / (infoTimeout * 1000)) * 100
+        );
+      }, 500);
+      tempTimer.current = setTimeout(() => {
+        clearInterval(tempInterval.current);
+        clearTimeout(tempTimer.current);
+        setInfoTimeoutProgress(0);
+        infoTimeoutEnded();
+      }, infoTimeout * 1000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastInfoTime]);
+
+  useEffect(() => {
+    return () => {
+      clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
+    };
+  }, []);
+
   return (
     <div className="card-page whole-screen flex flex-col items-center bg-slate-700 text-amber-200 gap-4">
       {gameQuestion && (
@@ -62,7 +131,7 @@ const GamePlayPage = () => {
               <div className="flex-grow flex flex-col justify-end w-full gap-4">
                 <div>
                   <ReactPlayer
-                    key={`https://www.youtube.com/watch?v=${gameQuestion.videoYouTubeID}-${gameQuestion.videoEndTime}`}
+                    key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}`}
                     playing={!isPaused}
                     controls={false}
                     progressInterval={500}
@@ -72,16 +141,16 @@ const GamePlayPage = () => {
                     width="100%"
                     url={
                       "https://www.youtube.com/watch?v=" +
-                      gameQuestion.videoYouTubeID
+                      gameQuestion.questionVideo.youTubeID
                     }
                     config={{
                       youtube: {
                         playerVars: {
                           // start and end need a whole number
                           start: !lastVideoTime
-                            ? Math.floor(gameQuestion.videoStartTime)
+                            ? Math.floor(gameQuestion.questionVideo.startTime)
                             : Math.floor(lastVideoTime),
-                          end: Math.floor(gameQuestion.videoEndTime),
+                          end: Math.floor(gameQuestion.questionVideo.endTime),
                           rel: 0,
                         },
                       },
@@ -97,6 +166,7 @@ const GamePlayPage = () => {
           ></GameHeader>
           <Dialog open={gameStage !== GameStage.Playing}>
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
+              <VisuallyHidden><DialogTitle /></VisuallyHidden>
               <GameHeader
                 content={
                   <>
@@ -104,11 +174,16 @@ const GamePlayPage = () => {
                       <div>
                         <h1>{gameQuestion.questionText}</h1>
                         <h2>
-                          {gameQuestion.videoEndTime -
-                            gameQuestion.videoStartTime}{" "}
+                          {gameQuestion.questionVideo.endTime -
+                            gameQuestion.questionVideo.startTime}{" "}
                           seconds
                         </h2>
                         {/* timer for remaining time before question starts */}
+                        {infoTimeoutProgress > 0 && (
+                          <div className="flex-grow-0 w-full">
+                            <Progress value={infoTimeoutProgress} />
+                          </div>
+                        )}
                       </div>
                     )}
                     {gameStage === GameStage.Answering && (
@@ -128,6 +203,16 @@ const GamePlayPage = () => {
                           ))}
                         {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                         {/* timer for remaining time to answer */}
+                        {answerTimeoutProgress > -1 && answerTimeoutProgress < 100 && (
+                          <div className="flex-grow-0 w-full">
+                            <Progress value={answerTimeoutProgress} />
+                          </div>
+                        )}
+                        {answerTimeoutProgress >= 100 && (
+                          <div>
+                            <h1>Time's up!</h1>
+                          </div>
+                        )}
                       </div>
                     )}
                     {gameStage === GameStage.Scoring && (
@@ -167,11 +252,14 @@ const GamePlayPage = () => {
                         <br />
                         {teams.map((team) => (
                           <>
-                            <p>{getTeamDisplayName(team)}{": "}
-                            {team.scoreHistory.reduce(
-                              (sum, current) => sum + current,
-                              0
-                            )}</p>
+                            <p>
+                              {getTeamDisplayName(team)}
+                              {": "}
+                              {team.scoreHistory.reduce(
+                                (sum, current) => sum + current,
+                                0
+                              )}
+                            </p>
                           </>
                         ))}
                         {/* timer for remaining time before next stage */}

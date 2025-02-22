@@ -14,12 +14,6 @@ import {
 interface GameState extends GameStatePartial {
   currentGame: Game | undefined;
   teams: TeamState[];
-  questionId: number;
-  lastVideoTime: number;
-  stage: GameStage;
-  isPaused: boolean;
-  lastStageChangeTime: number;
-  isSuddenDeath: boolean;
   debugButtonCol: number;
   debugButtonRow: number;
   debugTeamSelector: number;
@@ -39,7 +33,6 @@ interface GameState extends GameStatePartial {
   incorrectAnswer: () => void;
   startSuddenDeath: () => void;
   updateLastVideoTime: (videoTime: number) => void;
-  resetLastStageChangeTime: () => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
   toggleDebugDialog: () => void;
@@ -61,6 +54,8 @@ interface GameState extends GameStatePartial {
   setTeamCustomName: (teamId: number, customName: string) => void;
   addTeam: () => void;
   removeTeam: (teamId: number) => void;
+  infoTimeoutEnded: () => void;
+  answerTimeoutEnded: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -68,7 +63,6 @@ export const useGameStore = create<GameState>()(
     currentGame: undefined,
     teams: initialTeamState,
     ...newGameState,
-    lastStageChangeTime: 0,
     debugButtonCol: 0,
     debugButtonRow: 0,
     debugTeamSelector: 0,
@@ -232,6 +226,7 @@ export const useGameStore = create<GameState>()(
         if (answerableTeams.length === 1) {
             set((state) => ({
               stage: GameStage.Answering,
+              lastAnswerTime: Date.now(),
               isPaused: true,
               teams: state.teams.map((team) =>
                 // if the team is the one that just pressed, set them to be answering
@@ -246,6 +241,7 @@ export const useGameStore = create<GameState>()(
         else {
           set((state) => ({
             stage: GameStage.Answering,
+            lastAnswerTime: Date.now(),
             isPaused: true,
             teams: state.teams.map((team) =>
               team.id === gamepadIndex
@@ -292,6 +288,7 @@ export const useGameStore = create<GameState>()(
             ? // if only one team can answer, they are now answering
               {
                 stage: GameStage.Answering,
+                lastAnswerTime: Date.now(),
                 teams: state.teams.map((team) => ({
                   ...team,
                   isAnswering: team.canAnswer,
@@ -301,6 +298,7 @@ export const useGameStore = create<GameState>()(
             : // else there are still multiple teams that can answer
               {
                 stage: GameStage.Answering,
+                lastAnswerTime: Date.now(),
                 teams: state.teams.map((team) => ({
                   ...team,
                   isAnswering: false,
@@ -322,6 +320,7 @@ export const useGameStore = create<GameState>()(
       if (stage !== GameStage.Playing) return;
       set({
         stage: GameStage.Answering,
+        lastAnswerTime: Date.now(),
         isPaused: true,
         isSuddenDeath: true,
         teams: get().teams.map((team) => ({
@@ -333,9 +332,6 @@ export const useGameStore = create<GameState>()(
     },
     updateLastVideoTime: (time: number) => {
       set({ lastVideoTime: time });
-    },
-    resetLastStageChangeTime: () => {
-      set({ lastStageChangeTime: Date.now() });
     },
     advanceStage: () => {
       if (!get().currentGame) return;
@@ -352,7 +348,7 @@ export const useGameStore = create<GameState>()(
           });
           break;
         case GameStage.Playing:
-          set({ stage: GameStage.Answering, isPaused: true });
+          set({ stage: GameStage.Answering, isPaused: true, lastAnswerTime: Date.now() });
           break;
         case GameStage.Answering:
           set({
@@ -368,6 +364,7 @@ export const useGameStore = create<GameState>()(
               ? // if we're playing a game, & there's more questions
                 {
                   ...newGameQuestionState,
+                  lastInfoTime: Date.now(),
                   questionId: state.questionId + 1,
                   teams: get().teams.map((team) => ({
                     ...team,
@@ -396,7 +393,7 @@ export const useGameStore = create<GameState>()(
     selectQuiz(id: number) {
       const foundGame = Games.find((game) => game.id === id);
       if (!foundGame) return;
-      set({ currentGame: foundGame, questionId: 0 });
+      set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
     toggleDebugDialog: () =>
       set((state) => ({
@@ -655,6 +652,16 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         teams: state.teams.filter((team) => team.id !== teamId),
       }));
+    },
+    infoTimeoutEnded: () => {
+      if (get().stage === GameStage.Waiting || get().stage === GameStage.Scoring) {
+        get().advanceStage();
+      }
+    },
+    answerTimeoutEnded: () => {
+      if (get().stage === GameStage.Answering) {
+        // do nothing and just display visually that the timer expired
+      }
     },
   }))
 );

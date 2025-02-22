@@ -27,7 +27,7 @@ const GameHeader = (props: GameHeaderProps) => {
         {teams
           .filter((_team, i) => i % 2 === 0)
           .map((team) => (
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4" key={team.id}>
               <ShadedIndicator
                 text={"BUZZER"}
                 theme={team.theme}
@@ -78,7 +78,7 @@ const GameHeader = (props: GameHeaderProps) => {
         {teams
           .filter((_team, i) => i % 2 === 1)
           .map((team) => (
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4" key={team.id}>
               <ShadedIndicator
                 text={"BUZZER"}
                 theme={team.theme}
