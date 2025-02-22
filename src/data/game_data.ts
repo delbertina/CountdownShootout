@@ -5,10 +5,7 @@ export const Games: Game[] = [
     id: 1,
     title: "(Testing) Game 1",
     description: "Description 1",
-    settings: {
-      answerTimeout: 15,
-      infoTimeout: 5,
-    },
+    settings: {},
     questions: [
       {
         questionText: "Question 1",
@@ -47,7 +44,6 @@ export const Games: Game[] = [
     title: "(Testing) Holiday Mix",
     description: "Festive songs for the festive season!",
     settings: {
-      answerTimeout: 15,
     },
     questions: [
       {

@@ -364,6 +364,7 @@ export const useGameStore = create<GameState>()(
               ? // if we're playing a game, & there's more questions
                 {
                   ...newGameQuestionState,
+                  lastInfoTime: Date.now(),
                   questionId: state.questionId + 1,
                   teams: get().teams.map((team) => ({
                     ...team,

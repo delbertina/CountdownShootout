@@ -55,6 +55,7 @@ const GamePlayPage = () => {
   );
   const isSuddenDeath = useGameStore((state) => state.isSuddenDeath);
   const tempInterval: MutableRefObject<number | undefined> = useRef(undefined);
+  const tempTimer: MutableRefObject<number | undefined> = useRef(undefined);
 
   const startSuddenDeath = useGameStore((state) => state.startSuddenDeath);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -76,13 +77,17 @@ const GamePlayPage = () => {
 
   useEffect(() => {
     if (gameStage === GameStage.Answering && lastAnswerTime !== 0) {
+      clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
+      setAnswerTimeoutProgress(0);
       tempInterval.current = setInterval(() => {
         setAnswerTimeoutProgress(
           ((Date.now() - lastAnswerTime) / (answerTimeout * 1000)) * 100
         );
       }, 500);
-      setTimeout(() => {
+      tempTimer.current = setTimeout(() => {
         clearInterval(tempInterval.current);
+        clearTimeout(tempTimer.current);
         setAnswerTimeoutProgress(100);
         answerTimeoutEnded();
       }, answerTimeout * 1000);
@@ -92,13 +97,17 @@ const GamePlayPage = () => {
 
   useEffect(() => {
     if (gameStage === GameStage.Waiting && lastInfoTime !== 0) {
+      clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
+      setInfoTimeoutProgress(0);
       tempInterval.current = setInterval(() => {
         setInfoTimeoutProgress(
           ((Date.now() - lastInfoTime) / (infoTimeout * 1000)) * 100
         );
       }, 500);
-      setTimeout(() => {
+      tempTimer.current = setTimeout(() => {
         clearInterval(tempInterval.current);
+        clearTimeout(tempTimer.current);
         setInfoTimeoutProgress(0);
         infoTimeoutEnded();
       }, infoTimeout * 1000);
@@ -106,13 +115,10 @@ const GamePlayPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastInfoTime]);
 
-  //
-  // TODO: do intervals need to be cleaned up? Is it possible for them to go wrong?
-  //
   useEffect(() => {
     return () => {
-      console.log("cleaning up component");
       clearInterval(tempInterval.current);
+      clearTimeout(tempTimer.current);
     };
   }, []);
 
