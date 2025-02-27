@@ -1,4 +1,4 @@
-import { Plus, Swords } from "lucide-react";
+import { Settings, Swords } from "lucide-react";
 import GameCard from "../components/game-card";
 import { Button } from "../components/ui/button";
 import { Games } from "../data/game_data";
@@ -17,7 +17,7 @@ const GameListPage = () => {
         <h1 className="font-bold flex-grow-0">Game List</h1>
         <div>
           <Button>
-            <Plus />
+            <Settings />
           </Button>
         </div>
       </div>

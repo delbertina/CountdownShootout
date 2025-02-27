@@ -6,14 +6,14 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 
-const NewGameDialog = () => {
+const EditGameDialog = () => {
   return (
     <Dialog open={true} onOpenChange={() => {}}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Game</DialogTitle>
+          <DialogTitle>Edit Game</DialogTitle>
           <DialogDescription>
-            Create a new game to play with others.
+            Edit the data of a game.
           </DialogDescription>
         </DialogHeader>
       </DialogContent>
@@ -21,4 +21,4 @@ const NewGameDialog = () => {
   );
 };
 
-export default NewGameDialog;
+export default EditGameDialog;
