@@ -1,3 +1,4 @@
+import { Games } from "../data/game_data";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,13 @@ import {
               Create, update, import, and delete games.
             </DialogDescription>
           </DialogHeader>
+          <div>
+            {Games.map((game, i) => (
+              <div key={i} className="outline">
+                {game.title}
+              </div>
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
     );
