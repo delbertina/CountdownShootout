@@ -1,4 +1,6 @@
+import { Delete, Edit, Import, Plus, X } from "lucide-react";
 import { Games } from "../data/game_data";
+import { Button } from "./ui/button";
 import {
     Dialog,
     DialogContent,
@@ -17,10 +19,25 @@ import {
               Create, update, import, and delete games.
             </DialogDescription>
           </DialogHeader>
+          <div className="flex flex-row gap-4 justify-between">
+            <div>
+            <Button><Plus /></Button>
+            <Button><Import /></Button>
+            </div>
+            <div>
+              <Button><X /></Button>
+            </div>
+          </div>
           <div>
             {Games.map((game, i) => (
-              <div key={i} className="outline">
+              <div key={i} className="outline w-full flex flex-row gap-4 justify-between">
+                <div>
                 {game.title}
+                </div>
+                <div>
+                  <Button><Edit /></Button>
+                  <Button variant={"destructive"}><Delete /></Button>
+                </div>
               </div>
             ))}
           </div>
