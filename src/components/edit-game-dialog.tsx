@@ -27,15 +27,19 @@ const formSchema = z.object({
   info_timeout: z.number().min(1).max(30),
   answer_timeout: z.number().min(1).max(30),
   points_per_question: z.number().min(1).max(100),
-  question_text_1: z.string().min(1),
-  question_video_src: z.string().min(1),
-  question_video_start_time_1: z.number().min(0),
-  question_video_end_time_1: z.number().min(0),
-  question_answer_1: z.string().min(1),
-  question_answer_subtext_1: z.string().min(1).optional(),
-  question_answer_oncore_src_1: z.string().min(1).optional(),
-  question_answer_oncore_start_1: z.number().min(0).optional(),
-  question_answer_oncore_end_1: z.number().min(0).optional(),
+  questions: z.array(
+    z.object({
+      text: z.string().min(1),
+      video_src: z.string().min(1),
+      video_start_time: z.number().min(0),
+      video_end_time: z.number().min(0),
+      answer: z.string().min(1),
+      answer_subtext: z.string().min(1).optional(),
+      answer_oncore_src: z.string().min(1).optional(),
+      answer_oncore_start: z.number().min(0).optional(),
+      answer_oncore_end: z.number().min(0).optional(),
+    })
+  ),
 });
 
 const EditGameDialog = () => {
@@ -175,9 +179,11 @@ const EditGameDialog = () => {
                 </FormItem>
               )}
             />
+            {form.watch("questions").map((_question, index) => (
+              <>
             <FormField
               control={form.control}
-              name="question_text_1"
+              name={`questions.${index}.text`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Question Text</FormLabel>
@@ -193,7 +199,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_video_src"
+                  name={`questions.${index}.video_src`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Video</FormLabel>
@@ -215,7 +221,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_video_start_time_1"
+                  name={`questions.${index}.video_start_time`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Start Time</FormLabel>
@@ -233,7 +239,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_video_end_time_1"
+                  name={`questions.${index}.video_end_time`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>End Time</FormLabel>
@@ -253,7 +259,7 @@ const EditGameDialog = () => {
               <div className="col-span-6">
                 <FormField
                   control={form.control}
-                  name="question_answer_1"
+                  name={`questions.${index}.answer`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Answer</FormLabel>
@@ -275,7 +281,7 @@ const EditGameDialog = () => {
               <div className="col-span-6">
                 <FormField
                   control={form.control}
-                  name="question_answer_subtext_1"
+                  name={`questions.${index}.answer_subtext`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Answer Subtext</FormLabel>
@@ -295,7 +301,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_answer_oncore_src_1"
+                  name={`questions.${index}.answer_oncore_src`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Answer Oncore Video</FormLabel>
@@ -313,7 +319,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_answer_oncore_start_1"
+                  name={`questions.${index}.answer_oncore_start`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Answer Oncore Start</FormLabel>
@@ -331,7 +337,7 @@ const EditGameDialog = () => {
               <div className="col-span-4">
                 <FormField
                   control={form.control}
-                  name="question_answer_oncore_end_1"
+                  name={`questions.${index}.answer_oncore_end`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Answer Oncore End</FormLabel>
@@ -347,6 +353,8 @@ const EditGameDialog = () => {
                 />
               </div>
             </div>
+            </>
+            ))}
             <Button type="submit">Submit</Button>
           </form>
         </Form>
