@@ -20,6 +20,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { NewGameQuestion } from "../types/game_types";
 
 const formSchema = z.object({
   game_title: z.string().min(1),
@@ -55,15 +56,15 @@ const EditGameDialog = () => {
     setValue("questions", [
       ...questions,
       {
-        text: "",
-        video_src: "",
-        video_start_time: 0,
-        video_end_time: 0,
-        answer: "",
-        answer_subtext: "",
-        answer_oncore_src: "",
-        answer_oncore_start: 0,
-        answer_oncore_end: 0,
+        text: NewGameQuestion.questionText,
+        video_src: NewGameQuestion.questionVideo.youTubeID,
+        video_start_time: NewGameQuestion.questionVideo.startTime,
+        video_end_time: NewGameQuestion.questionVideo.endTime,
+        answer: NewGameQuestion.answer,
+        answer_subtext: NewGameQuestion.answerSubtext,
+        answer_oncore_src: NewGameQuestion.answerEncore?.youTubeID??"",
+        answer_oncore_start: NewGameQuestion.answerEncore?.startTime??0,
+        answer_oncore_end: NewGameQuestion.answerEncore?.endTime??0,
       },
     ]);
   };
@@ -96,21 +97,6 @@ const EditGameDialog = () => {
           <DialogTitle>Edit Game</DialogTitle>
           <DialogDescription>Edit the data of a game.</DialogDescription>
         </DialogHeader>
-        <div>{/* Title */}</div>
-        <div>{/* Description */}</div>
-        <div>{/* Game Settings */}</div>
-        <div>
-          {/* Question List Header */}
-          {/* Add Question Button */}
-        </div>
-        <div>
-          {/* Questions List */}
-          <div>{/* Question Text */}</div>
-          <div>{/* Question Video */}</div>
-          <div>{/* Question Answer */}</div>
-          <div>{/* Question Answer Subtext */}</div>
-          <div>{/* Question Oncore */}</div>
-        </div>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

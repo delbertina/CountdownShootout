@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
+import { ButtonData, DebugButton, Game, GameStage, NewGame } from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
@@ -17,7 +17,10 @@ interface GameState extends GameStatePartial {
   debugButtonCol: number;
   debugButtonRow: number;
   debugTeamSelector: number;
+  currentEditGame: Game;
   isDebugOpen: boolean;
+  isManageGamesOpen: boolean;
+  isEditGameOpen: boolean;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
   symbolLeft: (gamepadIndex: number) => void;
@@ -66,7 +69,10 @@ export const useGameStore = create<GameState>()(
     debugButtonCol: 0,
     debugButtonRow: 0,
     debugTeamSelector: 0,
+    currentEditGame: NewGame,
     isDebugOpen: false,
+    isManageGamesOpen: false,
+    isEditGameOpen: false,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
