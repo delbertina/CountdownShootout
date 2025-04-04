@@ -8,7 +8,7 @@ import {
 import { ButtonData } from "../types/game_types";
 import { useGameStore } from "../store/gameStore";
 import { useMemo } from "react";
-import { dummyTeamState, getTeamDisplayName } from "../types/state_types";
+import { dummyTeamState, GameDialog, getTeamDisplayName } from "../types/state_types";
 
 const DebugDialog = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -22,7 +22,7 @@ const DebugDialog = () => {
     () => teams.map((team) => team.scoreHistory),
     [teams]
   );
-  const isDebugOpen = useGameStore((state) => state.isDebugOpen);
+  const isDebugOpen = useGameStore((state) => state.openDialog === GameDialog.Debug);
   const toggleDebugDialog = useGameStore((state) => state.toggleDebugDialog);
 
   return (

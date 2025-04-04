@@ -400,7 +400,7 @@ export const useGameStore = create<GameState>()(
     },
     toggleDebugDialog: () =>
       set((state) => ({
-        isDebugOpen: !(state.openDialog === GameDialog.Debug),
+        openDialog: (state.openDialog === GameDialog.Debug) ? GameDialog.None : GameDialog.Debug,
         isPaused:
           state.stage === GameStage.Playing
             ? !(state.openDialog === GameDialog.Debug)
