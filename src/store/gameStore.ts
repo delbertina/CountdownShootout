@@ -4,6 +4,7 @@ import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
 import {
+  GameDialog,
   GameStatePartial,
   initialTeamState,
   newGameQuestionState,
@@ -18,9 +19,7 @@ interface GameState extends GameStatePartial {
   debugButtonRow: number;
   debugTeamSelector: number;
   currentEditGame: Game;
-  isDebugOpen: boolean;
-  isManageGamesOpen: boolean;
-  isEditGameOpen: boolean;
+  openDialog: GameDialog;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
   symbolLeft: (gamepadIndex: number) => void;
@@ -70,9 +69,7 @@ export const useGameStore = create<GameState>()(
     debugButtonRow: 0,
     debugTeamSelector: 0,
     currentEditGame: NewGame,
-    isDebugOpen: false,
-    isManageGamesOpen: false,
-    isEditGameOpen: false,
+    openDialog: GameDialog.None,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
@@ -126,7 +123,7 @@ export const useGameStore = create<GameState>()(
         }));
         get().answerQuestion(gamepadIndex);
       } else {
-        if (get().isDebugOpen) {
+        if (get().openDialog === GameDialog.Debug) {
           // select the button we're on
           get().selectDebugButton();
         } else if (stage === GameStage.Answering) {
@@ -403,10 +400,10 @@ export const useGameStore = create<GameState>()(
     },
     toggleDebugDialog: () =>
       set((state) => ({
-        isDebugOpen: !state.isDebugOpen,
+        isDebugOpen: !(state.openDialog === GameDialog.Debug),
         isPaused:
           state.stage === GameStage.Playing
-            ? !state.isDebugOpen
+            ? !(state.openDialog === GameDialog.Debug)
             : state.isPaused,
       })),
     debugAbandonQuiz: () => {
