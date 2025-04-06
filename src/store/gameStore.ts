@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { ButtonData, DebugButton, Game, GameStage, NewGame } from "../types/game_types";
+import {
+  ButtonData,
+  DebugButton,
+  Game,
+  GameStage,
+  NewGame,
+} from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
@@ -37,7 +43,8 @@ interface GameState extends GameStatePartial {
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
-  toggleDebugDialog: () => void;
+  presentDialog: (dialog: GameDialog) => void;
+  closeDialog: () => void;
   debugAbandonQuiz: () => void;
   debugRestartQuiz: () => void;
   debugScoreQuiz: () => void;
@@ -109,7 +116,7 @@ export const useGameStore = create<GameState>()(
         get().answerQuestion(gamepadIndex);
         return;
       } else {
-        get().toggleDebugDialog();
+        get().presentDialog(GameDialog.Debug);
       }
       // pause?
     },
@@ -227,18 +234,18 @@ export const useGameStore = create<GameState>()(
         // if the length of the answerable teams is 1, then that means only this
         // team can answer and is answering so reset to allow any team to answer
         if (answerableTeams.length === 1) {
-            set((state) => ({
-              stage: GameStage.Answering,
-              lastAnswerTime: Date.now(),
-              isPaused: true,
-              teams: state.teams.map((team) =>
-                // if the team is the one that just pressed, set them to be answering
-                // set all to be able to answer
-                team.id === gamepadIndex
-                  ? { ...team, isAnswering: true, canAnswer: true }
-                  : { ...team, canAnswer: true }
-              ),
-            }));
+          set((state) => ({
+            stage: GameStage.Answering,
+            lastAnswerTime: Date.now(),
+            isPaused: true,
+            teams: state.teams.map((team) =>
+              // if the team is the one that just pressed, set them to be answering
+              // set all to be able to answer
+              team.id === gamepadIndex
+                ? { ...team, isAnswering: true, canAnswer: true }
+                : { ...team, canAnswer: true }
+            ),
+          }));
         }
         // else there are still other teams that can answer
         else {
@@ -351,7 +358,11 @@ export const useGameStore = create<GameState>()(
           });
           break;
         case GameStage.Playing:
-          set({ stage: GameStage.Answering, isPaused: true, lastAnswerTime: Date.now() });
+          set({
+            stage: GameStage.Answering,
+            isPaused: true,
+            lastAnswerTime: Date.now(),
+          });
           break;
         case GameStage.Answering:
           set({
@@ -398,13 +409,12 @@ export const useGameStore = create<GameState>()(
       if (!foundGame) return;
       set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
-    toggleDebugDialog: () =>
+    presentDialog: (dialog: GameDialog) =>
+      set(() => ({ openDialog: dialog, itPaused: true })),
+    closeDialog: () =>
       set((state) => ({
-        openDialog: (state.openDialog === GameDialog.Debug) ? GameDialog.None : GameDialog.Debug,
-        isPaused:
-          state.stage === GameStage.Playing
-            ? !(state.openDialog === GameDialog.Debug)
-            : state.isPaused,
+        openDialog: GameDialog.None,
+        isPaused: state.stage === GameStage.Playing ? false : state.isPaused,
       })),
     debugAbandonQuiz: () => {
       console.log(
@@ -574,9 +584,8 @@ export const useGameStore = create<GameState>()(
         case DebugButton.DECREASE_TEAM_SCORE:
           get().debugDecreaseTeamScore();
           break;
-          break;
         case DebugButton.CLOSE:
-          get().toggleDebugDialog();
+          get().closeDialog();
           break;
         default:
           break;
@@ -657,7 +666,10 @@ export const useGameStore = create<GameState>()(
       }));
     },
     infoTimeoutEnded: () => {
-      if (get().stage === GameStage.Waiting || get().stage === GameStage.Scoring) {
+      if (
+        get().stage === GameStage.Waiting ||
+        get().stage === GameStage.Scoring
+      ) {
         get().advanceStage();
       }
     },
