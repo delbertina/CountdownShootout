@@ -45,6 +45,7 @@ interface GameState extends GameStatePartial {
   selectQuiz: (id: number) => void;
   presentDialog: (dialog: GameDialog) => void;
   closeDialog: () => void;
+  setCurrentEditGame: (game: Game) => void;
   debugAbandonQuiz: () => void;
   debugRestartQuiz: () => void;
   debugScoreQuiz: () => void;
@@ -416,6 +417,7 @@ export const useGameStore = create<GameState>()(
         openDialog: GameDialog.None,
         isPaused: state.stage === GameStage.Playing ? false : state.isPaused,
       })),
+    setCurrentEditGame: (game: Game) => set({ currentEditGame: game }),
     debugAbandonQuiz: () => {
       console.log(
         "Abandoning quiz & clearing team state. Previous: ",

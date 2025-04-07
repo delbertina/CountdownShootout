@@ -21,6 +21,8 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { NewGameQuestion } from "../types/game_types";
+import { GameDialog } from "../types/state_types";
+import { useGameStore } from "../store/gameStore";
 
 const formSchema = z.object({
   game_title: z.string().min(1),
@@ -44,12 +46,17 @@ const formSchema = z.object({
 });
 
 const EditGameDialog = () => {
+  const isDialogOpen = useGameStore(
+    (state) => state.openDialog === GameDialog.EditGame
+  );
+  const openDialog = useGameStore((state) => state.presentDialog);
+  const closeDialog = useGameStore((state) => state.closeDialog);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const { watch, setValue } = form;
-
   const questions = watch("questions");
 
   const addQuestion = () => {
@@ -62,9 +69,9 @@ const EditGameDialog = () => {
         video_end_time: NewGameQuestion.questionVideo.endTime,
         answer: NewGameQuestion.answer,
         answer_subtext: NewGameQuestion.answerSubtext,
-        answer_oncore_src: NewGameQuestion.answerEncore?.youTubeID??"",
-        answer_oncore_start: NewGameQuestion.answerEncore?.startTime??0,
-        answer_oncore_end: NewGameQuestion.answerEncore?.endTime??0,
+        answer_oncore_src: NewGameQuestion.answerEncore?.youTubeID ?? "",
+        answer_oncore_start: NewGameQuestion.answerEncore?.startTime ?? 0,
+        answer_oncore_end: NewGameQuestion.answerEncore?.endTime ?? 0,
       },
     ]);
   };
@@ -91,7 +98,12 @@ const EditGameDialog = () => {
   }
 
   return (
-    <Dialog open={true} onOpenChange={() => {}}>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(open) =>
+        open ? openDialog(GameDialog.EditGame) : closeDialog()
+      }
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Game</DialogTitle>

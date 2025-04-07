@@ -3,9 +3,11 @@ import GameCard from "../components/game-card";
 import { Button } from "../components/ui/button";
 import { Games } from "../data/game_data";
 import { useGameStore } from "../store/gameStore";
+import { GameDialog } from "../types/state_types";
 
 const GameListPage = () => {
   const selectQuiz = useGameStore((state) => state.selectQuiz);
+  const openDialog = useGameStore((state) => state.presentDialog);
   return (
     <div className="card-page whole-screen flex flex-col bg-slate-700 text-amber-200 gap-4">
       <div className="flex flex-row items-center justify-center gap-4">
@@ -17,7 +19,7 @@ const GameListPage = () => {
         <h1 className="font-bold flex-grow-0">Game List</h1>
         <div>
           <Button>
-            <Settings />
+            <Settings onClick={() => openDialog(GameDialog.ManageGames)} />
           </Button>
         </div>
       </div>
