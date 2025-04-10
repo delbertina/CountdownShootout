@@ -9,6 +9,8 @@ import { useToast } from "./hooks/use-toast";
 import DebugDialog from "./components/debug-dialog";
 import TeamOptionsPage from "./pages/team-options-page";
 import { getTeamDisplayName } from "./types/state_types";
+import ManageGamesDialog from "./components/manage-games-dialog";
+import EditGameDialog from "./components/edit-game-dialog";
 
 const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -76,6 +78,8 @@ const App = () => {
       {currentGame && <GamePlayPage />}
       <Toaster />
       <DebugDialog />
+      <ManageGamesDialog />
+      <EditGameDialog />
     </>
   );
 };
