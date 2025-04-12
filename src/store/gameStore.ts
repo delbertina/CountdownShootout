@@ -19,7 +19,9 @@ import {
 } from "../types/state_types";
 
 interface GameState extends GameStatePartial {
+  allGames: Game[];
   currentGame: Game | undefined;
+  nextGameId: number;
   teams: TeamState[];
   debugButtonCol: number;
   debugButtonRow: number;
@@ -66,11 +68,17 @@ interface GameState extends GameStatePartial {
   removeTeam: (teamId: number) => void;
   infoTimeoutEnded: () => void;
   answerTimeoutEnded: () => void;
+  addNewGame: (game: Game) => void;
+  editGame: (game: Game) => void;
+  deleteGame: (gameId: number) => void;
 }
 
 export const useGameStore = create<GameState>()(
   devtools((set, get) => ({
+    allGames: Games,
     currentGame: undefined,
+    nextGameId:
+      Games.map((game) => game.id).reduce((a, b) => Math.max(a, b)) + 1,
     teams: initialTeamState,
     ...newGameState,
     debugButtonCol: 0,
@@ -406,7 +414,7 @@ export const useGameStore = create<GameState>()(
       }
     },
     selectQuiz(id: number) {
-      const foundGame = Games.find((game) => game.id === id);
+      const foundGame = this.allGames.find((game) => game.id === id);
       if (!foundGame) return;
       set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
@@ -660,7 +668,7 @@ export const useGameStore = create<GameState>()(
         ],
       }));
     },
-    removeTeam: (teamId) => {
+    removeTeam: (teamId: number) => {
       // if there's 2 (or less somehow) teams, we can't remove any
       if (get().teams.length <= 2) return;
       set((state) => ({
@@ -679,6 +687,23 @@ export const useGameStore = create<GameState>()(
       if (get().stage === GameStage.Answering) {
         // do nothing and just display visually that the timer expired
       }
+    },
+    addNewGame: (game: Game) => {
+      set((state) => ({
+        allGames: [...state.allGames, { ...game, id: state.nextGameId }],
+        nextGameId: state.nextGameId + 1,
+      }));
+    },
+    editGame: (game: Game) => {
+      set((state) => ({
+        allGames: state.allGames.map((g) => (g.id === game.id ? game : g)),
+      }));
+    },
+    deleteGame: (gameId: number) => {
+      // do not change the nextGameId when deleting
+      set((state) => ({
+        allGames: state.allGames.filter((g) => g.id !== gameId),
+      }));
     },
   }))
 );
