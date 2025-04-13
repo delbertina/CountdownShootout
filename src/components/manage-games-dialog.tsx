@@ -1,5 +1,4 @@
 import { Delete, Edit, Import, Plus, X } from "lucide-react";
-import { Games } from "../data/game_data";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
 } from "./ui/dialog";
 import { useGameStore } from "../store/gameStore";
 import { GameDialog } from "../types/state_types";
-import { NewGame } from "../types/game_types";
+import { Game, NewGame } from "../types/game_types";
 
 const ManageGamesDialog = () => {
   const isDialogOpen = useGameStore(
@@ -19,10 +18,28 @@ const ManageGamesDialog = () => {
   const openDialog = useGameStore((state) => state.presentDialog);
   const closeDialog = useGameStore((state) => state.closeDialog);
   const setCurrentEditGame = useGameStore((state) => state.setCurrentEditGame);
+  const deleteGame = useGameStore((state) => state.deleteGame);
+  const allGames = useGameStore((state) => state.allGames);
 
   const addNewGame = () => {
     setCurrentEditGame({ ...NewGame });
     openDialog(GameDialog.EditGame);
+  };
+
+  const startEditGame = (game: Game) => {
+    if (game) {
+      setCurrentEditGame({ ...game });
+      openDialog(GameDialog.EditGame);
+    }
+  };
+
+  const startDeleteGame = (gameId: number) => {
+    // display a dialog to confirm deletion
+    const result = window.confirm("Are you sure you want to delete this game?");
+    // if confirmed, delete the game
+    if (result) {
+      deleteGame(gameId);
+    }
   };
 
   return (
@@ -41,8 +58,8 @@ const ManageGamesDialog = () => {
         </DialogHeader>
         <div className="flex flex-row gap-4 justify-between">
           <div>
-            <Button>
-              <Plus onClick={() => addNewGame()} />
+            <Button onClick={() => addNewGame()}>
+              <Plus />
             </Button>
             <Button disabled>
               <Import />
@@ -55,17 +72,17 @@ const ManageGamesDialog = () => {
           </div>
         </div>
         <div>
-          {Games.map((game, i) => (
+          {allGames.map((game, i) => (
             <div
               key={i}
               className="outline w-full flex flex-row gap-4 justify-between"
             >
               <div>{game.title}</div>
               <div>
-                <Button>
+                <Button onClick={() => startEditGame(game)}>
                   <Edit />
                 </Button>
-                <Button variant={"destructive"}>
+                <Button variant={"destructive"} onClick={() => startDeleteGame(game.id)}>
                   <Delete />
                 </Button>
               </div>
