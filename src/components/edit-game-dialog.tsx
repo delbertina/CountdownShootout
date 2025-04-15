@@ -20,7 +20,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { NewGameQuestion } from "../types/game_types";
+import { NewGame, NewGameQuestion } from "../types/game_types";
 import { GameDialog } from "../types/state_types";
 import { useGameStore } from "../store/gameStore";
 
@@ -51,6 +51,9 @@ const EditGameDialog = () => {
   );
   const openDialog = useGameStore((state) => state.presentDialog);
   const closeDialog = useGameStore((state) => state.closeDialog);
+  const currentEditGame = useGameStore((state) => state.currentEditGame);
+  const editGame = useGameStore((state) => state.editGame);
+  const createGame = useGameStore((state) => state.createGame);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,11 +89,39 @@ const EditGameDialog = () => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      const gameValues = {
+        id: currentEditGame.id,
+        title: values.game_title,
+        description: values.description,
+        settings:{
+          infoTimeout: values.info_timeout,
+          answerTimeout: values.answer_timeout,
+          pointsPerQuestion: values.points_per_question,
+        },
+        questions: values.questions.map((question) => ({
+          questionText: question.text,
+          questionVideo: {
+            youTubeID: question.video_src??"",
+            startTime: question.video_start_time,
+            endTime: question.video_end_time,
+          },
+          answer: question.answer,
+          answerSubtext: question.answer_subtext,
+          answerEncore: {
+            youTubeID: question.answer_oncore_src??"",
+            startTime: question.answer_oncore_start??0,
+            endTime: question.answer_oncore_end??0,
+          },
+        })),
+      };
+      // if we're "editing" a new game, create it
+      if (currentEditGame.id === NewGame.id) {
+        createGame(gameValues);
+      } else {
+        // else just normal edit
+        editGame(gameValues);
+      }
+      toast({ title: "Action Successful!" });
     } catch (error) {
       console.error("Form submission error", error);
       toast({ title: "Failed to submit the form. Please try again." });

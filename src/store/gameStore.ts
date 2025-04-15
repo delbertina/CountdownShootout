@@ -68,7 +68,7 @@ interface GameState extends GameStatePartial {
   removeTeam: (teamId: number) => void;
   infoTimeoutEnded: () => void;
   answerTimeoutEnded: () => void;
-  addNewGame: (game: Game) => void;
+  createGame: (game: Game) => void;
   editGame: (game: Game) => void;
   deleteGame: (gameId: number) => void;
 }
@@ -688,7 +688,7 @@ export const useGameStore = create<GameState>()(
         // do nothing and just display visually that the timer expired
       }
     },
-    addNewGame: (game: Game) => {
+    createGame: (game: Game) => {
       set((state) => ({
         allGames: [...state.allGames, { ...game, id: state.nextGameId }],
         nextGameId: state.nextGameId + 1,
