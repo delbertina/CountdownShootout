@@ -414,8 +414,11 @@ export const useGameStore = create<GameState>()(
       }
     },
     selectQuiz(id: number) {
-      const foundGame = this.allGames.find((game) => game.id === id);
-      if (!foundGame) return;
+      const foundGame = get().allGames.find((game) => game.id === id);
+      if (!foundGame) {
+        console.log("Game not found of index: ", id, get().allGames);
+        return;
+      }
       set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
     presentDialog: (dialog: GameDialog) =>

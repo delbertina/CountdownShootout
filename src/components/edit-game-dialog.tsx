@@ -27,20 +27,20 @@ import { useGameStore } from "../store/gameStore";
 const formSchema = z.object({
   game_title: z.string().min(1),
   description: z.string().min(1),
-  info_timeout: z.number().min(1).max(30),
-  answer_timeout: z.number().min(1).max(30),
-  points_per_question: z.number().min(1).max(100),
+  info_timeout: z.coerce.number().min(1).max(30),
+  answer_timeout: z.coerce.number().min(1).max(30),
+  points_per_question: z.coerce.number().min(1).max(100),
   questions: z.array(
     z.object({
       text: z.string().min(1),
       video_src: z.string().min(1),
-      video_start_time: z.number().min(0),
-      video_end_time: z.number().min(0),
+      video_start_time: z.coerce.number().min(0),
+      video_end_time: z.coerce.number().min(0),
       answer: z.string().min(1),
       answer_subtext: z.string().min(1).optional(),
-      answer_oncore_src: z.string().min(1).optional(),
-      answer_oncore_start: z.number().min(0).optional(),
-      answer_oncore_end: z.number().min(0).optional(),
+      answer_oncore_src: z.string().optional(),
+      answer_oncore_start: z.coerce.number().min(0).optional(),
+      answer_oncore_end: z.coerce.number().min(0).optional(),
     })
   ),
 });
@@ -58,13 +58,12 @@ const EditGameDialog = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-
   const { watch, setValue } = form;
-  const questions = watch("questions");
+  const questions = watch("questions") as z.infer<typeof formSchema>["questions"];
 
   const addQuestion = () => {
     setValue("questions", [
-      ...questions,
+      // ...questions,
       {
         text: NewGameQuestion.questionText,
         video_src: NewGameQuestion.questionVideo.youTubeID,
@@ -114,6 +113,7 @@ const EditGameDialog = () => {
           },
         })),
       };
+      console.log(gameValues);
       // if we're "editing" a new game, create it
       if (currentEditGame.id === NewGame.id) {
         createGame(gameValues);
@@ -135,11 +135,12 @@ const EditGameDialog = () => {
         open ? openDialog(GameDialog.EditGame) : closeDialog()
       }
     >
-      <DialogContent>
+      <DialogContent className="sm:max-w-3xl flex flex-col h-screen">
         <DialogHeader>
           <DialogTitle>Edit Game</DialogTitle>
           <DialogDescription>Edit the data of a game.</DialogDescription>
         </DialogHeader>
+        <div className="overflow-y-auto flex-1">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -240,8 +241,8 @@ const EditGameDialog = () => {
               <h2 className="text-lg font-semibold">Questions</h2>
               <Button onClick={addQuestion}>Add Question</Button>
             </div>
-            {form.watch("questions").map((_question, index) => (
-              <>
+            {watch("questions")?.map((_question, index) => (
+              <div key={index}>
                 <div className="flex flex-row justify-between">
                   <Button onClick={() => removeQuestion(index)}>Remove</Button>
                   <FormField
@@ -424,11 +425,12 @@ const EditGameDialog = () => {
                     />
                   </div>
                 </div>
-              </>
+              </div>
             ))}
             <Button type="submit">Submit</Button>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
