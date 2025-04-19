@@ -27,6 +27,7 @@ import {
 } from "../types/game_types";
 import { GameDialog } from "../types/state_types";
 import { useGameStore } from "../store/gameStore";
+import { ChevronDown, ChevronUp, Copy, Trash } from "lucide-react";
 
 const formSchema = z.object({
   game_title: z.string().min(1),
@@ -194,8 +195,8 @@ const EditGameDialog = () => {
       <DialogContent className="sm:max-w-3xl flex flex-col h-screen">
         <DialogHeader className="flex flex-row items-center justify-between">
           <div>
-          <DialogTitle>Edit Game</DialogTitle>
-          <DialogDescription>Edit the data of a game.</DialogDescription>
+            <DialogTitle>Edit Game</DialogTitle>
+            <DialogDescription>Edit the data of a game.</DialogDescription>
           </div>
           <Button onClick={handleClose}>X</Button>
         </DialogHeader>
@@ -304,28 +305,24 @@ const EditGameDialog = () => {
                 <Button onClick={addQuestion}>Add Question</Button>
               </div>
               {watch("questions")?.map((_question, index) => (
-                <div key={index}>
+                <div key={index} className="flex flex-col gap-8">
                   <div className="flex flex-row justify-between">
                     <div className="flex flex-row flex-wrap gap-4">
-                      <Button onClick={() => removeQuestion(index)}>
-                        Remove
-                      </Button>
                       <Button onClick={() => moveQuestionUp(index)}>
-                        Move Up
+                        <ChevronUp />
                       </Button>
                       <Button onClick={() => moveQuestionDown(index)}>
-                        Move Down
+                        <ChevronDown />
                       </Button>
                       <Button onClick={() => duplicateQuestion(index)}>
-                        Duplicate
-                      </Button>
-                      <Button
-                        // disabled={questions[index].oncore.length >= 0}
-                        onClick={() => addOncore(index)}
-                      >
-                        Add Oncore
+                        <Copy />
                       </Button>
                     </div>
+                    <Button onClick={() => removeQuestion(index)} variant={"destructive"}>
+                      <Trash />
+                    </Button>
+                  </div>
+                  <div>
                     <FormField
                       control={form.control}
                       name={`questions.${index}.text`}
@@ -363,7 +360,7 @@ const EditGameDialog = () => {
                               />
                             </FormControl>
                             <FormDescription>
-                              Link to the YouTube for the question
+                              YouTube video ID for question
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -385,8 +382,7 @@ const EditGameDialog = () => {
                               />
                             </FormControl>
                             <FormDescription>
-                              Timestamp that the video should start playing in
-                              seconds
+                              Timestamp to start playing (seconds)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -408,7 +404,7 @@ const EditGameDialog = () => {
                               />
                             </FormControl>
                             <FormDescription>
-                              Timestamp that the video should end in seconds
+                              Timestamp to stop playing (seconds)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -458,14 +454,26 @@ const EditGameDialog = () => {
                       />
                     </div>
                   </div>
+                  <div className="flex flex-row gap-4">
+                    <Button
+                      disabled={questions[index].oncore.length > 0}
+                      onClick={() => addOncore(index)}
+                    >
+                      Add Oncore
+                    </Button>
+                    <Button
+                      disabled={questions[index].oncore.length === 0}
+                      onClick={() => removeOncore(index)}
+                      variant="destructive"
+                    >
+                      Remove Oncore
+                    </Button>
+                  </div>
                   {_question.oncore.map((_oncore, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-4">
-                      <Button
-                        className="col-span-2"
-                        onClick={() => removeOncore(index)}
-                      >
-                        Remove
-                      </Button>
+                    <div
+                      key={i}
+                      className="grid grid-cols-12 gap-4 align-middle"
+                    >
                       <div className="col-span-4">
                         <FormField
                           control={form.control}
@@ -474,17 +482,21 @@ const EditGameDialog = () => {
                             <FormItem>
                               <FormLabel>Answer Oncore Video</FormLabel>
                               <FormControl>
-                                <Input placeholder="" type="text" {...field} />
+                                <Input
+                                  placeholder="youtube.com/???"
+                                  type="text"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormDescription>
-                                Youtube video URL for oncore video
+                                Youtube video ID for oncore video
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-4">
                         <FormField
                           control={form.control}
                           name={`questions.${index}.oncore.${i}.answer_oncore_start`}
@@ -499,15 +511,14 @@ const EditGameDialog = () => {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Timestamp that the oncore video starts in
-                                seconds
+                                Timestamp to start playing (seconds)
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-4">
                         <FormField
                           control={form.control}
                           name={`questions.${index}.oncore.${i}.answer_oncore_end`}
@@ -522,7 +533,7 @@ const EditGameDialog = () => {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Time that the oncore video ends in seconds
+                                Timestamp to stop playing (seconds)
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
