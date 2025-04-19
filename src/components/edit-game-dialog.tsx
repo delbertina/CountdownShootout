@@ -20,7 +20,11 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { NewGame, NewGameQuestion } from "../types/game_types";
+import {
+  NewGame,
+  NewGameQuestion,
+  NewGameQuestionOncore,
+} from "../types/game_types";
 import { GameDialog } from "../types/state_types";
 import { useGameStore } from "../store/gameStore";
 
@@ -38,9 +42,13 @@ const formSchema = z.object({
       video_end_time: z.coerce.number().min(0),
       answer: z.string().min(1),
       answer_subtext: z.string().min(1).optional(),
-      answer_oncore_src: z.string().optional(),
-      answer_oncore_start: z.coerce.number().min(0).optional(),
-      answer_oncore_end: z.coerce.number().min(0).optional(),
+      oncore: z.array(
+        z.object({
+          answer_oncore_src: z.string().min(1).optional(),
+          answer_oncore_start: z.coerce.number().min(0).optional(),
+          answer_oncore_end: z.coerce.number().min(0).optional(),
+        })
+      ),
     })
   ),
 });
@@ -59,9 +67,11 @@ const EditGameDialog = () => {
     resolver: zodResolver(formSchema),
   });
   const { watch, setValue } = form;
-  const questions = watch("questions") as z.infer<typeof formSchema>["questions"];
+  const questions = watch("questions") as z.infer<
+    typeof formSchema
+  >["questions"];
 
-  const addQuestion = () => {
+  const addQuestion = (): void => {
     setValue("questions", [
       // ...questions,
       {
@@ -71,28 +81,66 @@ const EditGameDialog = () => {
         video_end_time: NewGameQuestion.questionVideo.endTime,
         answer: NewGameQuestion.answer,
         answer_subtext: NewGameQuestion.answerSubtext,
-        answer_oncore_src: NewGameQuestion.answerEncore?.youTubeID ?? "",
-        answer_oncore_start: NewGameQuestion.answerEncore?.startTime ?? 0,
-        answer_oncore_end: NewGameQuestion.answerEncore?.endTime ?? 0,
+        oncore: [],
       },
     ]);
   };
 
-  const removeQuestion = (index: number) => {
+  const removeQuestion = (index: number): void => {
     setValue(
       "questions",
       questions.filter((_question, i) => i !== index)
     );
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const moveQuestionUp = (index: number): void => {
+    const newQuestions = [...questions];
+    const temp = newQuestions[index];
+    newQuestions[index] = newQuestions[index - 1];
+    newQuestions[index - 1] = temp;
+    setValue("questions", newQuestions);
+  };
+
+  const moveQuestionDown = (index: number): void => {
+    const newQuestions = [...questions];
+    const temp = newQuestions[index];
+    newQuestions[index] = newQuestions[index + 1];
+    newQuestions[index + 1] = temp;
+    setValue("questions", newQuestions);
+  };
+
+  const duplicateQuestion = (index: number): void => {
+    const newQuestions = [...questions];
+    newQuestions.splice(index + 1, 0, questions[index]);
+    setValue("questions", newQuestions);
+  };
+
+  const addOncore = (index: number): void => {
+    const newQuestions = [...questions];
+    newQuestions[index].oncore = [
+      {
+        answer_oncore_src: NewGameQuestionOncore.youTubeID,
+        answer_oncore_start: NewGameQuestionOncore.startTime,
+        answer_oncore_end: NewGameQuestionOncore.endTime,
+      },
+    ];
+    setValue("questions", newQuestions);
+  };
+
+  const removeOncore = (index: number): void => {
+    const newQuestions = [...questions];
+    newQuestions[index].oncore = [];
+    setValue("questions", newQuestions);
+  };
+
+  const onSubmit = (values: z.infer<typeof formSchema>): void => {
     try {
       console.log(values);
       const gameValues = {
         id: currentEditGame.id,
         title: values.game_title,
         description: values.description,
-        settings:{
+        settings: {
           infoTimeout: values.info_timeout,
           answerTimeout: values.answer_timeout,
           pointsPerQuestion: values.points_per_question,
@@ -100,17 +148,21 @@ const EditGameDialog = () => {
         questions: values.questions.map((question) => ({
           questionText: question.text,
           questionVideo: {
-            youTubeID: question.video_src??"",
+            youTubeID: question.video_src ?? "",
             startTime: question.video_start_time,
             endTime: question.video_end_time,
           },
           answer: question.answer,
           answerSubtext: question.answer_subtext,
-          answerEncore: {
-            youTubeID: question.answer_oncore_src??"",
-            startTime: question.answer_oncore_start??0,
-            endTime: question.answer_oncore_end??0,
-          },
+          // if no oncore, don't add
+          answerEncore:
+            question.oncore.length > 0
+              ? {
+                  youTubeID: question.oncore[0].answer_oncore_src ?? "",
+                  startTime: question.oncore[0].answer_oncore_start ?? 0,
+                  endTime: question.oncore[0].answer_oncore_end ?? 0,
+                }
+              : undefined,
         })),
       };
       console.log(gameValues);
@@ -126,310 +178,369 @@ const EditGameDialog = () => {
       console.error("Form submission error", error);
       toast({ title: "Failed to submit the form. Please try again." });
     }
+  };
+
+  function handleClose(): void {
+    closeDialog();
   }
 
   return (
     <Dialog
       open={isDialogOpen}
       onOpenChange={(open) =>
-        open ? openDialog(GameDialog.EditGame) : closeDialog()
+        open ? openDialog(GameDialog.EditGame) : handleClose()
       }
     >
       <DialogContent className="sm:max-w-3xl flex flex-col h-screen">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div>
           <DialogTitle>Edit Game</DialogTitle>
           <DialogDescription>Edit the data of a game.</DialogDescription>
+          </div>
+          <Button onClick={handleClose}>X</Button>
         </DialogHeader>
         <div className="overflow-y-auto flex-1">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 max-w-3xl mx-auto py-10"
-          >
-            <FormField
-              control={form.control}
-              name="game_title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="New Game" type="text" {...field} />
-                  </FormControl>
-                  <FormDescription>The main name of the game.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <Form {...form}>
+            <form
+              id="edit-game-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-8 max-w-3xl mx-auto py-10"
+            >
+              <FormField
+                control={form.control}
+                name="game_title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="New Game" type="text" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The main name of the game.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="New game description"
-                      type="text"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Any extra info about the game not included in the title.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="New game description"
+                        type="text"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Any extra info about the game not included in the title.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="grid grid-cols-12 gap-4">
-              <div className="col-span-6">
-                <FormField
-                  control={form.control}
-                  name="info_timeout"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Info Timeout</FormLabel>
-                      <FormControl>
-                        <Input placeholder="15" type="number" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        How long the info stage should be visable before
-                        advancing
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="col-span-6">
-                <FormField
-                  control={form.control}
-                  name="answer_timeout"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Answer Timeout</FormLabel>
-                      <FormControl>
-                        <Input placeholder="15" type="number" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        How long teams get to answer
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-            <FormField
-              control={form.control}
-              name="points_per_question"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Points Per Question</FormLabel>
-                  <FormControl>
-                    <Input placeholder="1" type="number" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Max points each question is worth
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex flex-row justify-between">
-              <h2 className="text-lg font-semibold">Questions</h2>
-              <Button onClick={addQuestion}>Add Question</Button>
-            </div>
-            {watch("questions")?.map((_question, index) => (
-              <div key={index}>
-                <div className="flex flex-row justify-between">
-                  <Button onClick={() => removeQuestion(index)}>Remove</Button>
+              <div className="grid grid-cols-12 gap-4">
+                <div className="col-span-6">
                   <FormField
                     control={form.control}
-                    name={`questions.${index}.text`}
+                    name="info_timeout"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Question Text</FormLabel>
+                        <FormLabel>Info Timeout</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Question #1"
-                            type="text"
-                            {...field}
-                          />
+                          <Input placeholder="15" type="number" {...field} />
                         </FormControl>
                         <FormDescription>
-                          Hint text for the question
+                          How long the info stage should be visable before
+                          advancing
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.video_src`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Question Video</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="youtube.com/???"
-                              type="text"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Link to the YouTube for the question
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.video_start_time`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Start Time</FormLabel>
-                          <FormControl>
-                            <Input placeholder="15" type="number" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Timestamp that the video should start playing in
-                            seconds
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.video_end_time`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>End Time</FormLabel>
-                          <FormControl>
-                            <Input placeholder="30" type="number" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Timestamp that the video should end in seconds
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-6">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.answer`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Answer</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Question #1 Answer"
-                              type="text"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            The answer to the question
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-6">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.answer_subtext`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Answer Subtext</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" type="text" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Subtext for answer to the question
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.answer_oncore_src`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Answer Oncore Video</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" type="text" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Youtube video URL for oncore video
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.answer_oncore_start`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Answer Oncore Start</FormLabel>
-                          <FormControl>
-                            <Input placeholder="15" type="number" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Timestamp that the oncore video starts in seconds
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <FormField
-                      control={form.control}
-                      name={`questions.${index}.answer_oncore_end`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Answer Oncore End</FormLabel>
-                          <FormControl>
-                            <Input placeholder="30" type="number" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Time that the oncore video ends in seconds
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="col-span-6">
+                  <FormField
+                    control={form.control}
+                    name="answer_timeout"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Answer Timeout</FormLabel>
+                        <FormControl>
+                          <Input placeholder="15" type="number" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          How long teams get to answer
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
-            ))}
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="points_per_question"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Points Per Question</FormLabel>
+                    <FormControl>
+                      <Input placeholder="1" type="number" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Max points each question is worth
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex flex-row justify-between">
+                <h2 className="text-lg font-semibold">Questions</h2>
+                <Button onClick={addQuestion}>Add Question</Button>
+              </div>
+              {watch("questions")?.map((_question, index) => (
+                <div key={index}>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-row flex-wrap gap-4">
+                      <Button onClick={() => removeQuestion(index)}>
+                        Remove
+                      </Button>
+                      <Button onClick={() => moveQuestionUp(index)}>
+                        Move Up
+                      </Button>
+                      <Button onClick={() => moveQuestionDown(index)}>
+                        Move Down
+                      </Button>
+                      <Button onClick={() => duplicateQuestion(index)}>
+                        Duplicate
+                      </Button>
+                      <Button
+                        // disabled={questions[index].oncore.length >= 0}
+                        onClick={() => addOncore(index)}
+                      >
+                        Add Oncore
+                      </Button>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name={`questions.${index}.text`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Question Text</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Question #1"
+                              type="text"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Hint text for the question
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-4">
+                      <FormField
+                        control={form.control}
+                        name={`questions.${index}.video_src`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Question Video</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="youtube.com/???"
+                                type="text"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Link to the YouTube for the question
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="col-span-4">
+                      <FormField
+                        control={form.control}
+                        name={`questions.${index}.video_start_time`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Time</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="15"
+                                type="number"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Timestamp that the video should start playing in
+                              seconds
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="col-span-4">
+                      <FormField
+                        control={form.control}
+                        name={`questions.${index}.video_end_time`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Time</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="30"
+                                type="number"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Timestamp that the video should end in seconds
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-6">
+                      <FormField
+                        control={form.control}
+                        name={`questions.${index}.answer`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Answer</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Question #1 Answer"
+                                type="text"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              The answer to the question
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <FormField
+                        control={form.control}
+                        name={`questions.${index}.answer_subtext`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Answer Subtext</FormLabel>
+                            <FormControl>
+                              <Input placeholder="" type="text" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              Subtext for answer to the question
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  {_question.oncore.map((_oncore, i) => (
+                    <div key={i} className="grid grid-cols-12 gap-4">
+                      <Button
+                        className="col-span-2"
+                        onClick={() => removeOncore(index)}
+                      >
+                        Remove
+                      </Button>
+                      <div className="col-span-4">
+                        <FormField
+                          control={form.control}
+                          name={`questions.${index}.oncore.${i}.answer_oncore_src`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Answer Oncore Video</FormLabel>
+                              <FormControl>
+                                <Input placeholder="" type="text" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Youtube video URL for oncore video
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <FormField
+                          control={form.control}
+                          name={`questions.${index}.oncore.${i}.answer_oncore_start`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Answer Oncore Start</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="15"
+                                  type="number"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Timestamp that the oncore video starts in
+                                seconds
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <FormField
+                          control={form.control}
+                          name={`questions.${index}.oncore.${i}.answer_oncore_end`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Answer Oncore End</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="30"
+                                  type="number"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Time that the oncore video ends in seconds
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </form>
+          </Form>
+        </div>
+        <div className="flex flex-row justify-end gap-4">
+          <Button onClick={() => handleClose()}>Cancel</Button>
+          <Button form="edit-game-form" type="submit">
+            Submit
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

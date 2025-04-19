@@ -88,7 +88,12 @@ export const NewGameQuestion: GameQuestion = {
   questionVideo: { youTubeID: "", startTime: 0, endTime: 0 },
   answer: "",
   answerSubtext: "",
-  answerEncore: { youTubeID: "", startTime: 0, endTime: 0 },
+};
+
+export const NewGameQuestionOncore: Video = {
+  youTubeID: "",
+  startTime: 0,
+  endTime: 0,
 };
 
 export const NewGame: Game = {
@@ -97,4 +102,4 @@ export const NewGame: Game = {
   description: "New Game Description",
   settings: {},
   questions: [NewGameQuestion],
-}
+};
