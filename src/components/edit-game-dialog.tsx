@@ -27,7 +27,14 @@ import {
 } from "../types/game_types";
 import { GameDialog } from "../types/state_types";
 import { useGameStore } from "../store/gameStore";
-import { ChevronDown, ChevronUp, Copy, ExternalLink, Plus, Trash } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  ExternalLink,
+  Plus,
+  Trash,
+} from "lucide-react";
 import { useEffect } from "react";
 import { getYoutubeBoundedURL } from "../lib/utils";
 
@@ -37,23 +44,83 @@ const formSchema = z.object({
   info_timeout: z.coerce.number().min(1).max(30).optional(),
   answer_timeout: z.coerce.number().min(1).max(30).optional(),
   points_per_question: z.coerce.number().min(1).max(100).optional(),
-  questions: z.array(
-    z.object({
-      text: z.string().min(1),
-      video_src: z.string().min(11).max(11)
-        .regex(new RegExp(/^[a-zA-Z0-9\-_]{11}/), { message: "Invalid YouTube ID. Can only contain A-Z, 0-9, - and _" }),
-      video_start_time: z.coerce.number().min(0),
-      video_end_time: z.coerce.number().min(0),
-      answer: z.string().min(1),
-      answer_subtext: z.string().min(1).optional().or(z.literal('')),
-      has_oncore: z.boolean().default(false),
-      answer_oncore_src: z.string().min(11).max(11)
-        .regex(new RegExp(/^[a-zA-Z0-9\-_]{11}/), { message: "Invalid YouTube ID. Can only contain A-Z, 0-9, - and _" })
-        .optional().or(z.literal('')),
-      answer_oncore_start: z.coerce.number().min(0).optional(),
-      answer_oncore_end: z.coerce.number().min(0).optional(),
-    })
-  ).min(1),
+  questions: z
+    .array(
+      z
+        .object({
+          text: z.string().min(1),
+          video_src: z
+            .string()
+            .min(11)
+            .max(11)
+            .regex(new RegExp(/^[a-zA-Z0-9\-_]{11}/), {
+              message: "Invalid YouTube ID. Can only contain A-Z, 0-9, - and _",
+            }),
+          video_start_time: z.coerce.number().min(0),
+          video_end_time: z.coerce.number().min(0),
+          answer: z.string().min(1),
+          answer_subtext: z.string().min(1).optional().or(z.literal("")),
+          has_oncore: z.boolean().default(false),
+          answer_oncore_src: z
+            .string()
+            .min(11)
+            .max(11)
+            .regex(new RegExp(/^[a-zA-Z0-9\-_]{11}/), {
+              message: "Invalid YouTube ID. Can only contain A-Z, 0-9, - and _",
+            })
+            .optional()
+            .or(z.literal("")),
+          answer_oncore_start: z.coerce.number().min(0).optional(),
+          answer_oncore_end: z.coerce.number().min(0).optional(),
+        })
+        .refine(
+          (data) => {
+            return data.video_start_time < data.video_end_time;
+          },
+          {
+            message: "End must be after start",
+            path: ["video_end_time"],
+          }
+        )
+        .refine(
+          (data) => {
+            return data.video_start_time < data.video_end_time;
+          },
+          {
+            message: "Start must be before end",
+            path: ["video_start_time"],
+          }
+        )
+        .refine(
+          (data) => {
+            return (
+              !data.has_oncore ||
+              (data.answer_oncore_start &&
+                data.answer_oncore_end &&
+                data.answer_oncore_start < data.answer_oncore_end)
+            );
+          },
+          {
+            message: "End must be after start",
+            path: ["answer_oncore_end"],
+          }
+        )
+        .refine(
+          (data) => {
+            return (
+              !data.has_oncore ||
+              (data.answer_oncore_start &&
+                data.answer_oncore_end &&
+                data.answer_oncore_start < data.answer_oncore_end)
+            );
+          },
+          {
+            message: "Start must be before end",
+            path: ["answer_oncore_start"],
+          }
+        )
+    )
+    .min(1),
 });
 
 const EditGameDialog = () => {
@@ -68,7 +135,8 @@ const EditGameDialog = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: "onChange",
-    resolver: zodResolver(formSchema), defaultValues: {
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       game_title: currentEditGame.title,
       description: currentEditGame.description,
       info_timeout: currentEditGame.settings.infoTimeout,
@@ -83,14 +151,19 @@ const EditGameDialog = () => {
         answer_subtext: question.answerSubtext,
         has_oncore: (question.answerEncore?.youTubeID ?? "") !== "",
         answer_oncore_src: question.answerEncore?.youTubeID ?? "",
-        answer_oncore_start:
-          question.answerEncore?.startTime ?? 0,
-        answer_oncore_end:
-          question.answerEncore?.endTime ?? 0,
+        answer_oncore_start: question.answerEncore?.startTime ?? 0,
+        answer_oncore_end: question.answerEncore?.endTime ?? 0,
       })),
     },
   });
-  const { control, watch, setValue, reset, handleSubmit, formState: { errors, isDirty, isValid } } = form;
+  const {
+    control,
+    watch,
+    setValue,
+    reset,
+    handleSubmit,
+    formState: { errors, isDirty, isValid },
+  } = form;
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: "questions",
@@ -153,16 +226,28 @@ const EditGameDialog = () => {
 
   const duplicateQuestion = (index: number): void => {
     const questionToDuplicate = fields[index]; // Get the question to duplicate
-    append({
-      ...questionToDuplicate, // Spread the existing question's values
-    }, { shouldFocus: true }); // Append the duplicated question
+    append(
+      {
+        ...questionToDuplicate, // Spread the existing question's values
+      },
+      { shouldFocus: true }
+    ); // Append the duplicated question
   };
 
   const showOncore = (index: number): void => {
     setValue(`questions.${index}.has_oncore`, true);
-    setValue(`questions.${index}.answer_oncore_src`, NewGameQuestionOncore.youTubeID);
-    setValue(`questions.${index}.answer_oncore_start`, NewGameQuestionOncore.startTime);
-    setValue(`questions.${index}.answer_oncore_end`, NewGameQuestionOncore.endTime);
+    setValue(
+      `questions.${index}.answer_oncore_src`,
+      NewGameQuestionOncore.youTubeID
+    );
+    setValue(
+      `questions.${index}.answer_oncore_start`,
+      NewGameQuestionOncore.startTime
+    );
+    setValue(
+      `questions.${index}.answer_oncore_end`,
+      NewGameQuestionOncore.endTime
+    );
   };
 
   const hideOncore = (index: number): void => {
@@ -172,13 +257,17 @@ const EditGameDialog = () => {
     setValue(`questions.${index}.answer_oncore_end`, undefined);
   };
 
-  const openVideo = (videoSrc: string, startTime: number, endTime: number): void => {
+  const openVideo = (
+    videoSrc: string,
+    startTime: number,
+    endTime: number
+  ): void => {
     if (videoSrc && startTime > -1 && endTime > startTime) {
       window.open(getYoutubeBoundedURL(videoSrc, startTime, endTime), "_blank");
     } else {
       toast({ title: "Video source invalid." });
     }
-  }
+  };
 
   const openQuestionVideo = (index: number): void => {
     const videoSrc = watch(`questions.${index}.video_src`);
@@ -188,12 +277,11 @@ const EditGameDialog = () => {
   };
 
   const openQuestionOncoreVideo = (index: number): void => {
-    const videoSrc = watch(`questions.${index}.answer_oncore_src`) ?? '';
+    const videoSrc = watch(`questions.${index}.answer_oncore_src`) ?? "";
     const startTime = watch(`questions.${index}.answer_oncore_start`) ?? 0;
     const endTime = watch(`questions.${index}.answer_oncore_end`) ?? 0;
     openVideo(videoSrc, startTime, endTime);
   };
-
 
   const onSubmit = (values: z.infer<typeof formSchema>): void => {
     try {
@@ -217,11 +305,13 @@ const EditGameDialog = () => {
           answer: question.answer,
           answerSubtext: question.answer_subtext,
           // if no oncore, don't add
-          answerEncore:  question.has_oncore ? {
-            youTubeID: question.answer_oncore_src ?? "",
-            startTime: question.answer_oncore_start ?? 0,
-            endTime: question.answer_oncore_end ?? 0,
-          } : undefined,
+          answerEncore: question.has_oncore
+            ? {
+                youTubeID: question.answer_oncore_src ?? "",
+                startTime: question.answer_oncore_start ?? 0,
+                endTime: question.answer_oncore_end ?? 0,
+              }
+            : undefined,
         })),
       };
       console.log(gameValues);
@@ -283,7 +373,6 @@ const EditGameDialog = () => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="description"
@@ -304,7 +393,6 @@ const EditGameDialog = () => {
                   </FormItem>
                 )}
               />
-
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-6">
                   <FormField
@@ -360,11 +448,19 @@ const EditGameDialog = () => {
                   </FormItem>
                 )}
               />
-              <div className="flex flex-row justify-between items-center shadow-lg  rounded-md p-4 mb-4 sticky top-0 bg-slate-300 z-10">
-                <h2 className="text-lg font-semibold">Questions ({fields.length})</h2>
-                <Button onClick={addQuestion}><Plus /></Button>
+              <div className="flex flex-row justify-between items-center shadow-lg rounded-md p-4 mb-4 sticky top-0 bg-slate-300 z-10">
+                <h2 className="text-lg font-semibold">
+                  Questions ({fields.length})
+                </h2>
+                <Button onClick={addQuestion}>
+                  <Plus />
+                </Button>
               </div>
-              {errors.questions && errors.questions?.type === "too_small"  &&  (<p className="text-red-500">Must contain at least 1 question.</p>)}
+              {errors.questions && errors.questions?.type === "too_small" && (
+                <p className="text-red-500">
+                  Must contain at least 1 question.
+                </p>
+              )}
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col gap-8 bg-slate-50">
                   <div className="flex flex-row justify-between bg-slate-200 p-2">
@@ -380,7 +476,10 @@ const EditGameDialog = () => {
                       </Button>
                       <h3>Question #{index + 1}</h3>
                     </div>
-                    <Button onClick={() => removeQuestion(index)} variant={"destructive"}>
+                    <Button
+                      onClick={() => removeQuestion(index)}
+                      variant={"destructive"}
+                    >
                       <Trash />
                     </Button>
                   </div>
@@ -408,7 +507,13 @@ const EditGameDialog = () => {
                   </div>
                   <div className="grid grid-cols-12 gap-4">
                     <div className="col-span-1">
-                      <Button className="mt-8" disabled={watch(`questions.${index}.video_src`) === ""} onClick={() => openQuestionVideo(index)}><ExternalLink /> </Button>
+                      <Button
+                        className="mt-8"
+                        disabled={watch(`questions.${index}.video_src`) === ""}
+                        onClick={() => openQuestionVideo(index)}
+                      >
+                        <ExternalLink />{" "}
+                      </Button>
                     </div>
                     <div className="col-span-5">
                       <FormField
@@ -519,9 +624,7 @@ const EditGameDialog = () => {
                       />
                     </div>
                   </div>
-                  <div
-                    className="grid grid-cols-12 gap-4 align-middle"
-                  >
+                  <div className="grid grid-cols-12 gap-4 align-middle">
                     <div className="flex gap-4 col-span-1">
                       <FormField
                         control={control}
@@ -551,7 +654,16 @@ const EditGameDialog = () => {
                     {watch(`questions.${index}.has_oncore`) && (
                       <>
                         <div className="col-span-1">
-                          <Button className="mt-8" disabled={watch(`questions.${index}.answer_oncore_src`) === ""} onClick={() => openQuestionOncoreVideo(index)}><ExternalLink /> </Button>
+                          <Button
+                            className="mt-8"
+                            disabled={
+                              watch(`questions.${index}.answer_oncore_src`) ===
+                              ""
+                            }
+                            onClick={() => openQuestionOncoreVideo(index)}
+                          >
+                            <ExternalLink />{" "}
+                          </Button>
                         </div>
                         <div className="col-span-4">
                           <FormField
@@ -629,7 +741,11 @@ const EditGameDialog = () => {
         </div>
         <div className="flex flex-row justify-end gap-4">
           <Button onClick={() => handleClose()}>Cancel</Button>
-          <Button form="edit-game-form" type="submit" disabled={!isDirty || !isValid}>
+          <Button
+            form="edit-game-form"
+            type="submit"
+            disabled={!isDirty || !isValid}
+          >
             Submit
           </Button>
         </div>
