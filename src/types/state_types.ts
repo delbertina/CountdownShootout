@@ -87,7 +87,15 @@ const getTeamDisplayName = (team: TeamStatePartial) =>
       : (team.id + 1) + " Team"
     : team.theme + " Team");
 
+enum GameDialog {
+  None = "NONE",
+  Debug = "DEBUG",
+  EditGame = "EDIT_GAME",
+  ManageGames = "MANAGE_GAMES",
+}
+
 export {
+  GameDialog,
   newGameState,
   newGameQuestionState,
   initialTeamState,

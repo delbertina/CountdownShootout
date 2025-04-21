@@ -82,3 +82,24 @@ export interface GameTeamTheme {
   accentColor: HEX;
   textColor: HEX;
 }
+
+export const NewGameQuestion: GameQuestion = {
+  questionText: "New Question",
+  questionVideo: { youTubeID: "", startTime: 0, endTime: 15 },
+  answer: "New Answer",
+  answerSubtext: "",
+};
+
+export const NewGameQuestionOncore: Video = {
+  youTubeID: "",
+  startTime: 0,
+  endTime: 15,
+};
+
+export const NewGame: Game = {
+  id: 0,
+  title: "New Game",
+  description: "New Game Description",
+  settings: {},
+  questions: [NewGameQuestion],
+};

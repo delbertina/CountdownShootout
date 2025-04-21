@@ -8,7 +8,11 @@ import {
 import { ButtonData } from "../types/game_types";
 import { useGameStore } from "../store/gameStore";
 import { useMemo } from "react";
-import { dummyTeamState, getTeamDisplayName } from "../types/state_types";
+import {
+  dummyTeamState,
+  GameDialog,
+  getTeamDisplayName,
+} from "../types/state_types";
 
 const DebugDialog = () => {
   const gameStage = useGameStore((state) => state.stage);
@@ -22,11 +26,19 @@ const DebugDialog = () => {
     () => teams.map((team) => team.scoreHistory),
     [teams]
   );
-  const isDebugOpen = useGameStore((state) => state.isDebugOpen);
-  const toggleDebugDialog = useGameStore((state) => state.toggleDebugDialog);
+  const isDebugOpen = useGameStore(
+    (state) => state.openDialog === GameDialog.Debug
+  );
+  const openDialog = useGameStore((state) => state.presentDialog);
+  const closeDialog = useGameStore((state) => state.closeDialog);
 
   return (
-    <Dialog open={isDebugOpen} onOpenChange={toggleDebugDialog}>
+    <Dialog
+      open={isDebugOpen}
+      onOpenChange={(open) =>
+        open ? openDialog(GameDialog.Debug) : closeDialog()
+      }
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Debug</DialogTitle>

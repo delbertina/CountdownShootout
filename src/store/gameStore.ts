@@ -1,9 +1,16 @@
 import { create } from "zustand";
-import { ButtonData, DebugButton, Game, GameStage } from "../types/game_types";
+import {
+  ButtonData,
+  DebugButton,
+  Game,
+  GameStage,
+  NewGame,
+} from "../types/game_types";
 import { Games } from "../data/game_data";
 import { devtools } from "zustand/middleware";
 import { TeamTheme } from "../types/theme_types";
 import {
+  GameDialog,
   GameStatePartial,
   initialTeamState,
   newGameQuestionState,
@@ -12,12 +19,15 @@ import {
 } from "../types/state_types";
 
 interface GameState extends GameStatePartial {
+  allGames: Game[];
   currentGame: Game | undefined;
+  nextGameId: number;
   teams: TeamState[];
   debugButtonCol: number;
   debugButtonRow: number;
   debugTeamSelector: number;
-  isDebugOpen: boolean;
+  currentEditGame: Game;
+  openDialog: GameDialog;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
   symbolLeft: (gamepadIndex: number) => void;
@@ -35,7 +45,9 @@ interface GameState extends GameStatePartial {
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
-  toggleDebugDialog: () => void;
+  presentDialog: (dialog: GameDialog) => void;
+  closeDialog: () => void;
+  setCurrentEditGame: (game: Game) => void;
   debugAbandonQuiz: () => void;
   debugRestartQuiz: () => void;
   debugScoreQuiz: () => void;
@@ -56,17 +68,24 @@ interface GameState extends GameStatePartial {
   removeTeam: (teamId: number) => void;
   infoTimeoutEnded: () => void;
   answerTimeoutEnded: () => void;
+  createGame: (game: Game) => void;
+  editGame: (game: Game) => void;
+  deleteGame: (gameId: number) => void;
 }
 
 export const useGameStore = create<GameState>()(
   devtools((set, get) => ({
+    allGames: Games,
     currentGame: undefined,
+    nextGameId:
+      Games.map((game) => game.id).reduce((a, b) => Math.max(a, b)) + 1,
     teams: initialTeamState,
     ...newGameState,
     debugButtonCol: 0,
     debugButtonRow: 0,
     debugTeamSelector: 0,
-    isDebugOpen: false,
+    currentEditGame: NewGame,
+    openDialog: GameDialog.None,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
       if (gamepadIndex !== 0) {
@@ -106,7 +125,7 @@ export const useGameStore = create<GameState>()(
         get().answerQuestion(gamepadIndex);
         return;
       } else {
-        get().toggleDebugDialog();
+        get().presentDialog(GameDialog.Debug);
       }
       // pause?
     },
@@ -120,7 +139,7 @@ export const useGameStore = create<GameState>()(
         }));
         get().answerQuestion(gamepadIndex);
       } else {
-        if (get().isDebugOpen) {
+        if (get().openDialog === GameDialog.Debug) {
           // select the button we're on
           get().selectDebugButton();
         } else if (stage === GameStage.Answering) {
@@ -224,18 +243,18 @@ export const useGameStore = create<GameState>()(
         // if the length of the answerable teams is 1, then that means only this
         // team can answer and is answering so reset to allow any team to answer
         if (answerableTeams.length === 1) {
-            set((state) => ({
-              stage: GameStage.Answering,
-              lastAnswerTime: Date.now(),
-              isPaused: true,
-              teams: state.teams.map((team) =>
-                // if the team is the one that just pressed, set them to be answering
-                // set all to be able to answer
-                team.id === gamepadIndex
-                  ? { ...team, isAnswering: true, canAnswer: true }
-                  : { ...team, canAnswer: true }
-              ),
-            }));
+          set((state) => ({
+            stage: GameStage.Answering,
+            lastAnswerTime: Date.now(),
+            isPaused: true,
+            teams: state.teams.map((team) =>
+              // if the team is the one that just pressed, set them to be answering
+              // set all to be able to answer
+              team.id === gamepadIndex
+                ? { ...team, isAnswering: true, canAnswer: true }
+                : { ...team, canAnswer: true }
+            ),
+          }));
         }
         // else there are still other teams that can answer
         else {
@@ -348,7 +367,11 @@ export const useGameStore = create<GameState>()(
           });
           break;
         case GameStage.Playing:
-          set({ stage: GameStage.Answering, isPaused: true, lastAnswerTime: Date.now() });
+          set({
+            stage: GameStage.Answering,
+            isPaused: true,
+            lastAnswerTime: Date.now(),
+          });
           break;
         case GameStage.Answering:
           set({
@@ -391,18 +414,21 @@ export const useGameStore = create<GameState>()(
       }
     },
     selectQuiz(id: number) {
-      const foundGame = Games.find((game) => game.id === id);
-      if (!foundGame) return;
+      const foundGame = get().allGames.find((game) => game.id === id);
+      if (!foundGame) {
+        console.log("Game not found of index: ", id, get().allGames);
+        return;
+      }
       set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
     },
-    toggleDebugDialog: () =>
+    presentDialog: (dialog: GameDialog) =>
+      set(() => ({ openDialog: dialog, itPaused: true })),
+    closeDialog: () =>
       set((state) => ({
-        isDebugOpen: !state.isDebugOpen,
-        isPaused:
-          state.stage === GameStage.Playing
-            ? !state.isDebugOpen
-            : state.isPaused,
+        openDialog: GameDialog.None,
+        isPaused: state.stage === GameStage.Playing ? false : state.isPaused,
       })),
+    setCurrentEditGame: (game: Game) => set({ currentEditGame: game }),
     debugAbandonQuiz: () => {
       console.log(
         "Abandoning quiz & clearing team state. Previous: ",
@@ -571,9 +597,8 @@ export const useGameStore = create<GameState>()(
         case DebugButton.DECREASE_TEAM_SCORE:
           get().debugDecreaseTeamScore();
           break;
-          break;
         case DebugButton.CLOSE:
-          get().toggleDebugDialog();
+          get().closeDialog();
           break;
         default:
           break;
@@ -646,7 +671,7 @@ export const useGameStore = create<GameState>()(
         ],
       }));
     },
-    removeTeam: (teamId) => {
+    removeTeam: (teamId: number) => {
       // if there's 2 (or less somehow) teams, we can't remove any
       if (get().teams.length <= 2) return;
       set((state) => ({
@@ -654,7 +679,10 @@ export const useGameStore = create<GameState>()(
       }));
     },
     infoTimeoutEnded: () => {
-      if (get().stage === GameStage.Waiting || get().stage === GameStage.Scoring) {
+      if (
+        get().stage === GameStage.Waiting ||
+        get().stage === GameStage.Scoring
+      ) {
         get().advanceStage();
       }
     },
@@ -662,6 +690,23 @@ export const useGameStore = create<GameState>()(
       if (get().stage === GameStage.Answering) {
         // do nothing and just display visually that the timer expired
       }
+    },
+    createGame: (game: Game) => {
+      set((state) => ({
+        allGames: [...state.allGames, { ...game, id: state.nextGameId }],
+        nextGameId: state.nextGameId + 1,
+      }));
+    },
+    editGame: (game: Game) => {
+      set((state) => ({
+        allGames: state.allGames.map((g) => (g.id === game.id ? game : g)),
+      }));
+    },
+    deleteGame: (gameId: number) => {
+      // do not change the nextGameId when deleting
+      set((state) => ({
+        allGames: state.allGames.filter((g) => g.id !== gameId),
+      }));
     },
   }))
 );
