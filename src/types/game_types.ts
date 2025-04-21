@@ -84,16 +84,16 @@ export interface GameTeamTheme {
 }
 
 export const NewGameQuestion: GameQuestion = {
-  questionText: "",
-  questionVideo: { youTubeID: "", startTime: 0, endTime: 0 },
-  answer: "",
+  questionText: "New Question",
+  questionVideo: { youTubeID: "", startTime: 0, endTime: 15 },
+  answer: "New Answer",
   answerSubtext: "",
 };
 
 export const NewGameQuestionOncore: Video = {
   youTubeID: "",
   startTime: 0,
-  endTime: 0,
+  endTime: 15,
 };
 
 export const NewGame: Game = {
