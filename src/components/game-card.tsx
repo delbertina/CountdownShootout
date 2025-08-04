@@ -5,6 +5,7 @@ import {
   CardContent,
   CardFooter,
 } from "./ui/card";
+import { Rating, RatingButton } from "./ui/rating";
 
 export interface GameCardProps {
   title: string;
@@ -24,7 +25,16 @@ const GameCard = (props: GameCardProps) => {
         <CardTitle>{props.title}</CardTitle>
       </CardHeader>
       <CardContent className="text-left flex-grow">
+        <Rating value={3} readOnly >
+          <RatingButton key={1} className="text-yellow-500 bg-transparent" />
+          <RatingButton key={2} className="text-yellow-500 bg-transparent" />
+          <RatingButton key={3} className="text-yellow-500 bg-transparent" />
+          <RatingButton key={4} className="text-yellow-500 bg-transparent" />
+          <RatingButton key={5} className="text-yellow-500 bg-transparent" />
+        </Rating>
+        <div>
         {props.description}
+        </div>
       </CardContent>
       <CardFooter className="font-light italic">
         {"Last Played: 1/1/2022"}
