@@ -49,6 +49,7 @@ export interface Game {
   id: number;
   title: string;
   description: string;
+  rating: number;
   settings: GameSettings;
   questions: GameQuestion[];
 }
@@ -100,6 +101,7 @@ export const NewGame: Game = {
   id: 0,
   title: "New Game",
   description: "New Game Description",
+  rating: 2,
   settings: {},
   questions: [NewGameQuestion],
 };

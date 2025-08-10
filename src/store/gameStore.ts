@@ -27,6 +27,7 @@ interface GameState extends GameStatePartial {
   debugButtonRow: number;
   debugTeamSelector: number;
   currentEditGame: Game;
+  currentViewGame: Game;
   openDialog: GameDialog;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
@@ -45,9 +46,11 @@ interface GameState extends GameStatePartial {
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
+  startQuiz: () => void;
   presentDialog: (dialog: GameDialog) => void;
   closeDialog: () => void;
   setCurrentEditGame: (game: Game) => void;
+  setCurrentViewGame: (game: Game) => void;
   debugAbandonQuiz: () => void;
   debugRestartQuiz: () => void;
   debugScoreQuiz: () => void;
@@ -85,6 +88,7 @@ export const useGameStore = create<GameState>()(
     debugButtonRow: 0,
     debugTeamSelector: 0,
     currentEditGame: NewGame,
+    currentViewGame: NewGame,
     openDialog: GameDialog.None,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
@@ -419,7 +423,14 @@ export const useGameStore = create<GameState>()(
         console.log("Game not found of index: ", id, get().allGames);
         return;
       }
-      set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
+      set({ currentViewGame: foundGame, openDialog: GameDialog.ViewGame });
+    },
+    startQuiz() {
+      set((state) => ({
+        currentGame: state.currentViewGame,
+        questionId: 0,
+        lastInfoTime: Date.now(),
+      }));
     },
     presentDialog: (dialog: GameDialog) =>
       set(() => ({ openDialog: dialog, itPaused: true })),
@@ -429,6 +440,7 @@ export const useGameStore = create<GameState>()(
         isPaused: state.stage === GameStage.Playing ? false : state.isPaused,
       })),
     setCurrentEditGame: (game: Game) => set({ currentEditGame: game }),
+    setCurrentViewGame: (game: Game) => set({ currentViewGame: game }),
     debugAbandonQuiz: () => {
       console.log(
         "Abandoning quiz & clearing team state. Previous: ",

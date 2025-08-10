@@ -5,6 +5,7 @@ export const Games: Game[] = [
     id: 1,
     title: "(Testing) Game 1",
     description: "Description 1",
+    rating: 1,
     settings: {},
     questions: [
       {
@@ -43,6 +44,7 @@ export const Games: Game[] = [
     id: 2,
     title: "(Testing) Holiday Mix",
     description: "Festive songs for the festive season!",
+    rating: 1,
     settings: {
     },
     questions: [
@@ -152,6 +154,7 @@ export const Games: Game[] = [
     id: 3,
     title: "Christmas",
     description: "Group 1 of festive songs",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -222,6 +225,7 @@ export const Games: Game[] = [
     id: 4,
     title: "Christmas: The Sequel",
     description: "Group 2 of festive songs",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -292,6 +296,7 @@ export const Games: Game[] = [
     id: 5,
     title: "Games",
     description: "Answer in the form of a game",
+    rating: 3,
     settings: {
       answerTimeout: 15,
     },
@@ -372,6 +377,7 @@ export const Games: Game[] = [
     id: 6,
     title: "Miscellaneous",
     description: "Stuff that didn't fit anywhere else",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -442,6 +448,7 @@ export const Games: Game[] = [
     id: 7,
     title: "Cursed",
     description: "Songs that are obscure and/or turned out comicly bad",
+    rating: 4,
     settings: {
       answerTimeout: 15,
     },

@@ -290,6 +290,7 @@ const EditGameDialog = () => {
         id: currentEditGame.id,
         title: values.game_title,
         description: values.description,
+        rating: 2,
         settings: {
           infoTimeout: values.info_timeout,
           answerTimeout: values.answer_timeout,
