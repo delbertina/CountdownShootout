@@ -6,6 +6,7 @@ import {
   CardContent,
   CardFooter,
 } from "./ui/card";
+import { Separator } from "./ui/separator";
 
 export interface GameCardProps {
   title: string;
@@ -16,18 +17,18 @@ const GameCard = (props: GameCardProps) => {
   return (
     <Card
       title={props.title}
-      className="w-96 h-48 flex flex-col"
+      className="w-96 h-48 flex flex-col cursor-pointer"
       onClick={() => {
         props.selectQuiz();
       }}
     >
       <CardHeader>
         <CardTitle>{props.title}</CardTitle>
+        <Separator />
       </CardHeader>
-      <CardContent className="text-left flex-grow">
-        <GameRating score={3} />
+      <CardContent className="text-left flex-grow -mt-4 justify-center">
         <div>
-        {props.description}
+        <GameRating score={3} />
         </div>
       </CardContent>
       <CardFooter className="font-light italic">

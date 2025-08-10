@@ -11,6 +11,7 @@ import TeamOptionsPage from "./pages/team-options-page";
 import { getTeamDisplayName } from "./types/state_types";
 import ManageGamesDialog from "./components/manage-games-dialog";
 import EditGameDialog from "./components/edit-game-dialog";
+import ViewGameDialog from "./components/view-game-dialog";
 
 const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -80,6 +81,7 @@ const App = () => {
       <DebugDialog />
       <ManageGamesDialog />
       <EditGameDialog />
+      <ViewGameDialog />
     </>
   );
 };

@@ -222,7 +222,7 @@ export const Rating = ({
     <RatingContext.Provider value={contextValue}>
       <div
         aria-label="Rating"
-        className={cn('inline-flex items-center gap-0.5', className)}
+        className={cn('inline-flex items-center', className)}
         onMouseLeave={() => setHoverValue(null)}
         ref={containerRef}
         role="radiogroup"
