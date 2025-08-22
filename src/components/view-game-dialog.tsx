@@ -30,9 +30,13 @@ const ViewGameDialog = () => {
         <div className="flex flex-row items-start justify-between">
           <div className="flex flex-col gap-2">
             <DialogTitle className="text-4xl">{currentGame.title}</DialogTitle>
-            <DialogDescription className="text-lg">{currentGame.description}</DialogDescription>
+            <DialogDescription className="text-lg">
+              {currentGame.description}
+            </DialogDescription>
           </div>
-          <Button className="mt-0" onClick={closeDialog}>X</Button>
+          <Button className="mt-0" onClick={closeDialog}>
+            X
+          </Button>
         </div>
         <div className="flex flex-row">
           <div className="flex flex-col gap-4 flex-grow">
@@ -43,7 +47,11 @@ const ViewGameDialog = () => {
                 {currentGame.questions.length === 1 ? "" : "s"}
               </div>
             </div>
-            <GameRating score={currentGame.rating} />
+            <GameRating
+              value={currentGame.rating}
+              isReadOnly={true}
+              onChange={() => {}}
+            />
           </div>
           <div className="flex flex-col gap-4 flex-grow">
             <div className="flex flex-row gap-2">

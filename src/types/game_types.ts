@@ -101,7 +101,7 @@ export const NewGame: Game = {
   id: 0,
   title: "New Game",
   description: "New Game Description",
-  rating: 2,
+  rating: 1,
   settings: {},
   questions: [NewGameQuestion],
 };
