@@ -93,6 +93,7 @@ enum GameDialog {
   EditGame = "EDIT_GAME",
   ViewGame = "VIEW_GAME",
   ManageGames = "MANAGE_GAMES",
+  ImportGames = "IMPORT_GAMES",
 }
 
 export {

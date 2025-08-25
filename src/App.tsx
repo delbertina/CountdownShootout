@@ -12,6 +12,7 @@ import { getTeamDisplayName } from "./types/state_types";
 import ManageGamesDialog from "./components/manage-games-dialog";
 import EditGameDialog from "./components/edit-game-dialog";
 import ViewGameDialog from "./components/view-game-dialog";
+import ImportGamesDialog from "./components/import-games-dialog";
 
 const App = () => {
   const currentGame = useGameStore((state) => state.currentGame);
@@ -79,6 +80,7 @@ const App = () => {
       {currentGame && <GamePlayPage />}
       <Toaster />
       <DebugDialog />
+      <ImportGamesDialog />
       <ManageGamesDialog />
       <EditGameDialog />
       <ViewGameDialog />
