@@ -4,6 +4,7 @@ import {
   DebugButton,
   Game,
   GameStage,
+  isGameValid,
   NewGame,
 } from "../types/game_types";
 import { Games } from "../data/game_data";
@@ -74,6 +75,8 @@ interface GameState extends GameStatePartial {
   createGame: (game: Game) => void;
   editGame: (game: Game) => void;
   deleteGame: (gameId: number) => void;
+  loadGameList: () => void;
+  saveGameList: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -719,6 +722,38 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         allGames: state.allGames.filter((g) => g.id !== gameId),
       }));
+    },
+    loadGameList: () => {
+      const storedGames = localStorage.getItem("games");
+      if (storedGames) {
+        try {
+          const parsedGames: Game[] = JSON.parse(storedGames);
+          // validate the parsed games
+          if (Array.isArray(parsedGames)) {
+            const isValid = parsedGames.every(
+              (game) =>
+                isGameValid(game)
+            );
+            if (isValid) {
+              set(() => ({
+                allGames: parsedGames,
+                nextGameId:
+                  parsedGames.map((game) => game.id).reduce((a, b) => Math.max(a, b)) + 1,
+              }));
+              console.log("Loaded games from localStorage:", parsedGames);
+            } else {
+              console.error("Invalid game data structure in localStorage.");
+            }
+          } else {
+            console.error("Parsed games is not an array.");
+          }
+        } catch (error) {
+          console.error("Error parsing games from localStorage:", error);
+        }
+      }
+    },
+    saveGameList: () => {
+      localStorage.setItem("games", JSON.stringify(get().allGames));
     },
   }))
 );

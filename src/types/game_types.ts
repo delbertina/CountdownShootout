@@ -105,3 +105,21 @@ export const NewGame: Game = {
   settings: {},
   questions: [NewGameQuestion],
 };
+
+export const isGameValid = (game: Game): boolean => {
+  if (!game.title || game.title.trim() === "") return false;
+  if (game.rating < 1 || game.rating > 5) return false;
+  if (!game.questions || game.questions.length === 0) return false;
+  for (const question of game.questions) {
+    if (!question.questionText || question.questionText.trim() === "")
+      return false;
+    if (
+      !question.questionVideo ||
+      !question.questionVideo.youTubeID ||
+      question.questionVideo.youTubeID.trim() === ""
+    )
+      return false;
+    if (!question.answer || question.answer.trim() === "") return false;
+  }
+  return true;
+}
