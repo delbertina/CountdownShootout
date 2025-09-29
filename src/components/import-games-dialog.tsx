@@ -39,32 +39,32 @@ const ImportGamesDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 mb-4">
-          <div className="flex flex-row gap-4">
-            <Button>
+          <div className="flex flex-row justify-center gap-4">
+            <Button size={"card"} className="flex-1">
               <FileInput />
               Import from File
             </Button>
-            <Button>
+            <Button size={"card"} className="flex-1">
               <FileOutput />
               Export to File
             </Button>
           </div>
-          <div className="flex flex-row gap-4">
-            <Button>
+          <div className="flex flex-row justify-center gap-4">
+            <Button size={"card"} className="flex-1">
               <RotateCcw />
               Reset to Default
             </Button>
-            <Button>
+            <Button size={"card"} className="flex-1">
               <Trash2 />
               Reset to Empty
             </Button>
           </div>
-          <div className="flex flex-row gap-4">
-            <Button>
+          <div className="flex flex-row justify-center gap-4">
+            <Button size={"card"} className="flex-1">
               <HardDriveUpload />
               Load from Local Storage Key
             </Button>
-            <Button>
+            <Button size={"card"} className="flex-1">
               <HardDriveDownload />
               Save to Local Storage Key
             </Button>
