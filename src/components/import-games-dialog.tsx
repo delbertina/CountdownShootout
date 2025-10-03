@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
+import { Game, isGameValid } from "../types/game_types";
 
 const ImportGamesDialog = () => {
   const isDialogOpen = useGameStore(
@@ -23,6 +24,47 @@ const ImportGamesDialog = () => {
   );
   const openDialog = useGameStore((state) => state.presentDialog);
   const closeDialog = useGameStore((state) => state.closeDialog);
+
+  const handleImportFromFile = () => {
+    // prompt user to select a file
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    // read file as text
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const json = JSON.parse(e.target.result);
+        // validate json and count games to be imported
+        let validGames: Game[] = [];
+        let invalidGames: number = 0;
+        for (const game of json) {
+          if (isGameValid(game)) {
+            validGames.push(game);
+          } else {
+            invalidGames += 1;
+          }
+        }
+        // if no valid games, alert user and return
+        if (validGames.length === 0) {
+          alert("No valid games to import.");
+          return;
+        }
+        // prompt user to confirm import
+        const result = window.confirm(
+          `Import ${validGames.length} valid games. ${invalidGames} invalid games will be skipped.`
+        );
+        // if result is true, import games
+        if (result) {
+          // import games
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+
+  }
 
   return (
     <Dialog
@@ -40,7 +82,7 @@ const ImportGamesDialog = () => {
         </DialogHeader>
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex flex-row justify-center gap-4">
-            <Button size={"card"} className="flex-1">
+            <Button size={"card"} className="flex-1" onClick={handleImportFromFile}>
               <FileInput />
               Import from File
             </Button>
