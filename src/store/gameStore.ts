@@ -132,7 +132,8 @@ export const useGameStore = create<GameState>()(
         get().answerQuestion(gamepadIndex);
         return;
       } else {
-        get().presentDialog(GameDialog.Debug);
+        // toggle debug dialog
+        get().presentDialog(get().openDialog != GameDialog.Debug ? GameDialog.Debug : GameDialog.None);
       }
       // pause?
     },

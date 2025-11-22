@@ -24,6 +24,7 @@ const ImportGamesDialog = () => {
   );
   const openDialog = useGameStore((state) => state.presentDialog);
   const closeDialog = useGameStore((state) => state.closeDialog);
+  const games = useGameStore((state) => state.allGames);
 
   const handleImportFromFile = () => {
     // prompt user to select a file
@@ -63,8 +64,19 @@ const ImportGamesDialog = () => {
       reader.readAsText(file);
     };
     input.click();
-
   }
+
+  const handleExportToFile = () => {
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(games, null, 2));
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "games.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
 
   return (
     <Dialog
@@ -86,7 +98,7 @@ const ImportGamesDialog = () => {
               <FileInput />
               Import from File
             </Button>
-            <Button size={"card"} className="flex-1">
+            <Button size={"card"} className="flex-1" onClick={handleExportToFile}>
               <FileOutput />
               Export to File
             </Button>
