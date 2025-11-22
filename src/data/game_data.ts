@@ -3,6 +3,557 @@ import { Game } from "../types/game_types";
 export const Games: Game[] = [
   {
     id: 1,
+    title: "Weird Al",
+    description: "Must answer in the form of a Weird Al song",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 158,
+          endTime: 167,
+        },
+        answer: "Another One Rides the Bus",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 777,
+          endTime: 794,
+        },
+        answer: "White and Nerdy",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 740,
+          endTime: 774,
+        },
+        answer: "The Saga Begins",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 1048,
+          endTime: 1058,
+        },
+        answer: "Like a Surgeon",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "Mystery Category",
+    description: "Must guess what ties these songs together",
+    rating: 4,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 723,
+          endTime: 738,
+        },
+        answer: "Answer Hidden",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 674,
+          endTime: 696,
+        },
+        answer: "Answer Hidden",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 637,
+          endTime: 672,
+        },
+        answer: "Answer Hidden",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 697,
+          endTime: 722,
+        },
+        answer: "Answer Hidden",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Anime /according/ to me",
+    description: "",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 935,
+          endTime: 954,
+        },
+        answer: "Giorno's Theme",
+        answerSubtext: "From: JoJo's Bizarre Adventure",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 973,
+          endTime: 983,
+        },
+        answer: "Secret Tunnel",
+        answerSubtext: "From: Avatar: The Last Airbender",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 954,
+          endTime: 972,
+        },
+        answer: "Pokemon Theme",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 1027,
+          endTime: 1047,
+        },
+        answer: "Cory in the House Theme",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 998,
+          endTime: 1026,
+        },
+        answer: "Merry Go Round Of Life",
+        answerSubtext: "From: Howl's Moving Castle",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 983,
+          endTime: 997,
+        },
+        answer: "Evangelion Theme",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 4,
+    title: "Actions > Words",
+    description: "Must answer in the form of a dance move",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 428,
+          endTime: 485,
+        },
+        answer: "Numa Numa",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 487,
+          endTime: 533,
+        },
+        answer: "Watch Me (Whip/Nae Nae)",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 534,
+          endTime: 546,
+        },
+        answer: "Gangnam Style",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 547,
+          endTime: 577,
+        },
+        answer: "Single Ladies",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 578,
+          endTime: 615,
+        },
+        answer: "Stayin' Alive",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 616,
+          endTime: 636,
+        },
+        answer: "It's Not Unusual",
+        answerSubtext: "AKA The Carlton",
+      },
+    ],
+  },
+  {
+    id: 5,
+    title: "General #1",
+    description: "Guess the song from the clip",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 795,
+          endTime: 804,
+        },
+        answer: "ABC - Jackson 5",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 806,
+          endTime: 843,
+        },
+        answer: "Industry Baby - Lil Nas X",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 844,
+          endTime: 894,
+        },
+        answer: "Ocean Man - Ween",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 894,
+          endTime: 911,
+        },
+        answer: "La Bamba",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 912,
+          endTime: 934,
+        },
+        answer: "Hit the Road Jack",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 1059,
+          endTime: 1087,
+        },
+        answer: "Flowers - Miley Cyrus",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 7",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 1087,
+          endTime: 1102,
+        },
+        answer: "Uptown Funk - Bruno Mars",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 6,
+    title: "Madison Watt's Mixtape",
+    description: "Songs that she really liked and I somehow remember.",
+    rating: 4,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 375,
+          endTime: 405,
+        },
+        answer: "Holiday - Green Day",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 407,
+          endTime: 426,
+        },
+        answer: "Holiday (Solo) - Green Day",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 7,
+    title: "General #2",
+    description: "",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 0,
+          endTime: 8,
+        },
+        answer: "You Really Got Me - The Kinks",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 9,
+          endTime: 42,
+        },
+        answer: "Stand By Me - Ben E. King",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 44,
+          endTime: 64,
+        },
+        answer: "Seven Nation Army - The White Stripes",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 65,
+          endTime: 78,
+        },
+        answer: "Iron Man - Black Sabbath",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 80,
+          endTime: 96,
+        },
+        answer: "Super Freak - Rick James",
+        answerSubtext: "AKA 'U Can't Touch This'",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 97,
+          endTime: 112,
+        },
+        answer: "Feel Good Inc. - Gorillaz",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 8,
+    title: "General #3",
+    description: "",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 113,
+          endTime: 124,
+        },
+        answer: "Living On A Prayer - Bon Jovi",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 125,
+          endTime: 134,
+        },
+        answer: "Thriller - Michael Jackson",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 135,
+          endTime: 148,
+        },
+        answer: "Smells Like Teen Spirit - Nirvana",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 149,
+          endTime: 157,
+        },
+        answer: "Under Pressure - Queen",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 169,
+          endTime: 188,
+        },
+        answer: "9 to 5 - Dolly Parton",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 255,
+          endTime: 266,
+        },
+        answer: "Come and Get Your Love - Redbone",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 9,
+    title: "General #4",
+    description: "",
+    rating: 2,
+    settings: {},
+    questions: [
+      {
+        questionText: "Question 1",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 267,
+          endTime: 282,
+        },
+        answer: "Bad Guy - Billie Eilish",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 2",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 284,
+          endTime: 290,
+        },
+        answer: "Come Together - The Beatles",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 3",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 291,
+          endTime: 310,
+        },
+        answer: "Enter Sandman - Metallica",
+        answerSubtext: "Intro",
+      },
+      {
+        questionText: "Question 4",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 311,
+          endTime: 349,
+        },
+        answer: "Don't Go Breaking My Heart - Elton John & Kiki Dee",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 5",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 350,
+          endTime: 360,
+        },
+        answer: "I Want You Back - Jackson 5",
+        answerSubtext: "",
+      },
+      {
+        questionText: "Question 6",
+        questionVideo: {
+          youTubeID: "8cFU4rBgqio",
+          startTime: 361,
+          endTime: 374,
+        },
+        answer: "Good Vibrations - The Beach Boys",
+        answerSubtext: "",
+      },
+    ],
+  },
+  {
+    id: 11,
     title: "2024 - (Testing) Game 1",
     description: "Description 1",
     rating: 1,
@@ -41,12 +592,11 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 2,
+    id: 12,
     title: "2024 - (Testing) Holiday Mix",
     description: "Festive songs for the festive season!",
     rating: 1,
-    settings: {
-    },
+    settings: {},
     questions: [
       {
         questionText: "Question 1",
@@ -151,7 +701,7 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 3,
+    id: 13,
     title: "2024 - Christmas",
     description: "Group 1 of festive songs",
     rating: 2,
@@ -222,7 +772,7 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 4,
+    id: 14,
     title: "2024 - Christmas: The Sequel",
     description: "Group 2 of festive songs",
     rating: 2,
@@ -293,7 +843,7 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 5,
+    id: 15,
     title: "2024 - Games",
     description: "Answer in the form of a game",
     rating: 3,
@@ -374,7 +924,7 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 6,
+    id: 16,
     title: "2024 - Miscellaneous",
     description: "Stuff that didn't fit anywhere else",
     rating: 2,
@@ -445,7 +995,7 @@ export const Games: Game[] = [
     ],
   },
   {
-    id: 7,
+    id: 17,
     title: "2024 - Cursed",
     description: "Songs that are obscure and/or turned out comicly bad",
     rating: 4,
