@@ -128,45 +128,60 @@ const GamePlayPage = () => {
         <>
           <GameHeader
             content={
-              <div className="flex-grow flex flex-col justify-end w-full gap-4">
-                <div>
-                  <ReactPlayer
-                    key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}`}
-                    playing={!isPaused}
-                    controls={false}
-                    progressInterval={500}
-                    onEnded={() => handleVideoEnd()}
-                    onProgress={(e: OnProgressProps) => handleVideoProgress(e)}
-                    className="react-player"
-                    width="100%"
-                    url={
-                      "https://www.youtube.com/watch?v=" +
-                      gameQuestion.questionVideo.youTubeID
-                    }
-                    config={{
-                      youtube: {
-                        playerVars: {
-                          // start and end need a whole number
-                          start: !lastVideoTime
-                            ? Math.floor(gameQuestion.questionVideo.startTime)
-                            : Math.floor(lastVideoTime),
-                          end: Math.floor(gameQuestion.questionVideo.endTime),
-                          rel: 0,
-                        },
-                      },
-                    }}
-                  ></ReactPlayer>
-                </div>
-                {/* timer for remaining time in video */}
-                <div className="flex-grow-0 w-full">
-                  <Progress value={videoProgress} />
-                </div>
-              </div>
+              <>
+              {/* Stupid thing is stupid and cannot load in the background. */}
+              {/* Idk why but this suddenly doesn't work!!! */}
+              {/* I'm really sour about finding this out now so I'm adding this big comment to remove later. */}
+                {gameStage === GameStage.Playing && (
+                  <div className="flex-grow flex flex-col justify-end w-full gap-4">
+                    <div>
+                      <ReactPlayer
+                        key={`https://www.youtube.com/watch?v=${gameQuestion.questionVideo.youTubeID}`}
+                        playing={!isPaused}
+                        controls={false}
+                        progressInterval={500}
+                        onEnded={() => handleVideoEnd()}
+                        onProgress={(e: OnProgressProps) =>
+                          handleVideoProgress(e)
+                        }
+                        className="react-player"
+                        width="100%"
+                        url={
+                          "https://www.youtube.com/watch?v=" +
+                          gameQuestion.questionVideo.youTubeID
+                        }
+                        config={{
+                          youtube: {
+                            playerVars: {
+                              // start and end need a whole number
+                              start: !lastVideoTime
+                                ? Math.floor(
+                                    gameQuestion.questionVideo.startTime
+                                  )
+                                : Math.floor(lastVideoTime),
+                              end: Math.floor(
+                                gameQuestion.questionVideo.endTime
+                              ),
+                              rel: 0,
+                            },
+                          },
+                        }}
+                      ></ReactPlayer>
+                    </div>
+                    {/* timer for remaining time in video */}
+                    <div className="flex-grow-0 w-full">
+                      <Progress value={videoProgress} />
+                    </div>
+                  </div>
+                )}
+              </>
             }
           ></GameHeader>
           <Dialog open={gameStage !== GameStage.Playing}>
             <DialogContent className="border-none rounded-none min-w-[100%] min-h-[100%] flex flex-col items-center gap-4 flex-grow text-center bg-slate-700 text-amber-200">
-              <VisuallyHidden><DialogTitle /></VisuallyHidden>
+              <VisuallyHidden>
+                <DialogTitle />
+              </VisuallyHidden>
               <GameHeader
                 content={
                   <>
@@ -203,11 +218,12 @@ const GamePlayPage = () => {
                           ))}
                         {!isAnswering && <h1>Nobody is answering ... ?</h1>}
                         {/* timer for remaining time to answer */}
-                        {answerTimeoutProgress > -1 && answerTimeoutProgress < 100 && (
-                          <div className="flex-grow-0 w-full">
-                            <Progress value={answerTimeoutProgress} />
-                          </div>
-                        )}
+                        {answerTimeoutProgress > -1 &&
+                          answerTimeoutProgress < 100 && (
+                            <div className="flex-grow-0 w-full">
+                              <Progress value={answerTimeoutProgress} />
+                            </div>
+                          )}
                         {answerTimeoutProgress >= 100 && (
                           <div>
                             <h1>Time's up!</h1>

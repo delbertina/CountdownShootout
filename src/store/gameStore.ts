@@ -431,6 +431,7 @@ export const useGameStore = create<GameState>()(
     },
     startQuiz() {
       set((state) => ({
+        openDialog: GameDialog.None,
         currentGame: state.currentViewGame,
         questionId: 0,
         lastInfoTime: Date.now(),
