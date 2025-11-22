@@ -49,6 +49,7 @@ export interface Game {
   id: number;
   title: string;
   description: string;
+  rating: number;
   settings: GameSettings;
   questions: GameQuestion[];
 }
@@ -100,6 +101,25 @@ export const NewGame: Game = {
   id: 0,
   title: "New Game",
   description: "New Game Description",
+  rating: 1,
   settings: {},
   questions: [NewGameQuestion],
 };
+
+export const isGameValid = (game: Game): boolean => {
+  if (!game.title || game.title.trim() === "") return false;
+  if (game.rating < 1 || game.rating > 5) return false;
+  if (!game.questions || game.questions.length === 0) return false;
+  for (const question of game.questions) {
+    if (!question.questionText || question.questionText.trim() === "")
+      return false;
+    if (
+      !question.questionVideo ||
+      !question.questionVideo.youTubeID ||
+      question.questionVideo.youTubeID.trim() === ""
+    )
+      return false;
+    if (!question.answer || question.answer.trim() === "") return false;
+  }
+  return true;
+}

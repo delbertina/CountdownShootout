@@ -42,6 +42,10 @@ const ManageGamesDialog = () => {
     }
   };
 
+  const openImportDialog = () => {
+    openDialog(GameDialog.ImportGames);
+  };
+
   return (
     <Dialog
       open={isDialogOpen}
@@ -61,12 +65,12 @@ const ManageGamesDialog = () => {
             <Button onClick={() => addNewGame()}>
               <Plus />
             </Button>
-            <Button disabled>
+            <Button onClick={() => openImportDialog()}>
               <Import />
             </Button>
           </div>
           <div>
-            <Button disabled>
+            <Button variant={"destructive"} onClick={closeDialog}>
               <X />
             </Button>
           </div>

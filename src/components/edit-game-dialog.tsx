@@ -37,10 +37,12 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { getYoutubeBoundedURL } from "../lib/utils";
+import GameRating from "./game-rating";
 
 const formSchema = z.object({
   game_title: z.string().min(1),
   description: z.string().min(1),
+  rating: z.coerce.number().min(1).max(5),
   info_timeout: z.coerce.number().min(1).max(30).optional(),
   answer_timeout: z.coerce.number().min(1).max(30).optional(),
   points_per_question: z.coerce.number().min(1).max(100).optional(),
@@ -139,6 +141,7 @@ const EditGameDialog = () => {
     defaultValues: {
       game_title: currentEditGame.title,
       description: currentEditGame.description,
+      rating: currentEditGame.rating,
       info_timeout: currentEditGame.settings.infoTimeout,
       answer_timeout: currentEditGame.settings.answerTimeout,
       points_per_question: currentEditGame.settings.pointsPerQuestion,
@@ -175,6 +178,7 @@ const EditGameDialog = () => {
       reset({
         game_title: currentEditGame.title,
         description: currentEditGame.description,
+        rating: currentEditGame.rating,
         info_timeout: currentEditGame.settings.infoTimeout,
         answer_timeout: currentEditGame.settings.answerTimeout,
         points_per_question: currentEditGame.settings.pointsPerQuestion,
@@ -290,6 +294,7 @@ const EditGameDialog = () => {
         id: currentEditGame.id,
         title: values.game_title,
         description: values.description,
+        rating: values.rating,
         settings: {
           infoTimeout: values.info_timeout,
           answerTimeout: values.answer_timeout,
@@ -389,6 +394,24 @@ const EditGameDialog = () => {
                     <FormDescription>
                       Any extra info about the game not included in the title.
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="rating"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rating</FormLabel>
+                    <FormControl>
+                      <GameRating
+                        isReadOnly={false}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>The rating of the game.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

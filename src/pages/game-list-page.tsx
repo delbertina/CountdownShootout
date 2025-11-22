@@ -28,8 +28,7 @@ const GameListPage = () => {
         {allGames.map((game, i) => (
           <div key={i}>
             <GameCard
-              title={game.title}
-              description={game.description}
+              game={game}
               selectQuiz={() => selectQuiz(game.id)}
             />
           </div>

@@ -3,8 +3,9 @@ import { Game } from "../types/game_types";
 export const Games: Game[] = [
   {
     id: 1,
-    title: "(Testing) Game 1",
+    title: "2024 - (Testing) Game 1",
     description: "Description 1",
+    rating: 1,
     settings: {},
     questions: [
       {
@@ -41,8 +42,9 @@ export const Games: Game[] = [
   },
   {
     id: 2,
-    title: "(Testing) Holiday Mix",
+    title: "2024 - (Testing) Holiday Mix",
     description: "Festive songs for the festive season!",
+    rating: 1,
     settings: {
     },
     questions: [
@@ -150,8 +152,9 @@ export const Games: Game[] = [
   },
   {
     id: 3,
-    title: "Christmas",
+    title: "2024 - Christmas",
     description: "Group 1 of festive songs",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -220,8 +223,9 @@ export const Games: Game[] = [
   },
   {
     id: 4,
-    title: "Christmas: The Sequel",
+    title: "2024 - Christmas: The Sequel",
     description: "Group 2 of festive songs",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -290,8 +294,9 @@ export const Games: Game[] = [
   },
   {
     id: 5,
-    title: "Games",
+    title: "2024 - Games",
     description: "Answer in the form of a game",
+    rating: 3,
     settings: {
       answerTimeout: 15,
     },
@@ -370,8 +375,9 @@ export const Games: Game[] = [
   },
   {
     id: 6,
-    title: "Miscellaneous",
+    title: "2024 - Miscellaneous",
     description: "Stuff that didn't fit anywhere else",
+    rating: 2,
     settings: {
       answerTimeout: 15,
     },
@@ -440,8 +446,9 @@ export const Games: Game[] = [
   },
   {
     id: 7,
-    title: "Cursed",
+    title: "2024 - Cursed",
     description: "Songs that are obscure and/or turned out comicly bad",
+    rating: 4,
     settings: {
       answerTimeout: 15,
     },

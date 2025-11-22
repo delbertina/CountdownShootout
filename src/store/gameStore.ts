@@ -4,6 +4,7 @@ import {
   DebugButton,
   Game,
   GameStage,
+  isGameValid,
   NewGame,
 } from "../types/game_types";
 import { Games } from "../data/game_data";
@@ -27,6 +28,7 @@ interface GameState extends GameStatePartial {
   debugButtonRow: number;
   debugTeamSelector: number;
   currentEditGame: Game;
+  currentViewGame: Game;
   openDialog: GameDialog;
   isGamepadDetected: boolean;
   symbolRight: (gamepadIndex: number) => void;
@@ -45,9 +47,11 @@ interface GameState extends GameStatePartial {
   updateLastVideoTime: (videoTime: number) => void;
   advanceStage: () => void;
   selectQuiz: (id: number) => void;
+  startQuiz: () => void;
   presentDialog: (dialog: GameDialog) => void;
   closeDialog: () => void;
   setCurrentEditGame: (game: Game) => void;
+  setCurrentViewGame: (game: Game) => void;
   debugAbandonQuiz: () => void;
   debugRestartQuiz: () => void;
   debugScoreQuiz: () => void;
@@ -71,6 +75,8 @@ interface GameState extends GameStatePartial {
   createGame: (game: Game) => void;
   editGame: (game: Game) => void;
   deleteGame: (gameId: number) => void;
+  loadGameList: () => void;
+  saveGameList: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -85,6 +91,7 @@ export const useGameStore = create<GameState>()(
     debugButtonRow: 0,
     debugTeamSelector: 0,
     currentEditGame: NewGame,
+    currentViewGame: NewGame,
     openDialog: GameDialog.None,
     isGamepadDetected: false,
     symbolRight: (gamepadIndex: number) => {
@@ -125,7 +132,8 @@ export const useGameStore = create<GameState>()(
         get().answerQuestion(gamepadIndex);
         return;
       } else {
-        get().presentDialog(GameDialog.Debug);
+        // toggle debug dialog
+        get().presentDialog(get().openDialog != GameDialog.Debug ? GameDialog.Debug : GameDialog.None);
       }
       // pause?
     },
@@ -419,7 +427,14 @@ export const useGameStore = create<GameState>()(
         console.log("Game not found of index: ", id, get().allGames);
         return;
       }
-      set({ currentGame: foundGame, questionId: 0, lastInfoTime: Date.now() });
+      set({ currentViewGame: foundGame, openDialog: GameDialog.ViewGame });
+    },
+    startQuiz() {
+      set((state) => ({
+        currentGame: state.currentViewGame,
+        questionId: 0,
+        lastInfoTime: Date.now(),
+      }));
     },
     presentDialog: (dialog: GameDialog) =>
       set(() => ({ openDialog: dialog, itPaused: true })),
@@ -429,6 +444,7 @@ export const useGameStore = create<GameState>()(
         isPaused: state.stage === GameStage.Playing ? false : state.isPaused,
       })),
     setCurrentEditGame: (game: Game) => set({ currentEditGame: game }),
+    setCurrentViewGame: (game: Game) => set({ currentViewGame: game }),
     debugAbandonQuiz: () => {
       console.log(
         "Abandoning quiz & clearing team state. Previous: ",
@@ -707,6 +723,38 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         allGames: state.allGames.filter((g) => g.id !== gameId),
       }));
+    },
+    loadGameList: () => {
+      const storedGames = localStorage.getItem("games");
+      if (storedGames) {
+        try {
+          const parsedGames: Game[] = JSON.parse(storedGames);
+          // validate the parsed games
+          if (Array.isArray(parsedGames)) {
+            const isValid = parsedGames.every(
+              (game) =>
+                isGameValid(game)
+            );
+            if (isValid) {
+              set(() => ({
+                allGames: parsedGames,
+                nextGameId:
+                  parsedGames.map((game) => game.id).reduce((a, b) => Math.max(a, b)) + 1,
+              }));
+              console.log("Loaded games from localStorage:", parsedGames);
+            } else {
+              console.error("Invalid game data structure in localStorage.");
+            }
+          } else {
+            console.error("Parsed games is not an array.");
+          }
+        } catch (error) {
+          console.error("Error parsing games from localStorage:", error);
+        }
+      }
+    },
+    saveGameList: () => {
+      localStorage.setItem("games", JSON.stringify(get().allGames));
     },
   }))
 );
