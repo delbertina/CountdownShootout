@@ -415,6 +415,12 @@ export const useGameStore = create<GameState>()(
           set(() => ({
             ...newGameState,
             currentGame: undefined,
+            teams: get().teams.map((team) => ({
+              ...team,
+              scoreHistory: [],
+              canAnswer: false,
+              isAnswering: false,
+            }))
           }));
           break;
         default:
